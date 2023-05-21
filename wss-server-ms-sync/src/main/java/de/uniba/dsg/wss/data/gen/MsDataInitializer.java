@@ -4,6 +4,7 @@ import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
 import de.uniba.dsg.wss.data.gen.model.Product;
 import de.uniba.dsg.wss.data.gen.model.Warehouse;
+import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,20 @@ public class MsDataInitializer extends DataInitializer {
     this.dataWriter = dataWriter;
   }
 
+  /**
+   * @Override public void initializePersistentData() throws IOException { // LOG.info("Beginning
+   * model data generation"); JsonMachine jsonMachine = new JsonMachine(); DataModel<Product,
+   * Warehouse, Employee, Carrier> model =
+   * jsonMachine.deserialize("/Users/PEAQ/Desktop/baseline-model.json"); MsDataModel msDataModel =
+   * new MsDataConverter().convert(model); dataWriter.write(msDataModel); }
+   */
   @Override
-  public void initializePersistentData() {
-    LOG.info("Beginning model data generation");
-    DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
+  public void initializePersistentData() throws IOException {
+    JacksonParser jacksonParser = new JacksonParser();
+    DataModel<Product, Warehouse, Employee, Carrier> model =
+        jacksonParser.deserialize("/Users/PEAQ/Desktop/baseline-model.json");
     MsDataModel msDataModel = new MsDataConverter().convert(model);
     dataWriter.write(msDataModel);
+    LOG.info("Deserialization and Mapping to Java Objects were successful");
   }
 }

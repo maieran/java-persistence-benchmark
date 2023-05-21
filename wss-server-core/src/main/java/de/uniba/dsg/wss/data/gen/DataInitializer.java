@@ -7,6 +7,8 @@ import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
 import de.uniba.dsg.wss.data.gen.model.Product;
 import de.uniba.dsg.wss.data.gen.model.Warehouse;
+import java.io.File;
+import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +27,7 @@ public abstract class DataInitializer implements CommandLineRunner {
   private final PasswordEncoder passwordEncoder;
   private final int modelWarehouseCount;
   private final boolean fullScaleModel;
+  private String filePath;
 
   public DataInitializer(Environment environment, PasswordEncoder passwordEncoder) {
     this.passwordEncoder = passwordEncoder;
@@ -57,22 +60,31 @@ public abstract class DataInitializer implements CommandLineRunner {
    * @return a newly generated data model
    */
   protected DataModel<Product, Warehouse, Employee, Carrier> generateData() {
-    DefaultDataGenerator generator = createDataGenerator();
-    Configuration config = generator.getConfiguration();
-    LOG.info(
-        "Generating {} products, {} warehouses, {} districts, {} employees, {} customers, and {} orders",
-        box(config.getProductCount()),
-        box(config.getWarehouseCount()),
-        box(config.getDistrictCount()),
-        box(config.getEmployeeCount()),
-        box(config.getCustomerCount()),
-        box(config.getOrderCount()));
-    DataModel<Product, Warehouse, Employee, Carrier> model = generator.generate();
-    LOG.info(
-        "Generated {} model data objects, took {}",
-        box(model.getStats().getTotalModelObjectCount()),
-        model.getStats().getDuration());
-    return model;
+    // TODO: Hier gleich mal überprüfen, ob die Datei vorhanden ist, um Heap nicht unnötig
+    // auszubelasten
+    filePath = "/Users/PEAQ/Desktop/baseline-model.json";
+    File file = new File(filePath);
+    DataModel<Product, Warehouse, Employee, Carrier> model;
+    if (!file.exists()) {
+      DefaultDataGenerator generator = createDataGenerator();
+      Configuration config = generator.getConfiguration();
+      LOG.info(
+          "Generating {} products, {} warehouses, {} districts, {} employees, {} customers, and {} orders",
+          box(config.getProductCount()),
+          box(config.getWarehouseCount()),
+          box(config.getDistrictCount()),
+          box(config.getEmployeeCount()),
+          box(config.getCustomerCount()),
+          box(config.getOrderCount()));
+      model = generator.generate();
+      LOG.info(
+          "Generated {} model data objects, took {}",
+          box(model.getStats().getTotalModelObjectCount()),
+          model.getStats().getDuration());
+      return model;
+    }
+    LOG.info("File exists: {}, no generation needed", file);
+    return null;
   }
 
   /**
@@ -84,7 +96,24 @@ public abstract class DataInitializer implements CommandLineRunner {
    */
   @Override
   public void run(String... args) throws Exception {
+    baseModelFileGeneration();
     initializePersistentData();
+  }
+
+  /**
+   * protected void baseModelFileGeneration() throws IOException { DataModel<Product, Warehouse,
+   * Employee, Carrier> model = generateData(); JsonMachine jsonMachine = new JsonMachine(); //
+   * LOG.info("GENERATING JSON FILE"); jsonMachine.serialize(model,
+   * "/Users/PEAQ/Desktop/baseline-model.json");
+   *
+   * <p>// jsonDataWriter.writeWarehouseToJsonFile();
+   *
+   * <p>}
+   */
+  protected void baseModelFileGeneration() throws IOException {
+    DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
+    JacksonParser jacksonParser = new JacksonParser();
+    jacksonParser.serialize(model, "/Users/PEAQ/Desktop/baseline-model.json");
   }
 
   /**

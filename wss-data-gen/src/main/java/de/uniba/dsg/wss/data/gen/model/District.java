@@ -1,5 +1,7 @@
 package de.uniba.dsg.wss.data.gen.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.List;
 
 /**
@@ -8,9 +10,12 @@ import java.util.List;
  *
  * @author Benedikt Full
  */
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class District extends Base {
 
+  // @JsonIdentityReference(alwaysAsId = true)
   private Warehouse warehouse;
+
   private List<Customer> customers;
   private List<Order> orders;
   private String name;

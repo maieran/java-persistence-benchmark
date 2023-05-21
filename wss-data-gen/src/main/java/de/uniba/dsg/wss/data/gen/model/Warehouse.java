@@ -1,5 +1,7 @@
 package de.uniba.dsg.wss.data.gen.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.List;
 
 /**
@@ -7,12 +9,16 @@ import java.util.List;
  *
  * @author Benedikt Full
  */
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Warehouse extends Base {
 
   private String name;
   private Address address;
+
   private List<District> districts;
+
   private List<Stock> stocks;
+
   private double salesTax;
   private double yearToDateBalance;
 
