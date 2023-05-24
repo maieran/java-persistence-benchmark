@@ -4,6 +4,8 @@ import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
 import de.uniba.dsg.wss.data.gen.model.Product;
 import de.uniba.dsg.wss.data.gen.model.Warehouse;
+import java.io.File;
+import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +35,19 @@ public class MsDataInitializer extends DataInitializer {
   }
 
   @Override
-  public void initializePersistentData() {
-    LOG.info("Beginning model data generation");
-    DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
+  public void initializePersistentData() throws IOException {
+    JacksonParser jacksonParser = new JacksonParser();
+
+    // Get the current working directory
+    String currentDir = System.getProperty("user.dir");
+    // Specify the relative path and filename
+    String filePath = currentDir + File.separator + "baseline-model.json";
+
+    DataModel<Product, Warehouse, Employee, Carrier> model = jacksonParser.deserialize(filePath);
     MsDataModel msDataModel = new MsDataConverter().convert(model);
     dataWriter.write(msDataModel);
+    LOG.info(
+        "Total amount of deserialized objects: {} for MS-Jacis",
+        msDataModel.getStats().getTotalModelObjectCount());
   }
 }

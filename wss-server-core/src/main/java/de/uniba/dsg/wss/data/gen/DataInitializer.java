@@ -60,11 +60,16 @@ public abstract class DataInitializer implements CommandLineRunner {
    * @return a newly generated data model
    */
   protected DataModel<Product, Warehouse, Employee, Carrier> generateData() {
-    // TODO: Hier gleich mal überprüfen, ob die Datei vorhanden ist, um Heap nicht unnötig
-    // auszubelasten
-    filePath = "/Users/PEAQ/Desktop/baseline-model.json";
-    File file = new File(filePath);
+
     DataModel<Product, Warehouse, Employee, Carrier> model;
+
+    // Get the current working directory
+    String currentDir = System.getProperty("user.dir");
+    // Specify the relative path and filename
+    String filePath = currentDir + File.separator + "baseline-model.json";
+
+    File file = new File(filePath);
+
     if (!file.exists()) {
       DefaultDataGenerator generator = createDataGenerator();
       Configuration config = generator.getConfiguration();
@@ -101,19 +106,24 @@ public abstract class DataInitializer implements CommandLineRunner {
   }
 
   /**
-   * protected void baseModelFileGeneration() throws IOException { DataModel<Product, Warehouse,
-   * Employee, Carrier> model = generateData(); JsonMachine jsonMachine = new JsonMachine(); //
-   * LOG.info("GENERATING JSON FILE"); jsonMachine.serialize(model,
-   * "/Users/PEAQ/Desktop/baseline-model.json");
+   * Initializes the data generation and uses {@link JacksonParser} to serialize generated data
+   * model by {@link DataModel} into a JSON-format file. It stores then the json file, which ran be
+   * reused for deserialization and object mapping in {@link #initializePersistentData()} in the
+   * corresponding subclass modules.
    *
-   * <p>// jsonDataWriter.writeWarehouseToJsonFile();
-   *
-   * <p>}
+   * @throws IOException on error
    */
   protected void baseModelFileGeneration() throws IOException {
     DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
     JacksonParser jacksonParser = new JacksonParser();
-    jacksonParser.serialize(model, "/Users/PEAQ/Desktop/baseline-model.json");
+
+    // Get the current working directory
+    String currentDir = System.getProperty("user.dir");
+
+    // Specify the relative path and filename
+    String filePath = currentDir + File.separator + "baseline-model.json";
+
+    jacksonParser.serialize(model, filePath);
   }
 
   /**

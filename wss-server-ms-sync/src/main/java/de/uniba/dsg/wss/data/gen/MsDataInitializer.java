@@ -4,6 +4,7 @@ import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
 import de.uniba.dsg.wss.data.gen.model.Product;
 import de.uniba.dsg.wss.data.gen.model.Warehouse;
+import java.io.File;
 import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,10 +44,18 @@ public class MsDataInitializer extends DataInitializer {
   @Override
   public void initializePersistentData() throws IOException {
     JacksonParser jacksonParser = new JacksonParser();
-    DataModel<Product, Warehouse, Employee, Carrier> model =
-        jacksonParser.deserialize("/Users/PEAQ/Desktop/baseline-model.json");
+
+    // Get the current working directory
+    String currentDir = System.getProperty("user.dir");
+    // Specify the relative path and filename
+    String filePath = currentDir + File.separator + "baseline-model.json";
+
+    DataModel<Product, Warehouse, Employee, Carrier> model = jacksonParser.deserialize(filePath);
     MsDataModel msDataModel = new MsDataConverter().convert(model);
     dataWriter.write(msDataModel);
-    LOG.info("Deserialization and Mapping to Java Objects were successful");
+
+    LOG.info(
+        "Total amount of deserialized objects: {} for MS-Sync",
+        msDataModel.getStats().getTotalModelObjectCount());
   }
 }
