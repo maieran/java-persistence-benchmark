@@ -44,10 +44,6 @@ public class JacksonParser {
     LOG.info("Data model deserializing from file: {} to Java Objects", filePath);
 
     Stopwatch stopwatch = new Stopwatch().start();
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     List<Product> products = new ArrayList<>();
     List<Warehouse> warehouses = new ArrayList<>();
     List<Employee> employees = new ArrayList<>();
@@ -57,6 +53,9 @@ public class JacksonParser {
     Map<String, District> districtMap = new HashMap<>();
 
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.registerModule(new JavaTimeModule());
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       JsonFactory jsonFactory = objectMapper.getFactory();
       JsonParser jsonParser = jsonFactory.createParser(reader);
 
@@ -91,71 +90,12 @@ public class JacksonParser {
         // Central idea:
         // Employee objects will be read and instantiated to close the circular reference in Java
         // objects
+        // Read the "employees" array
+        // Read the "employees" array
         else if ("employees".equals(fieldName)) {
           jsonParser.nextToken();
           while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-            Employee employee = new Employee();
-
-            // Read the employee properties
-            while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-              String property = jsonParser.getCurrentName();
-
-              if ("id".equals(property)) {
-                employee.setId(jsonParser.nextTextValue());
-              } else if ("firstName".equals(property)) {
-                employee.setFirstName(jsonParser.nextTextValue());
-              } else if ("middleName".equals(property)) {
-                employee.setMiddleName(jsonParser.nextTextValue());
-              } else if ("lastName".equals(property)) {
-                employee.setLastName(jsonParser.nextTextValue());
-              } else if ("address".equals(property)) {
-                // Read the address object nested in employee object
-                Address address = new Address();
-
-                while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-                  String addressProperty = jsonParser.getCurrentName();
-
-                  if ("street1".equals(addressProperty)) {
-                    address.setStreet1(jsonParser.nextTextValue());
-                  } else if ("street2".equals(addressProperty)) {
-                    address.setStreet2(jsonParser.nextTextValue());
-                  } else if ("zipCode".equals(addressProperty)) {
-                    address.setZipCode(jsonParser.nextTextValue());
-                  } else if ("city".equals(addressProperty)) {
-                    address.setCity(jsonParser.nextTextValue());
-                  } else if ("state".equals(addressProperty)) {
-                    address.setState(jsonParser.nextTextValue());
-                  }
-                }
-
-                employee.setAddress(address);
-              } else if ("phoneNumber".equals(property)) {
-                employee.setPhoneNumber(jsonParser.nextTextValue());
-              } else if ("email".equals(property)) {
-                employee.setEmail(jsonParser.nextTextValue());
-              } else if ("title".equals(property)) {
-                employee.setTitle(jsonParser.nextTextValue());
-              } else if ("username".equals(property)) {
-                employee.setUsername(jsonParser.nextTextValue());
-              } else if ("password".equals(property)) {
-                employee.setPassword(jsonParser.nextTextValue());
-              } else if ("role".equals(property)) {
-                employee.setRole(jsonParser.nextTextValue());
-              } else if ("district".equals(property)) {
-                String districtID = jsonParser.nextTextValue();
-                District district = districtMap.get(districtID);
-
-                if (district == null) {
-                  // Fetch the district object from warehouses
-                  district = fetchDistrictById(districtID, warehouses);
-                  districtMap.put(districtID, district);
-                }
-
-                // Closing the circular reference of the data model by setting reference to district
-                employee.setDistrict(district);
-              }
-            }
-
+            Employee employee = readEmployee(jsonParser, districtMap, warehouses);
             employees.add(employee);
           }
         }
@@ -180,6 +120,8 @@ public class JacksonParser {
     stopwatch.stop();
     LOG.info("Deserialization took : {}", stopwatch.getDuration());
 
+    districtMap = null;
+
     return new DataGeneratorModel(products, warehouses, employees, carriers, stats);
   }
 
@@ -198,5 +140,74 @@ public class JacksonParser {
     for (District district : districtsList) {
       districtMap.put(district.getId(), district);
     }
+  }
+
+  private Employee readEmployee(
+      JsonParser jsonParser, Map<String, District> districtMap, List<Warehouse> warehouses)
+      throws IOException {
+    Employee employee = new Employee();
+    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+      String property = jsonParser.getCurrentName();
+      jsonParser.nextToken(); // Move to the value token
+
+      if ("id".equals(property)) {
+        employee.setId(jsonParser.getText().intern());
+      } else if ("firstName".equals(property)) {
+        employee.setFirstName(jsonParser.getText().intern());
+      } else if ("middleName".equals(property)) {
+        employee.setMiddleName(jsonParser.getText().intern());
+      } else if ("lastName".equals(property)) {
+        employee.setLastName(jsonParser.getText().intern());
+      } else if ("address".equals(property)) {
+        Address address = readAddress(jsonParser);
+        employee.setAddress(address);
+      } else if ("phoneNumber".equals(property)) {
+        employee.setPhoneNumber(jsonParser.getText().intern());
+      } else if ("email".equals(property)) {
+        employee.setEmail(jsonParser.getText().intern());
+      } else if ("title".equals(property)) {
+        employee.setTitle(jsonParser.getText().intern());
+      } else if ("username".equals(property)) {
+        employee.setUsername(jsonParser.getText().intern());
+      } else if ("password".equals(property)) {
+        employee.setPassword(jsonParser.getText().intern());
+      } else if ("role".equals(property)) {
+        employee.setRole(jsonParser.getText().intern());
+      } else if ("district".equals(property)) {
+        String districtID = jsonParser.getText().intern();
+        District district = districtMap.get(districtID);
+
+        if (district == null) {
+          district = fetchDistrictById(districtID, warehouses);
+          districtMap.put(districtID, district);
+        }
+
+        employee.setDistrict(district);
+      }
+    }
+
+    return employee;
+  }
+
+  private Address readAddress(JsonParser jsonParser) throws IOException {
+    Address address = new Address();
+    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+      String addressProperty = jsonParser.getCurrentName();
+      jsonParser.nextToken(); // Move to the value token
+
+      if ("street1".equals(addressProperty)) {
+        address.setStreet1(jsonParser.getText().intern());
+      } else if ("street2".equals(addressProperty)) {
+        address.setStreet2(jsonParser.getText().intern());
+      } else if ("zipCode".equals(addressProperty)) {
+        address.setZipCode(jsonParser.getText().intern());
+      } else if ("city".equals(addressProperty)) {
+        address.setCity(jsonParser.getText().intern());
+      } else if ("state".equals(addressProperty)) {
+        address.setState(jsonParser.getText().intern());
+      }
+    }
+
+    return address;
   }
 }

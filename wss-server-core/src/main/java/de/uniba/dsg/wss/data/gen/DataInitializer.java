@@ -115,15 +115,19 @@ public abstract class DataInitializer implements CommandLineRunner {
    */
   protected void baseModelFileGeneration() throws IOException {
     DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
-    JacksonParser jacksonParser = new JacksonParser();
 
-    // Get the current working directory
-    String currentDir = System.getProperty("user.dir");
+    if (model != null) {
 
-    // Specify the relative path and filename
-    String filePath = currentDir + File.separator + "baseline-model.json";
+      JacksonParser jacksonParser = new JacksonParser();
 
-    jacksonParser.serialize(model, filePath);
+      // Get the current working directory
+      String currentDir = System.getProperty("user.dir");
+
+      // Specify the relative path and filename
+      String filePath = currentDir + File.separator + "baseline-model.json";
+
+      jacksonParser.serialize(model, filePath);
+    }
   }
 
   /**
