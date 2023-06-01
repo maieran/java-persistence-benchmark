@@ -1,13 +1,9 @@
 package de.uniba.dsg.wss.data.gen;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.uniba.dsg.wss.commons.Stopwatch;
 import de.uniba.dsg.wss.data.gen.model.*;
 import java.io.*;
@@ -19,16 +15,17 @@ public class JacksonParser {
 
   private static final Logger LOG = LogManager.getLogger(JacksonParser.class);
 
-  public void serialize(DataModel<?, ?, ?, ?> model, String filePath) throws IOException {
+  public void serialize(DataModel<?, ?, ?, ?> model, String filePath, ObjectMapper objectMapper)
+      throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
       Stopwatch stopwatch = new Stopwatch().start();
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.registerModule(new JavaTimeModule()); //
-      objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false); //
-      objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); //
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL); //
+      // ObjectMapper objectMapper = new ObjectMapper();
+      // objectMapper.registerModule(new JavaTimeModule()); //
+      // objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false); //
+      // objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false); //
+      // objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL); //
 
       objectMapper.writeValue(file, model);
       stopwatch.stop();
@@ -39,8 +36,8 @@ public class JacksonParser {
     }
   }
 
-  public DataModel<Product, Warehouse, Employee, Carrier> deserialize(String filePath)
-      throws IOException {
+  public DataModel<Product, Warehouse, Employee, Carrier> deserialize(
+      String filePath, ObjectMapper objectMapper) throws IOException {
     LOG.info("Data model deserializing from file: {} to Java Objects", filePath);
 
     Stopwatch stopwatch = new Stopwatch().start();
@@ -53,9 +50,9 @@ public class JacksonParser {
     Map<String, District> districtMap = new HashMap<>();
 
     try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.registerModule(new JavaTimeModule());
-      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      // ObjectMapper objectMapper = new ObjectMapper();
+      // objectMapper.registerModule(new JavaTimeModule());
+      // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       JsonFactory jsonFactory = objectMapper.getFactory();
       JsonParser jsonParser = jsonFactory.createParser(reader);
 
@@ -115,12 +112,14 @@ public class JacksonParser {
           stats = objectMapper.readValue(jsonParser, Stats.class);
         }
       }
+      jsonParser.close();
     }
 
     stopwatch.stop();
     LOG.info("Deserialization took : {}", stopwatch.getDuration());
 
     districtMap = null;
+    objectMapper = null;
 
     return new DataGeneratorModel(products, warehouses, employees, carriers, stats);
   }

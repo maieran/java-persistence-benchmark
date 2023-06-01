@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.gen;
 
 import static org.apache.logging.log4j.util.Unbox.box;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uniba.dsg.wss.auth.Roles;
 import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
@@ -117,16 +118,16 @@ public abstract class DataInitializer implements CommandLineRunner {
     DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
 
     if (model != null) {
-
-      JacksonParser jacksonParser = new JacksonParser();
-
       // Get the current working directory
       String currentDir = System.getProperty("user.dir");
 
       // Specify the relative path and filename
       String filePath = currentDir + File.separator + "baseline-model.json";
 
-      jacksonParser.serialize(model, filePath);
+      ObjectMapper objectMapper = ObjectMapperHolder.getObjectMapper();
+
+      JacksonParser jacksonParser = new JacksonParser();
+      jacksonParser.serialize(model, filePath, objectMapper);
     }
   }
 

@@ -1,5 +1,6 @@
 package de.uniba.dsg.wss.data.gen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
 import de.uniba.dsg.wss.data.gen.model.Product;
@@ -50,7 +51,10 @@ public class MsDataInitializer extends DataInitializer {
     // Specify the relative path and filename
     String filePath = currentDir + File.separator + "baseline-model.json";
 
-    DataModel<Product, Warehouse, Employee, Carrier> model = jacksonParser.deserialize(filePath);
+    ObjectMapper objectMapper = ObjectMapperHolder.getObjectMapper();
+
+    DataModel<Product, Warehouse, Employee, Carrier> model =
+        jacksonParser.deserialize(filePath, objectMapper);
     MsDataModel msDataModel = new MsDataConverter().convert(model);
     dataWriter.write(msDataModel);
 
