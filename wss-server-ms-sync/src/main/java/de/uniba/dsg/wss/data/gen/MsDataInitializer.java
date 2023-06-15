@@ -1,12 +1,9 @@
 package de.uniba.dsg.wss.data.gen;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.uniba.dsg.wss.data.gen.model.Carrier;
-import de.uniba.dsg.wss.data.gen.model.Employee;
-import de.uniba.dsg.wss.data.gen.model.Product;
-import de.uniba.dsg.wss.data.gen.model.Warehouse;
+import de.uniba.dsg.wss.data.gen.model.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,27 +32,44 @@ public class MsDataInitializer extends DataInitializer {
     this.dataWriter = dataWriter;
   }
 
-  /**
-   * @Override public void initializePersistentData() throws IOException { // LOG.info("Beginning
-   * model data generation"); JsonMachine jsonMachine = new JsonMachine(); DataModel<Product,
-   * Warehouse, Employee, Carrier> model =
-   * jsonMachine.deserialize("/Users/PEAQ/Desktop/baseline-model.json"); MsDataModel msDataModel =
-   * new MsDataConverter().convert(model); dataWriter.write(msDataModel); }
-   */
+  /** //TODO: Dokumentation */
   @Override
   public void initializePersistentData() throws IOException {
     JacksonParser jacksonParser = new JacksonParser();
 
     // Get the current working directory
     String currentDir = System.getProperty("user.dir");
-    // Specify the relative path and filename
-    String filePath = currentDir + File.separator + "baseline-model.json";
 
-    ObjectMapper objectMapper = ObjectMapperHolder.getObjectMapper();
+    List<Product> productsList =
+        jacksonParser.deserializeProductsFromJSON(
+            currentDir + File.separator + "baseline-model_products.json");
 
-    DataModel<Product, Warehouse, Employee, Carrier> model =
-        jacksonParser.deserialize(filePath, objectMapper);
-    MsDataModel msDataModel = new MsDataConverter().convert(model);
+    List<Warehouse> warehouseList =
+        jacksonParser.deserializeWarehousesFromJSON(
+            currentDir + File.separator + "baseline-model_warehouses.json");
+
+    List<Employee> employeeList =
+        jacksonParser.deserializeEmployeesFromJSON(
+            currentDir + File.separator + "baseline-model_employees.json");
+
+    List<Carrier> carrierList =
+        jacksonParser.deserializeCarriersFromJSON(
+            currentDir + File.separator + "baseline-model_carriers.json");
+
+    Stats stats =
+        jacksonParser.deserializeStatsFromJSON(
+            currentDir + File.separator + "baseline-model_stats.json");
+
+    DataGeneratorModel deserializedModel =
+        new DataGeneratorModel(productsList, warehouseList, employeeList, carrierList, stats);
+
+    MsDataModel msDataModel = new MsDataConverter().convert(deserializedModel);
+    stats = null;
+    carrierList.clear();
+    productsList.clear();
+    employeeList.clear();
+    warehouseList.clear();
+    jacksonParser = null;
     dataWriter.write(msDataModel);
 
     LOG.info(

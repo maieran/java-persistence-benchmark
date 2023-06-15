@@ -2,7 +2,6 @@ package de.uniba.dsg.wss.data.gen;
 
 import static org.apache.logging.log4j.util.Unbox.box;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.uniba.dsg.wss.auth.Roles;
 import de.uniba.dsg.wss.data.gen.model.Carrier;
 import de.uniba.dsg.wss.data.gen.model.Employee;
@@ -28,7 +27,6 @@ public abstract class DataInitializer implements CommandLineRunner {
   private final PasswordEncoder passwordEncoder;
   private final int modelWarehouseCount;
   private final boolean fullScaleModel;
-  private String filePath;
 
   public DataInitializer(Environment environment, PasswordEncoder passwordEncoder) {
     this.passwordEncoder = passwordEncoder;
@@ -66,31 +64,40 @@ public abstract class DataInitializer implements CommandLineRunner {
 
     // Get the current working directory
     String currentDir = System.getProperty("user.dir");
-    // Specify the relative path and filename
-    String filePath = currentDir + File.separator + "baseline-model.json";
 
-    File file = new File(filePath);
+    String[] jsonFiles = {
+      "baseline-model_products.json",
+      "baseline-model_warehouses.json",
+      "baseline-model_carriers.json",
+      "baseline-model_employees.json",
+      "baseline-model_stats.json"
+    };
 
-    if (!file.exists()) {
-      DefaultDataGenerator generator = createDataGenerator();
-      Configuration config = generator.getConfiguration();
-      LOG.info(
-          "Generating {} products, {} warehouses, {} districts, {} employees, {} customers, and {} orders",
-          box(config.getProductCount()),
-          box(config.getWarehouseCount()),
-          box(config.getDistrictCount()),
-          box(config.getEmployeeCount()),
-          box(config.getCustomerCount()),
-          box(config.getOrderCount()));
-      model = generator.generate();
-      LOG.info(
-          "Generated {} model data objects, took {}",
-          box(model.getStats().getTotalModelObjectCount()),
-          model.getStats().getDuration());
-      return model;
+    for (String filename : jsonFiles) {
+      File file = new File(currentDir + File.separator + filename);
+      if (file.exists()) {
+        LOG.info("Baseline model files already exist. Skipping data generation.");
+        return null;
+      }
     }
-    LOG.info("File exists: {}, no generation needed", file);
-    return null;
+
+    DefaultDataGenerator generator = createDataGenerator();
+    Configuration config = generator.getConfiguration();
+    LOG.info(
+        "Generating {} products, {} warehouses, {} districts, {} employees, {} customers, and {} orders",
+        box(config.getProductCount()),
+        box(config.getWarehouseCount()),
+        box(config.getDistrictCount()),
+        box(config.getEmployeeCount()),
+        box(config.getCustomerCount()),
+        box(config.getOrderCount()));
+    model = generator.generate();
+    LOG.info(
+        "Generated {} model data objects, took {}",
+        box(model.getStats().getTotalModelObjectCount()),
+        model.getStats().getDuration());
+
+    return model;
   }
 
   /**
@@ -108,8 +115,9 @@ public abstract class DataInitializer implements CommandLineRunner {
 
   /**
    * Initializes the data generation and uses {@link JacksonParser} to serialize generated data
-   * model by {@link DataModel} into a JSON-format file. It stores then the json file, which ran be
-   * reused for deserialization and object mapping in {@link #initializePersistentData()} in the
+   * model by {@link DataModel} into a JSON-format file. It stores five json files take the model in
+   * lists, which can be reused for deserialization with the help of incremental streaming api in
+   * {@link #initializePersistentData()} by Jackson Streaming API of {@link JacksonParser} in the
    * corresponding subclass modules.
    *
    * @throws IOException on error
@@ -118,16 +126,26 @@ public abstract class DataInitializer implements CommandLineRunner {
     DataModel<Product, Warehouse, Employee, Carrier> model = generateData();
 
     if (model != null) {
+
       // Get the current working directory
       String currentDir = System.getProperty("user.dir");
 
-      // Specify the relative path and filename
-      String filePath = currentDir + File.separator + "baseline-model.json";
-
-      ObjectMapper objectMapper = ObjectMapperHolder.getObjectMapper();
-
       JacksonParser jacksonParser = new JacksonParser();
-      jacksonParser.serialize(model, filePath, objectMapper);
+
+      jacksonParser.serializeProductsToJSON(
+          model.getProducts(), currentDir + File.separator + "baseline-model_products.json");
+
+      jacksonParser.serializeWarehousesToJSON(
+          model.getWarehouses(), currentDir + File.separator + "baseline-model_warehouses.json");
+
+      jacksonParser.serializeEmployeesToJSON(
+          model.getEmployees(), currentDir + File.separator + "baseline-model_employees.json");
+
+      jacksonParser.serializeCarriersToJSON(
+          model.getCarriers(), currentDir + File.separator + "baseline-model_carriers.json");
+
+      jacksonParser.serializeStatsToJSON(
+          model.getStats(), currentDir + File.separator + "baseline-model_stats.json");
     }
   }
 

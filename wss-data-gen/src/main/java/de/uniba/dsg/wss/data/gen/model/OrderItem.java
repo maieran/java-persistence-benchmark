@@ -1,7 +1,5 @@
 package de.uniba.dsg.wss.data.gen.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +8,6 @@ import java.time.LocalDateTime;
  *
  * @author Benedikt Full
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class OrderItem extends Base {
 
   private Order order;

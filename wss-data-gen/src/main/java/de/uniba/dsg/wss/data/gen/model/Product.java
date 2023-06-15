@@ -1,15 +1,10 @@
 package de.uniba.dsg.wss.data.gen.model;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 /**
  * A product of the wholesale supplier.
  *
  * @author Benedikt Full
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({@JsonSubTypes.Type(value = Product.class, name = "product")})
 public class Product extends Base {
 
   private String imagePath;
