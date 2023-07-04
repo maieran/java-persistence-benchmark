@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.data.redis.core.RedisHash;
 
 @RedisHash("District")
@@ -34,7 +32,7 @@ public class DistrictData extends BaseData implements Serializable {
   // Object reference
   // private final Map<String, OrderData> orderRefs;
   @JsonProperty("orderRefsIds")
-  private Map<String, String> orderRefsIds;
+  private List<String> orderRefsIds;
 
   @JsonCreator
   public DistrictData(
@@ -51,7 +49,7 @@ public class DistrictData extends BaseData implements Serializable {
     this.salesTax = salesTax;
     this.yearToDateBalance = yearToDateBalance;
     this.customerRefsIds = new ArrayList<>();
-    this.orderRefsIds = new HashMap<>();
+    this.orderRefsIds = new ArrayList<>();
   }
 
   //  @JsonCreator
@@ -104,11 +102,11 @@ public class DistrictData extends BaseData implements Serializable {
     this.customerRefsIds = customerRefsIds;
   }
 
-  public Map<String, String> getOrderRefsIds() {
+  public List<String> getOrderRefsIds() {
     return orderRefsIds;
   }
 
-  public void setOrderRefsIds(Map<String, String> orderRefsIds) {
+  public void setOrderRefsIds(List<String> orderRefsIds) {
     this.orderRefsIds = orderRefsIds;
   }
 }

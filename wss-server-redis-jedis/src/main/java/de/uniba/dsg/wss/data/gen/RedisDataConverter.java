@@ -320,7 +320,8 @@ public class RedisDataConverter
 
           orders.put(order.getId(), order);
           // referential integrity
-          district.getOrderRefsIds().put(order.getId(), order.getId());
+          // district.getOrderRefsIds().put(order.getId(), order.getId());
+          district.getOrderRefsIds().add(order.getId());
           customers
               .get(order.getCustomerRefId())
               .getOrderRefsIds()

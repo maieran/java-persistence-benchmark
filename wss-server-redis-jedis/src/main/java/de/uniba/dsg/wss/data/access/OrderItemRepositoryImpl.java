@@ -26,4 +26,10 @@ public class OrderItemRepositoryImpl implements OrderItemRepository {
     String hashKey = "orderItems";
     return hashOperations.get(hashKey, itemId);
   }
+
+  @Override
+  public void storeUpdatedOrderItem(OrderItemData orderItem) {
+    String hashKey = "orderItems";
+    hashOperations.put(hashKey, orderItem.getId(), orderItem);
+  }
 }

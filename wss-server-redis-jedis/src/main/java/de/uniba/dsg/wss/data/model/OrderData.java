@@ -115,4 +115,8 @@ public class OrderData extends BaseData implements Serializable {
   public void setItemsIds(List<String> itemsIds) {
     this.itemsIds = itemsIds;
   }
+
+  public void setAsFulFilled() {
+    this.fulfilled = true;
+  }
 }

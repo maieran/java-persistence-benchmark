@@ -26,4 +26,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     String hashKey = "customers";
     return hashOperations.get(hashKey, customerId);
   }
+
+  @Override
+  public void storeUpdatedCustomer(CustomerData customer) {
+    String hashKey = "customers";
+    hashOperations.put(hashKey, customer.getId(), customer);
+  }
 }

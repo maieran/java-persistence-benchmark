@@ -8,4 +8,6 @@ public interface WarehouseRepository {
   void saveAll(Map<String, WarehouseData> warehouses);
 
   Map<String, WarehouseData> getWarehouses();
+
+  WarehouseData findById(String id);
 }

@@ -82,6 +82,16 @@ public class RedisConfiguration {
 
   // TODO: BIG TOPIC , NEED TO CONFIGURE THE MOST EFFICIENT AND EFFECTIVE SERIALIZERS
 
+  /**
+   * On how to store raw json into redis :
+   * https://stackoverflow.com/questions/41875635/storing-raw-json-in-redis-by-using-spring-data-redis
+   * On mapping of polymorphic models and class when using objectMapper :
+   * https://stackoverflow.com/questions/19239413/de-serializing-json-to-polymorphic-object-model-using-spring-and-jsontypeinfo-an
+   * On how to set up the polymorphic de-/serializer :
+   * https://stackoverflow.com/questions/63339255/deserialize-list-of-polymorphic-objects-into-object-field
+   *
+   * @return
+   */
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
     RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
@@ -168,11 +178,4 @@ public class RedisConfiguration {
   //    return redisTemplate;
   //  }
 
-  /**
-   * ###################################################################################################
-   * ###################################################################################################
-   * ###################################################################################################
-   *
-   * @return
-   */
 }

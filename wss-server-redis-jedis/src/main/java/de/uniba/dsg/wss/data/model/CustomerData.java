@@ -173,4 +173,8 @@ public class CustomerData extends PersonData implements Serializable {
   public void setPaymentCount(int paymentCount) {
     this.paymentCount = paymentCount;
   }
+
+  public void increaseDeliveryCount() {
+    this.deliveryCount++;
+  }
 }

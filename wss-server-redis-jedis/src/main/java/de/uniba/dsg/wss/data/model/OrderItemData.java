@@ -128,4 +128,8 @@ public class OrderItemData extends BaseData implements Serializable {
   public void setDeliveryDate(LocalDateTime deliveryDate) {
     this.deliveryDate = deliveryDate;
   }
+
+  public void updateDeliveryDate() {
+    this.deliveryDate = LocalDateTime.now();
+  }
 }

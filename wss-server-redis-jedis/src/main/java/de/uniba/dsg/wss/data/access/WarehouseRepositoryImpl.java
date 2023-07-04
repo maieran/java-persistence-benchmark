@@ -26,6 +26,12 @@ public class WarehouseRepositoryImpl implements WarehouseRepository {
     return hashOperations.entries(hashKey);
   }
 
+  @Override
+  public WarehouseData findById(String id) {
+    String hashKey = "warehouses";
+    return hashOperations.get(hashKey, id);
+  }
+
   //  @Override
   //  public void saveAll(Map<String, WarehouseData> warehouses) {
   //    String hashKey = "warehouses";
