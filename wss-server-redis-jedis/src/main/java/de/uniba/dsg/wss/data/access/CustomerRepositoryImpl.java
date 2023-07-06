@@ -32,4 +32,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     String hashKey = "customers";
     hashOperations.put(hashKey, customer.getId(), customer);
   }
+
+  @Override
+  public Map<String, CustomerData> getCustomers() {
+    String hashKey = "customers";
+    return hashOperations.entries(hashKey);
+  }
 }

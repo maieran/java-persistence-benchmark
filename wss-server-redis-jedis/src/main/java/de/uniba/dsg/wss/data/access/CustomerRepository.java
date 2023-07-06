@@ -9,4 +9,6 @@ public interface CustomerRepository {
   CustomerData findById(String customerId);
 
   void storeUpdatedCustomer(CustomerData customer);
+
+  Map<String, CustomerData> getCustomers();
 }

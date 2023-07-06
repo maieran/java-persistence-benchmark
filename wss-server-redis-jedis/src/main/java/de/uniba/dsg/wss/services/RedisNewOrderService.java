@@ -174,9 +174,6 @@ public class RedisNewOrderService extends NewOrderService {
     }
 
     orderRepository.save(order);
-    OrderData orderExampleForFetchToThrowError = orderRepository.findById(order.getId());
-    if (!orderExampleForFetchToThrowError.equals(order)) LOG.debug("Not equal");
-
     return order;
   }
 
