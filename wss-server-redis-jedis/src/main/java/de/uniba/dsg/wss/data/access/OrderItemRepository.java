@@ -9,4 +9,6 @@ public interface OrderItemRepository {
   OrderItemData findById(String itemId);
 
   void storeUpdatedOrderItem(OrderItemData orderItem);
+
+  void save(OrderItemData orderItem);
 }

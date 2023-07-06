@@ -16,13 +16,13 @@ public class OrderData extends BaseData implements Serializable {
   // private final DistrictData districtRef;
 
   // Reference via ID
-  private final String districtRefId;
+  private String districtRefId;
 
   // Object reference
   // private final CustomerData customerRef;
 
   // Reference via ID
-  private final String customerRefId;
+  private String customerRefId;
 
   // Object reference
   // private CarrierData carrierRef;
@@ -31,9 +31,9 @@ public class OrderData extends BaseData implements Serializable {
   private String carrierRefId;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-  private final LocalDateTime entryDate;
+  private LocalDateTime entryDate;
 
-  private final int itemCount;
+  private int itemCount;
   private final boolean allLocal;
   private boolean fulfilled;
 
@@ -68,8 +68,35 @@ public class OrderData extends BaseData implements Serializable {
     this.itemsIds = new ArrayList<>();
   }
 
+  public OrderData(
+      // DistrictData districtRef,
+      // CustomerData customerRef,
+      // CarrierData carrierRef,
+      @JsonProperty("districtRefId") String districtRefId,
+      @JsonProperty("customerRefId") String customerRefId,
+      @JsonProperty("entryDate") LocalDateTime entryDate,
+      @JsonProperty("itemCount") int itemCount,
+      @JsonProperty("allLocal") boolean allLocal) {
+    super();
+    this.districtRefId = districtRefId;
+    this.customerRefId = customerRefId;
+    this.entryDate = entryDate;
+    this.itemCount = itemCount;
+    this.allLocal = allLocal;
+    this.fulfilled = false;
+    this.itemsIds = new ArrayList<>();
+  }
+
+  public void setDistrictRefId(String districtRefId) {
+    this.districtRefId = districtRefId;
+  }
+
   public String getDistrictRefId() {
     return districtRefId;
+  }
+
+  public void setCustomerRefId(String customerRefId) {
+    this.customerRefId = customerRefId;
   }
 
   public String getCustomerRefId() {
@@ -86,6 +113,14 @@ public class OrderData extends BaseData implements Serializable {
 
   public LocalDateTime getEntryDate() {
     return entryDate;
+  }
+
+  public void setEntryDate(LocalDateTime entryDate) {
+    this.entryDate = entryDate;
+  }
+
+  public void setItemCount(int itemCount) {
+    this.itemCount = itemCount;
   }
 
   public int getItemCount() {

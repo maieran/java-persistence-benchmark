@@ -13,6 +13,8 @@ public class StockData extends BaseData implements Serializable {
   // Object reference
   // private final WarehouseData warehouseRef;
 
+  public static int increaseQuantity = 100;
+
   // TODO: Contains only the Id of Warehouse
   private final String warehouseRefId;
 
@@ -166,5 +168,17 @@ public class StockData extends BaseData implements Serializable {
 
   public String getDist10() {
     return dist10;
+  }
+
+  public boolean reduceQuantity(int quantity) {
+    // TODO: no synchronized because client suppose to be thread-safe
+    if (this.quantity < quantity) {
+      this.quantity += increaseQuantity;
+      return false;
+    }
+    this.quantity -= quantity;
+    this.yearToDateBalance += quantity;
+    this.orderCount++;
+    return true;
   }
 }

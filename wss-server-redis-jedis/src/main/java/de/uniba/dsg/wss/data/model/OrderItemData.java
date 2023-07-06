@@ -32,7 +32,7 @@ public class OrderItemData extends BaseData implements Serializable {
   private int quantity;
   private int leftQuantityInStock;
   private String distInfo;
-  private final double amount;
+  private double amount;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime deliveryDate;
@@ -61,6 +61,27 @@ public class OrderItemData extends BaseData implements Serializable {
     this.distInfo = distInfo;
   }
 
+  public OrderItemData(
+      @JsonProperty("orderRefId") String orderRefId,
+      @JsonProperty("productRefId") String productRefId,
+      @JsonProperty("supplyingWarehouseRefId") String supplyingWarehouseRefId,
+      @JsonProperty("number") int number,
+      @JsonProperty("quantity") int quantity,
+      @JsonProperty("leftQuantityInStock") int leftQuantityInStock,
+      @JsonProperty("amount") double amount,
+      @JsonProperty("distInfo") String distInfo) {
+    super();
+    this.orderRefId = orderRefId;
+    this.productRefId = productRefId;
+    this.supplyingWarehouseRefId = supplyingWarehouseRefId;
+    this.number = number;
+    // this.deliveryDate = null;
+    this.quantity = quantity;
+    this.leftQuantityInStock = leftQuantityInStock;
+    this.amount = amount;
+    this.distInfo = distInfo;
+  }
+
   public String getOrderRefId() {
     return orderRefId;
   }
@@ -77,11 +98,11 @@ public class OrderItemData extends BaseData implements Serializable {
     this.productRefId = productRefId;
   }
 
-  public String getSupplyingWarehouseRef() {
+  public String getSupplyingWarehouseRefId() {
     return supplyingWarehouseRefId;
   }
 
-  public void setSupplyingWarehouseRef(String supplyingWarehouseRefId) {
+  public void setSupplyingWarehouseRefId(String supplyingWarehouseRefId) {
     this.supplyingWarehouseRefId = supplyingWarehouseRefId;
   }
 
@@ -119,6 +140,10 @@ public class OrderItemData extends BaseData implements Serializable {
 
   public double getAmount() {
     return amount;
+  }
+
+  public void setAmount(double amount) {
+    this.amount = amount;
   }
 
   public LocalDateTime getDeliveryDate() {

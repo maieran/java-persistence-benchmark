@@ -36,6 +36,12 @@ public class OrderRepositoryImpl implements OrderRepository {
     hashOperations.put(hashKey, order.getId(), order);
   }
 
+  @Override
+  public void save(OrderData order) {
+    String hashKey = "orders";
+    hashOperations.put(hashKey, order.getId(), order);
+  }
+
   //  @Override
   //  public List<OrderData> updateDeliveryStatusOfOldestUnfulfilledOrders(List<OrderData> orders,
   // CarrierData carrierData) {

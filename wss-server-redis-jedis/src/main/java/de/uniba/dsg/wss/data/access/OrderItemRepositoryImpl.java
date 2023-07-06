@@ -32,4 +32,10 @@ public class OrderItemRepositoryImpl implements OrderItemRepository {
     String hashKey = "orderItems";
     hashOperations.put(hashKey, orderItem.getId(), orderItem);
   }
+
+  @Override
+  public void save(OrderItemData orderItem) {
+    String hashKey = "orderItems";
+    hashOperations.put(hashKey, orderItem.getId(), orderItem);
+  }
 }

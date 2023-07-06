@@ -10,6 +10,8 @@ public interface OrderRepository {
 
   void storeUpdatedOrder(OrderData order);
 
+  void save(OrderData order);
+
   // List<OrderData> updateDeliveryStatusOfOldestUnfulfilledOrders(List<OrderData> orders,
   // CarrierData carrierData);
 }

@@ -95,6 +95,7 @@ public class RedisDeliveryService extends DeliveryService {
 
       double amount = 0;
 
+      // TODO: REDIS BATCH CALL
       for (String orderItemId : order.getItemsIds()) {
         OrderItemData orderItem = orderItemRepository.findById(orderItemId);
         orderItem.updateDeliveryDate();
