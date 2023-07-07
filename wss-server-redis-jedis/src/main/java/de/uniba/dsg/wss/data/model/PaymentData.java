@@ -1,5 +1,8 @@
 package de.uniba.dsg.wss.data.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import org.springframework.data.redis.core.RedisHash;
@@ -13,13 +16,32 @@ public class PaymentData extends BaseData implements Serializable {
   // Reference via ID
   private String customerRefId;
 
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime date;
+
   private double amount;
   private String data;
 
+  @JsonCreator
   public PaymentData(
-      String id, String customerRefId, LocalDateTime date, double amount, String data) {
+      @JsonProperty("id") String id,
+      @JsonProperty("customerRefId") String customerRefId,
+      @JsonProperty("date") LocalDateTime date,
+      @JsonProperty("amount") double amount,
+      @JsonProperty("data") String data) {
     super(id);
+    this.customerRefId = customerRefId;
+    this.date = date;
+    this.amount = amount;
+    this.data = data;
+  }
+
+  public PaymentData(
+      @JsonProperty("customerRefId") String customerRefId,
+      @JsonProperty("date") LocalDateTime date,
+      @JsonProperty("amount") double amount,
+      @JsonProperty("data") String data) {
+    super();
     this.customerRefId = customerRefId;
     this.date = date;
     this.amount = amount;

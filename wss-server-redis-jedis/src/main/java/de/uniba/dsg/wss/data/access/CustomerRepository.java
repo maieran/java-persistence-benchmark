@@ -11,4 +11,6 @@ public interface CustomerRepository {
   void storeUpdatedCustomer(CustomerData customer);
 
   Map<String, CustomerData> getCustomers();
+
+  void save(CustomerData copiedCustomer);
 }

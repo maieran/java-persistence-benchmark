@@ -86,4 +86,8 @@ public class WarehouseData extends BaseData implements Serializable {
   public void setYearToDateBalance(double yearToDateBalance) {
     this.yearToDateBalance = yearToDateBalance;
   }
+
+  public void increaseYearToBalance(double amount) {
+    this.yearToDateBalance += amount;
+  }
 }

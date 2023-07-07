@@ -38,4 +38,10 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     String hashKey = "customers";
     return hashOperations.entries(hashKey);
   }
+
+  @Override
+  public void save(CustomerData copiedCustomer) {
+    String hashKey = "customers";
+    hashOperations.put(hashKey, copiedCustomer.getId(), copiedCustomer);
+  }
 }

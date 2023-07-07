@@ -10,4 +10,6 @@ public interface WarehouseRepository {
   Map<String, WarehouseData> getWarehouses();
 
   WarehouseData findById(String id);
+
+  void save(WarehouseData warehouse);
 }

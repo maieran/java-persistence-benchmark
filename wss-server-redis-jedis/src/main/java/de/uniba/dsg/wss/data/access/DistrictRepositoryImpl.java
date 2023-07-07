@@ -28,4 +28,10 @@ public class DistrictRepositoryImpl implements DistrictRepository {
     String hashKey = "districts";
     return hashOperations.get(hashKey, districtId);
   }
+
+  @Override
+  public void save(DistrictData district) {
+    String hashKey = "districts";
+    hashOperations.put(hashKey, district.getId(), district);
+  }
 }

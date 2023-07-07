@@ -88,6 +88,34 @@ public class CustomerData extends PersonData implements Serializable {
     this.paymentRefsIds = new ArrayList<>();
   }
 
+  /**
+   * Creates a shallow copy of the provided customer.
+   *
+   * @param customer a customer, must not be {@code null}
+   */
+  public CustomerData(CustomerData customer) {
+    super(
+        customer.getId(),
+        customer.getFirstName(),
+        customer.getMiddleName(),
+        customer.getLastName(),
+        customer.getAddress(),
+        customer.getPhoneNumber(),
+        customer.getEmail());
+    this.districtRefId = customer.districtRefId;
+    this.since = customer.since;
+    this.credit = customer.credit;
+    this.creditLimit = customer.creditLimit;
+    this.discount = customer.discount;
+    this.balance = customer.balance;
+    this.yearToDatePayment = customer.yearToDatePayment;
+    this.paymentCount = customer.paymentCount;
+    this.deliveryCount = customer.deliveryCount;
+    this.data = customer.data;
+    this.orderRefsIds = null;
+    this.paymentRefsIds = null;
+  }
+
   public String getDistrictRefId() {
     return districtRefId;
   }
@@ -176,5 +204,21 @@ public class CustomerData extends PersonData implements Serializable {
 
   public void increaseDeliveryCount() {
     this.deliveryCount++;
+  }
+
+  public void increaseYearToBalance(double amount) {
+    this.yearToDatePayment += amount;
+  }
+
+  public void decreaseBalance(double amount) {
+    balance -= amount;
+  }
+
+  public void increasePaymentCount() {
+    this.paymentCount++;
+  }
+
+  public void updateData(String buildNewCustomerData) {
+    this.data = buildNewCustomerData;
   }
 }

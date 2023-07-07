@@ -20,4 +20,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     String hashKey = "payments";
     hashOperations.putAll(hashKey, payments);
   }
+
+  @Override
+  public void save(PaymentData payment) {
+    String hashKey = "payments";
+    hashOperations.put(hashKey, payment.getId(), payment);
+  }
 }

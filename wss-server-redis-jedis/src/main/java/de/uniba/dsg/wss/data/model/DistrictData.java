@@ -109,4 +109,8 @@ public class DistrictData extends BaseData implements Serializable {
   public void setOrderRefsIds(List<String> orderRefsIds) {
     this.orderRefsIds = orderRefsIds;
   }
+
+  public void increaseYearToBalance(double amount) {
+    this.yearToDateBalance += amount;
+  }
 }
