@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.OrderData;
+import java.util.List;
 import java.util.Map;
 
 public interface OrderRepository {
@@ -11,6 +12,8 @@ public interface OrderRepository {
   void storeUpdatedOrder(OrderData order);
 
   void save(OrderData order);
+
+  List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds);
 
   // List<OrderData> updateDeliveryStatusOfOldestUnfulfilledOrders(List<OrderData> orders,
   // CarrierData carrierData);

@@ -1,6 +1,8 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.OrderData;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
 
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, OrderData> hashOperations;
   private static final Logger LOG = LogManager.getLogger(OrderRepository.class);
 
   public OrderRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -42,30 +46,35 @@ public class OrderRepositoryImpl implements OrderRepository {
     hashOperations.put(hashKey, order.getId(), order);
   }
 
-  //  @Override
-  //  public List<OrderData> updateDeliveryStatusOfOldestUnfulfilledOrders(List<OrderData> orders,
-  // CarrierData carrierData) {
-  //    String hashKey = "orders";
-  //    List<OrderData> oldestOrders = new ArrayList<>();
-  //
-  //    for(OrderData order : orders){
-  //      // TODO: Need to see if we need to handle concurrency here
-  //      if (order.isFulfilled()) {
-  //        LOG.info("HOUSTON WE HAVE A PROBLEM!!!!");
-  //        continue;
-  //      }
-  //
-  //      String customerRefId = order.getCustomerRefId();
-  //      CustomerData customerData = customerRepository.findById(customerRefId);
-  //
-  //
-  //
-  //    }
-  //
-  //
-  //
-  //
-  //
-  //    return null;
-  //  }
+  @Override
+  public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) {
+    String hashKey = "orders";
+    List<OrderData> orderDataList = new ArrayList<>();
+
+    for (String orderRefId : orderRefsIds) {
+      OrderData orderData = hashOperations.get(hashKey, orderRefId);
+      if (orderData != null) {
+        orderDataList.add(orderData);
+      }
+    }
+
+    return orderDataList;
+  }
+
+  // https://docs.spring.io/spring-data-redis/docs/current/reference/html/#pipeline
+
+  /**
+   * @Override public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) { String
+   * script = "local results = {} " + "for _, orderRefId in ipairs(ARGV) do " + " local orderData =
+   * redis.call('HGET', KEYS[1], orderRefId) " + " table.insert(results, orderData) " + "end " +
+   * "return results ";
+   *
+   * <p>RedisScript<List<OrderData>> redisScript = new DefaultRedisScript<>(script, List.class);
+   * List<OrderData> orderDataList = redisTemplate.execute(redisScript,
+   * Collections.singletonList("orders"), orderRefsIds);
+   *
+   * <p>orderDataList.removeIf(Objects::isNull);
+   *
+   * <p>return orderDataList; }
+   */
 }

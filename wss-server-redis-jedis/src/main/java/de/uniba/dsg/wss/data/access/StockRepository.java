@@ -7,4 +7,6 @@ public interface StockRepository {
   void saveAll(Map<String, StockData> idsToStocks);
 
   StockData findById(String stockId);
+
+  Map<String, StockData> getStocks();
 }

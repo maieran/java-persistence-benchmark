@@ -28,4 +28,10 @@ public class StockRepositoryImpl implements StockRepository {
     String hashKey = "stocks";
     return hashOperations.get(hashKey, stockId);
   }
+
+  @Override
+  public Map<String, StockData> getStocks() {
+    String hashKey = "stocks";
+    return hashOperations.entries(hashKey);
+  }
 }
