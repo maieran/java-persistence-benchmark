@@ -9,4 +9,6 @@ public interface DistrictRepository {
   DistrictData findById(String districtId);
 
   void save(DistrictData district);
+
+  Map<String, DistrictData> getDistricts();
 }

@@ -15,6 +15,8 @@ public interface OrderRepository {
 
   List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds);
 
+  Map<String, OrderData> getOrders();
+
   // List<OrderData> updateDeliveryStatusOfOldestUnfulfilledOrders(List<OrderData> orders,
   // CarrierData carrierData);
 }

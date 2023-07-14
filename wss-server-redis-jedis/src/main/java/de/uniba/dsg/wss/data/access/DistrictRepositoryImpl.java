@@ -34,4 +34,10 @@ public class DistrictRepositoryImpl implements DistrictRepository {
     String hashKey = "districts";
     hashOperations.put(hashKey, district.getId(), district);
   }
+
+  @Override
+  public Map<String, DistrictData> getDistricts() {
+    String hashKey = "districts";
+    return hashOperations.entries(hashKey);
+  }
 }

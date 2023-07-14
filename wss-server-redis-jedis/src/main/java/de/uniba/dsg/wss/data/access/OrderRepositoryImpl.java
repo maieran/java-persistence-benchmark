@@ -61,6 +61,12 @@ public class OrderRepositoryImpl implements OrderRepository {
     return orderDataList;
   }
 
+  @Override
+  public Map<String, OrderData> getOrders() {
+    String hashKey = "orders";
+    return hashOperations.entries(hashKey);
+  }
+
   // https://docs.spring.io/spring-data-redis/docs/current/reference/html/#pipeline
 
   /**

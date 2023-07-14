@@ -34,7 +34,7 @@ public class CustomerData extends PersonData implements Serializable {
 
   // Reference via ID
   @JsonProperty("paymentRefsIds")
-  private final List<String> paymentRefsIds;
+  private List<String> paymentRefsIds;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private final LocalDateTime since;
@@ -112,8 +112,9 @@ public class CustomerData extends PersonData implements Serializable {
     this.paymentCount = customer.paymentCount;
     this.deliveryCount = customer.deliveryCount;
     this.data = customer.data;
-    this.orderRefsIds = null;
-    this.paymentRefsIds = null;
+    // TODO: Was ist, wen die beiden null sind ?
+    this.orderRefsIds = customer.orderRefsIds;
+    this.paymentRefsIds = customer.paymentRefsIds;
   }
 
   public String getDistrictRefId() {

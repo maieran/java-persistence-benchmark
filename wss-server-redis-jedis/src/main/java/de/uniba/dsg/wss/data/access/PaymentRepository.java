@@ -9,4 +9,6 @@ public interface PaymentRepository {
   void saveAll(Map<String, PaymentData> idsToPayments);
 
   void save(PaymentData payment);
+
+  Map<String, PaymentData> getPayments();
 }

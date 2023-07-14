@@ -29,7 +29,10 @@ public class CarrierRepositoryImpl implements CarrierRepository {
 
   @Override
   public CarrierData findById(String carrierRefId) {
-    String hashKey = "carriers";
-    return hashOperations.get(hashKey, carrierRefId);
+    if (carrierRefId != null) {
+      String hashKey = "carriers";
+      return hashOperations.get(hashKey, carrierRefId);
+    }
+    return null;
   }
 }

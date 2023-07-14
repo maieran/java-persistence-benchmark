@@ -39,13 +39,8 @@ public class WarehouseRepositoryImpl implements WarehouseRepository {
   }
 
   //  @Override
-  //  public void saveAll(Map<String, WarehouseData> warehouses) {
+  //  public void deleteAll() {
   //    String hashKey = "warehouses";
-  //    Map<String, WarehouseData> warehouseMap = new HashMap<>();
-  //    for (WarehouseData warehouse : warehouses) {
-  //      warehouseMap.put(warehouse.getId(), warehouse);
-  //    }
-  //    hashOperations.putAll(hashKey, warehouseMap);
+  //    hashOperations.delete(hashKey);
   //  }
-
 }

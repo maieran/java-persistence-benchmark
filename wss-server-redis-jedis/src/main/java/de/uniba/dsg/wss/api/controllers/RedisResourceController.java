@@ -228,15 +228,20 @@ public class RedisResourceController implements ResourceController {
       OrderRepresentation orderRepresentation = modelMapper.map(order, OrderRepresentation.class);
 
       CarrierData carrier = carrierRepository.findById(order.getCarrierRefId());
-      CarrierRepresentation carrierRepresentation =
-          modelMapper.map(carrier, CarrierRepresentation.class);
+      if (carrier != null) {
+        CarrierRepresentation carrierRepresentation =
+            modelMapper.map(carrier, CarrierRepresentation.class);
+        orderRepresentation.setCarrier(carrierRepresentation);
+      } else {
+        orderRepresentation.setCarrier(null);
+      }
 
       CustomerData customer = customerRepository.findById(order.getCustomerRefId());
       CustomerRepresentation customerRepresentation =
           modelMapper.map(customer, CustomerRepresentation.class);
       customerRepresentation.setDistrict(districtRepresentation);
 
-      orderRepresentation.setCarrier(carrierRepresentation);
+      // orderRepresentation.setCarrier(carrierRepresentation);
       orderRepresentation.setCustomer(customerRepresentation);
       orderRepresentation.setDistrict(districtRepresentation);
 

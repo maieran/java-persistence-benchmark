@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.StockData;
+import java.util.List;
 import java.util.Map;
 
 public interface StockRepository {
@@ -9,4 +10,6 @@ public interface StockRepository {
   StockData findById(String stockId);
 
   Map<String, StockData> getStocks();
+
+  Map<String, StockData> getStocksByWarehouse(List<String> stockRefsIds);
 }

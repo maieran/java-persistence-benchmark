@@ -5,10 +5,7 @@ import de.uniba.dsg.wss.data.model.*;
 import de.uniba.dsg.wss.data.transfer.messages.StockLevelRequest;
 import de.uniba.dsg.wss.data.transfer.messages.StockLevelResponse;
 import de.uniba.dsg.wss.service.StockLevelService;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +40,7 @@ public class RedisStockLevelService extends StockLevelService {
     List<String> districtRefsIds = warehouse.getDistrictRefsIds();
     if (districtRefsIds.contains(district.getId())) {
       List<StockData> stocksInOrder = new ArrayList<>();
+      // TODO: BATCH CALL
       List<OrderData> orders = orderRepository.getOrdersFromDistrict(district.getOrderRefsIds());
       orders.sort(Comparator.comparing(OrderData::getEntryDate));
       int limit = Math.min(orders.size(), 20);
@@ -52,7 +50,7 @@ public class RedisStockLevelService extends StockLevelService {
         List<String> orderItemsIds = order.getItemsIds();
         // List<StockData> orderStocks = new ArrayList<>();
         Map<String, StockData> allStock = stockRepository.getStocks();
-
+        // TODO: BATCH CALL ??
         for (String orderItemId : orderItemsIds) {
           OrderItemData orderItem = orderItemRepository.findById(orderItemId);
           for (Map.Entry<String, StockData> entry : allStock.entrySet()) {
@@ -65,9 +63,13 @@ public class RedisStockLevelService extends StockLevelService {
       }
 
       List<StockData> distinctStocks = new ArrayList<>();
+      Set<String> seenStocks = new HashSet<>();
+
       for (StockData stock : stocksInOrder) {
-        if (!distinctStocks.contains(stock)) {
+        String stockId = stock.getId();
+        if (!seenStocks.contains(stockId)) {
           distinctStocks.add(stock);
+          seenStocks.add(stockId);
         }
       }
 
