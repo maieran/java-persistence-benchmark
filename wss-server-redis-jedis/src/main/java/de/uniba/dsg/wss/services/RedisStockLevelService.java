@@ -40,19 +40,19 @@ public class RedisStockLevelService extends StockLevelService {
     List<String> districtRefsIds = warehouse.getDistrictRefsIds();
     if (districtRefsIds.contains(district.getId())) {
       List<StockData> stocksInOrder = new ArrayList<>();
-      // TODO: BATCH CALL
+
       List<OrderData> orders = orderRepository.getOrdersFromDistrict(district.getOrderRefsIds());
       orders.sort(Comparator.comparing(OrderData::getEntryDate));
       int limit = Math.min(orders.size(), 20);
 
       for (int i = 0; i < limit; i++) {
         OrderData order = orders.get(i);
-        List<String> orderItemsIds = order.getItemsIds();
-        // List<StockData> orderStocks = new ArrayList<>();
+
         Map<String, StockData> allStock = stockRepository.getStocks();
-        // TODO: BATCH CALL ??
-        for (String orderItemId : orderItemsIds) {
-          OrderItemData orderItem = orderItemRepository.findById(orderItemId);
+        List<OrderItemData> orderItems =
+            orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
+
+        for (OrderItemData orderItem : orderItems) {
           for (Map.Entry<String, StockData> entry : allStock.entrySet()) {
             if (orderItem.getSupplyingWarehouseRefId().equals(entry.getValue().getWarehouseRefId())
                 && orderItem.getProductRefId().equals(entry.getValue().getProductRefId())) {
@@ -84,7 +84,6 @@ public class RedisStockLevelService extends StockLevelService {
     }
   }
 
-  // TODO: CHECK HOW IT WILL BEHAVE WHEN CONCURRENCY
   private int countStockEntriesLowerThanThreshold(
       List<StockData> stocksInOrder, int stockThreshold) {
     return (int)

@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 
-// @SpringBootTest(classes = {TestRedisConfiguration.class, RedisResourceController.class})
 @SpringBootTest
 public class RedisResourceControllerTest extends RedisTest {
 
@@ -23,16 +22,8 @@ public class RedisResourceControllerTest extends RedisTest {
 
   @BeforeEach
   public void setUp() {
-    /*    RedisDataConverter converter = new RedisDataConverter();
-    RedisDataModel model = converter.convert(new TestDataGenerator().generate());
-    warehouseRepository.saveAll(model.getIdsToWarehouses());*/
     prepareTestStorage();
   }
-
-  //  @AfterEach
-  //  public void tearDown() {
-  //    warehouseRepository.deleteAll();
-  //  }
 
   @Test
   @WithMockUser(

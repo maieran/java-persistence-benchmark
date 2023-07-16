@@ -47,24 +47,9 @@ public class RedisNewOrderService extends NewOrderService {
     this.orderItemRepository = orderItemRepository;
   }
 
-  /*
-   TODO: Need to figure out how it will behave in concurrent condition
-  */
-
   @Override
   public NewOrderResponse process(NewOrderRequest newOrderRequest) {
-    OrderData storedOrder = null;
-
-    // TODO: keeping it until concurrency testing
-    //    for (int i = 0; i < maxRetries; i++) {
-    //      try {
-    //        // synchronized access
-    //        storedOrder = processOrderRequest(req);
-    //        break;
-    //      } catch (MsTransactionException e) {
-    //        // TODO handle exception?
-    //      }
-    //    }
+    OrderData storedOrder;
 
     WarehouseData warehouseData = warehouseRepository.findById(newOrderRequest.getWarehouseId());
     CustomerData customerData = customerRepository.findById(newOrderRequest.getCustomerId());
@@ -82,9 +67,6 @@ public class RedisNewOrderService extends NewOrderService {
     boolean allLocal = true;
 
     for (NewOrderRequestItem item : newOrderRequest.getItems()) {
-      // TODO: Possible improvement when calling the id of stockData: by productId +
-      // getSupplyingWarehouseId() in model and converter
-      // TODO: Would also reduce the amount of calls to server
       StockData stockData =
           findByWarehouseIdAndProductId(item.getProductId(), item.getSupplyingWarehouseId());
       if (stockData == null) {
@@ -121,20 +103,22 @@ public class RedisNewOrderService extends NewOrderService {
     // creation of return dtos
     List<NewOrderResponseItem> dtoItems = new ArrayList<>();
 
-    for (String orderItemId : storedOrder.getItemsIds()) {
-      OrderItemData orderItemData = orderItemRepository.findById(orderItemId);
-      ProductData productData = productRepository.findById(orderItemData.getProductRefId());
+    List<OrderItemData> orderItems =
+        orderItemRepository.getOrderItemsByOrder(storedOrder.getItemsIds());
+
+    for (OrderItemData orderItem : orderItems) {
+      ProductData productData = productRepository.findById(orderItem.getProductRefId());
       dtoItems.add(
           new NewOrderResponseItem(
-              orderItemData.getSupplyingWarehouseRefId(),
+              orderItem.getSupplyingWarehouseRefId(),
               productData.getId(),
               productData.getName(),
               productData.getPrice(),
-              orderItemData.getAmount(),
-              orderItemData.getQuantity(),
-              orderItemData.getLeftQuantityInStock(),
+              orderItem.getAmount(),
+              orderItem.getQuantity(),
+              orderItem.getLeftQuantityInStock(),
               determineBrandGeneric(productData.getData(), "stock data")));
-      orderItemSum += orderItemData.getAmount();
+      orderItemSum += orderItem.getAmount();
     }
 
     DistrictData districtData = districtRepository.findById(storedOrder.getDistrictRefId());
@@ -179,13 +163,16 @@ public class RedisNewOrderService extends NewOrderService {
 
   private List<OrderItemData> updateStock(OrderData order, List<StockUpdateDto> stockUpdates) {
     List<OrderItemData> orderItemsList = new ArrayList<>();
+
     for (int i = 0; i < stockUpdates.size(); i++) {
       StockUpdateDto stockUpdateDto = stockUpdates.get(i);
       if (!stockUpdateDto.getStockData().reduceQuantity(stockUpdateDto.getQuantity())) {
         break;
       } else {
+
         ProductData productData =
             productRepository.findById(stockUpdateDto.getStockData().getProductRefId());
+
         OrderItemData orderItem =
             new OrderItemData(
                 order.getId(),
@@ -196,33 +183,23 @@ public class RedisNewOrderService extends NewOrderService {
                 stockUpdateDto.getStockData().getQuantity(),
                 stockUpdateDto.getQuantity() * productData.getPrice(),
                 stockUpdateDto.getStockData().getDist01());
-        // TODO: Einzeln abspeichern oder in BATCH ?
-        orderItemRepository.save(orderItem);
+
+        // orderItemRepository.save(orderItem);
         orderItemsList.add(orderItem);
       }
     }
 
-    //        // compensate the first transactions, if some updates fail
-    //        if (i != stockUpdates.size()) {
-    //          for (int j = 0; j < i; j++) {
-    //            StockUpdateDto stockUpdate = stockUpdates.get(j);
-    //            stockUpdate.getStockData().undoReduceQuantityOperation(stockUpdate.getQuantity());
-    //          }
-    //          return List.of();
-    //        }
+    orderItemRepository.saveOrderItemsInBatch(orderItemsList);
     return orderItemsList;
   }
 
   private StockData findByWarehouseIdAndProductId(String productId, String supplyingWarehouseId) {
     WarehouseData warehouseData = warehouseRepository.findById(supplyingWarehouseId);
     ProductData productData = productRepository.findById(productId);
-    // TODO: DO THE BATCH-CALL Instead
-    for (String stockId : warehouseData.getStockRefsIds()) {
-      StockData stockData = stockRepository.findById(stockId);
-      if (stockData.getProductRefId().equals(productData.getId())) {
-        return stockData;
-      }
-    }
-    return null;
+
+    return stockRepository.getStocksByWarehouse(warehouseData.getStockRefsIds()).stream()
+        .filter(stock -> stock.getProductRefId().equals(productData.getId()))
+        .findFirst()
+        .orElse(null);
   }
 }

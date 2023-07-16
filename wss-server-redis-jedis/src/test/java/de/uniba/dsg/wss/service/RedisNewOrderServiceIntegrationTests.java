@@ -28,7 +28,6 @@ public class RedisNewOrderServiceIntegrationTests extends RedisTest {
     prepareTestStorage();
   }
 
-  // TODO: We need to check how the client will handle the retries and concurrency in general
   private void adjustDefaults(int retries, int increaseQuantity) {
     RedisNewOrderService.maxRetries = retries;
     StockData.increaseQuantity = increaseQuantity;

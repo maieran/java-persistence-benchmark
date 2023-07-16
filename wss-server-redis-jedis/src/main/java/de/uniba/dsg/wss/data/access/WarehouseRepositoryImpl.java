@@ -37,10 +37,4 @@ public class WarehouseRepositoryImpl implements WarehouseRepository {
     String hashKey = "warehouses";
     hashOperations.put(hashKey, warehouse.getId(), warehouse);
   }
-
-  //  @Override
-  //  public void deleteAll() {
-  //    String hashKey = "warehouses";
-  //    hashOperations.delete(hashKey);
-  //  }
 }

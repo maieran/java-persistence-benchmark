@@ -125,10 +125,6 @@ public class CustomerData extends PersonData implements Serializable {
     this.districtRefId = districtRefId;
   }
 
-  // Object reference
-  //  public Map<String, OrderData> getOrderRefs() {
-  //    return orderRefs;
-  //  }
 
   public Map<String, String> getOrderRefsIds() {
     return orderRefsIds;
@@ -137,11 +133,6 @@ public class CustomerData extends PersonData implements Serializable {
   public void setOrderRefsIds(Map<String, String> orderRefsIds) {
     this.orderRefsIds = orderRefsIds;
   }
-
-  // Object reference
-  //  public List<PaymentData> getPaymentRefs() {
-  //    return paymentRefs;
-  //  }
 
   public List<String> getPaymentRefsIds() {
     return paymentRefsIds;

@@ -11,5 +11,5 @@ public interface StockRepository {
 
   Map<String, StockData> getStocks();
 
-  Map<String, StockData> getStocksByWarehouse(List<String> stockRefsIds);
+  List<StockData> getStocksByWarehouse(List<String> stockRefsIds);
 }

@@ -18,30 +18,28 @@ public class RedisDataConverter
 
   @Override
   public RedisDataModel convert(DataModel<Product, Warehouse, Employee, Carrier> model) {
-    // Create model objects by converting provided template
+
     Stopwatch stopwatch = new Stopwatch().start();
 
-    // TODO: No need to rework the references , since these objects contain simple data types
+
     Map<String, ProductData> products = convertProducts(model.getProducts());
     Map<String, CarrierData> carriers = convertCarriers(model.getCarriers());
 
-    // TODO: We need to include here the ID's to avoid circular references and therefore
-    // StackOverflowError
     Map<String, WarehouseData> warehouses =
-        convertWarehouses(model.getWarehouses()); // TODO: FERTIG
+        convertWarehouses(model.getWarehouses());
     Map<String, StockData> stocks =
-        convertStocks(model.getWarehouses(), warehouses, products); // TODO: FERTIG
+        convertStocks(model.getWarehouses(), warehouses, products);
     Map<String, DistrictData> districts =
-        convertDistricts(model.getWarehouses(), warehouses); // TODO: FERTIG
-    Map<String, EmployeeData> employees = convertEmployees(model.getEmployees()); // TODO: Fertig
+        convertDistricts(model.getWarehouses(), warehouses);
+    Map<String, EmployeeData> employees = convertEmployees(model.getEmployees());
     Map<String, CustomerData> customers =
-        convertCustomers(model.getWarehouses(), districts); // TODO: FERTIG
+        convertCustomers(model.getWarehouses(), districts);
     Map<String, OrderData> orders =
-        convertOrders(model.getWarehouses(), districts, customers, carriers); // TODO: Fertig
+        convertOrders(model.getWarehouses(), districts, customers, carriers);
     Map<String, OrderItemData> orderItems =
-        convertOrderItems(model.getWarehouses(), warehouses, products, orders); // TODO: ids
+        convertOrderItems(model.getWarehouses(), warehouses, products, orders);
     Map<String, PaymentData> payments =
-        convertPayments(model.getWarehouses(), customers); // TODO: ids
+        convertPayments(model.getWarehouses(), customers);
     stopwatch.stop();
 
     // Create summary data
@@ -102,8 +100,6 @@ public class RedisDataConverter
               address(w.getAddress()),
               w.getSalesTax(),
               w.getYearToDateBalance());
-      // NEW relaxing the concurrency thing here, since at the data generation step, the procedure
-      // is implemented single threaded
 
       warehouses.put(warehouse.getId(), warehouse);
     }
@@ -173,7 +169,7 @@ public class RedisDataConverter
     Map<String, DistrictData> districts = new HashMap<>();
     for (Warehouse w : ws) {
       WarehouseData warehouse = warehouses.get(w.getId());
-      // Map<String, DistrictData> districtsForWarehouse = warehouse.getDistricts();
+
 
       for (District d : w.getDistricts()) {
         // referential integrity...

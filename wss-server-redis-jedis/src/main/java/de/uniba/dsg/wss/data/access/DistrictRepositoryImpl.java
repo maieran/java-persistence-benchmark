@@ -1,7 +1,10 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.DistrictData;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -39,5 +42,13 @@ public class DistrictRepositoryImpl implements DistrictRepository {
   public Map<String, DistrictData> getDistricts() {
     String hashKey = "districts";
     return hashOperations.entries(hashKey);
+  }
+
+  @Override
+  public List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds) {
+    String hashKey = "districts";
+    List<DistrictData> districts = hashOperations.multiGet(hashKey, districtRefsIds);
+
+    return districts.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 }

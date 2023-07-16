@@ -1,7 +1,10 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.CustomerData;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -43,5 +46,13 @@ public class CustomerRepositoryImpl implements CustomerRepository {
   public void save(CustomerData copiedCustomer) {
     String hashKey = "customers";
     hashOperations.put(hashKey, copiedCustomer.getId(), copiedCustomer);
+  }
+
+  @Override
+  public List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds) {
+    String hashKey = "customers";
+    List<CustomerData> customers = hashOperations.multiGet(hashKey, customerRefsIds);
+
+    return customers.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 }

@@ -62,10 +62,8 @@ public class RedisOrderStatusService extends OrderStatusService {
       }
     }
 
-    // TODO: BATCH CALL
     OrderData mostRecentOrder =
-        customer.getOrderRefsIds().values().stream()
-            .map(orderRepository::findById)
+        orderRepository.getOrdersByCustomer(customer.getOrderRefsIds()).stream()
             .filter(Objects::nonNull)
             .max(Comparator.comparing(OrderData::getEntryDate))
             .orElseThrow(IllegalStateException::new);
@@ -87,15 +85,17 @@ public class RedisOrderStatusService extends OrderStatusService {
             carrierRepository.findById(mostRecentOrder.getCarrierRefId()) == null
                 ? null
                 : mostRecentOrder.getCarrierRefId(),
-            null // Set 'itemStatus' as null initially
+            null // Set 'itemStatus' as null, will be set down below
             );
 
     List<OrderItemStatusResponse> itemStatusList =
-        mostRecentOrder.getItemsIds().stream()
+        orderItemRepository
+            .getOrderItemsByIds(mostRecentOrder.getItemsIds())
+            .entrySet()
+            .parallelStream()
             .map(
-                itemId -> {
-                  // TODO: REDIS BATCH CALL ????
-                  OrderItemData item = orderItemRepository.findById(itemId);
+                entry -> {
+                  OrderItemData item = entry.getValue();
                   return new OrderItemStatusResponse(
                       item.getSupplyingWarehouseRefId(),
                       item.getProductRefId(),

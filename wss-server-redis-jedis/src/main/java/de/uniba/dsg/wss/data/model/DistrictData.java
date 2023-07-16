@@ -52,24 +52,6 @@ public class DistrictData extends BaseData implements Serializable {
     this.orderRefsIds = new ArrayList<>();
   }
 
-  //  @JsonCreator
-  //  public DistrictData(
-  //      @JsonProperty("id") String id,
-  //      @JsonProperty("warehouseRefId") String warehouseRefId,
-  //      @JsonProperty("name ") String name,
-  //      @JsonProperty("address ") AddressData address,
-  //      @JsonProperty("salesTax") double salesTax,
-  //      @JsonProperty("yearToDateBalance") double yearToDateBalance) {
-  //    super(id);
-  //    this.warehouseRefId = warehouseRefId;
-  //    this.name = name;
-  //    this.address = address;
-  //    this.salesTax = salesTax;
-  //    this.yearToDateBalance = yearToDateBalance;
-  //    this.customerRefsIds = new ArrayList<>();
-  //    this.orderRefsIds = new HashMap<>();
-  //  }
-
   public String getWarehouseRefId() {
     return warehouseRefId;
   }

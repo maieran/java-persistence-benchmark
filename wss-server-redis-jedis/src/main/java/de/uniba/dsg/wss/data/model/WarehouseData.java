@@ -40,13 +40,6 @@ public class WarehouseData extends BaseData implements Serializable {
     this.address = address;
     this.salesTax = salesTax;
     this.yearToDateBalance = yearToDateBalance;
-
-    /* TODO: We avoid the direct combination of Objects, since there is no possible way to attach them directly in Redis
-       instead we use the ID and separate them
-    */
-    // districtRefs = new HashMap<>();
-    // stockRefs = new ArrayList<>();
-
     stockRefsIds = new ArrayList<>();
     districtRefsIds = new ArrayList<>();
   }

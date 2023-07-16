@@ -87,8 +87,6 @@ public class RedisPaymentService extends PaymentService {
     return paymentResponse;
   }
 
-  // TODO: Need to check for concurrency yet, since redis promises to have a thread-safe client when
-  // using jedispool
   private CustomerData storePaymentAndUpdateDependentObjects(
       WarehouseData warehouse, DistrictData district, CustomerData customer, PaymentData payment) {
     double amount = payment.getAmount();
@@ -104,7 +102,7 @@ public class RedisPaymentService extends PaymentService {
     districtRepository.save(district);
 
     CustomerData copiedCustomer;
-    // Here we test without syncronized like in MS-Sync
+
     // add payment reference over its id to customer
     customer.getPaymentRefsIds().add(payment.getId());
     // update customer - decrease balance - req.amount

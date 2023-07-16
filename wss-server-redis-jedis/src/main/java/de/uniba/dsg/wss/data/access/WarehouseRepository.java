@@ -13,5 +13,4 @@ public interface WarehouseRepository {
 
   void save(WarehouseData warehouse);
 
-  //  void deleteAll();
 }

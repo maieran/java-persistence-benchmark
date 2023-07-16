@@ -80,12 +80,6 @@ public class StockData extends BaseData implements Serializable {
     this.dist10 = dist10;
   }
 
-  // TODO: Commented out since getter are for compatible with object reference
-  //
-  //  public ProductData getProductRef() {
-  //    return productRef;
-  //  }
-
   public String getWarehouseRefId() {
     return this.warehouseRefId;
   }
@@ -171,7 +165,6 @@ public class StockData extends BaseData implements Serializable {
   }
 
   public boolean reduceQuantity(int quantity) {
-    // TODO: no synchronized because client suppose to be thread-safe
     if (this.quantity < quantity) {
       this.quantity += increaseQuantity;
       return false;

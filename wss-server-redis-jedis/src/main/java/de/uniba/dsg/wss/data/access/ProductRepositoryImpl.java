@@ -1,6 +1,8 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.ProductData;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,5 +34,20 @@ public class ProductRepositoryImpl implements ProductRepository {
   public ProductData findById(String productRefId) {
     String hashKey = "products";
     return hashOperations.get(hashKey, productRefId);
+  }
+
+  @Override
+  public Map<String, ProductData> getProductsFromStocks(List<String> productIds) {
+    String hashKey = "products";
+    List<ProductData> products = hashOperations.multiGet(hashKey, productIds);
+
+    Map<String, ProductData> productDataMap = new HashMap<>();
+    for (ProductData product : products) {
+      if (product != null) {
+        productDataMap.put(product.getId(), product);
+      }
+    }
+
+    return productDataMap;
   }
 }

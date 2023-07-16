@@ -139,9 +139,6 @@ public class OrderData extends BaseData implements Serializable {
     this.fulfilled = fulfilled;
   }
 
-  //  public List<OrderItemData> getItems() {
-  //    return items;
-  //  }
 
   public List<String> getItemsIds() {
     return itemsIds;

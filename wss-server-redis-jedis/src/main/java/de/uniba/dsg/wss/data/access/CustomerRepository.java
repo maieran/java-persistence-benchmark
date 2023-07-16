@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.CustomerData;
+import java.util.List;
 import java.util.Map;
 
 public interface CustomerRepository {
@@ -13,4 +14,6 @@ public interface CustomerRepository {
   Map<String, CustomerData> getCustomers();
 
   void save(CustomerData copiedCustomer);
+
+  List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds);
 }

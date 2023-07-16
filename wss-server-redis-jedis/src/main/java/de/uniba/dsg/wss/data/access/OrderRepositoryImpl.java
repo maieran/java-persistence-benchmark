@@ -1,9 +1,10 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.OrderData;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.redis.core.HashOperations;
@@ -49,16 +50,9 @@ public class OrderRepositoryImpl implements OrderRepository {
   @Override
   public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) {
     String hashKey = "orders";
-    List<OrderData> orderDataList = new ArrayList<>();
+    List<OrderData> orders = hashOperations.multiGet(hashKey, orderRefsIds);
 
-    for (String orderRefId : orderRefsIds) {
-      OrderData orderData = hashOperations.get(hashKey, orderRefId);
-      if (orderData != null) {
-        orderDataList.add(orderData);
-      }
-    }
-
-    return orderDataList;
+    return orders.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 
   @Override
@@ -67,20 +61,14 @@ public class OrderRepositoryImpl implements OrderRepository {
     return hashOperations.entries(hashKey);
   }
 
-  // https://docs.spring.io/spring-data-redis/docs/current/reference/html/#pipeline
+  @Override
+  public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
+    String hashKey = "orders";
+    Map<String, OrderData> allOrders = hashOperations.entries(hashKey);
 
-  /**
-   * @Override public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) { String
-   * script = "local results = {} " + "for _, orderRefId in ipairs(ARGV) do " + " local orderData =
-   * redis.call('HGET', KEYS[1], orderRefId) " + " table.insert(results, orderData) " + "end " +
-   * "return results ";
-   *
-   * <p>RedisScript<List<OrderData>> redisScript = new DefaultRedisScript<>(script, List.class);
-   * List<OrderData> orderDataList = redisTemplate.execute(redisScript,
-   * Collections.singletonList("orders"), orderRefsIds);
-   *
-   * <p>orderDataList.removeIf(Objects::isNull);
-   *
-   * <p>return orderDataList; }
-   */
+    return allOrders.entrySet().stream()
+        .filter(entry -> orderRefsIds.containsKey(entry.getKey()))
+        .map(Map.Entry::getValue)
+        .collect(Collectors.toList());
+  }
 }

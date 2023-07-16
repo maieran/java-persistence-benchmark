@@ -58,10 +58,6 @@ public class RedisDataWriter
 
     RedisDataModel redisDataModel = (RedisDataModel) model;
 
-    /**
-     * TODO: NEED TO GET RID OF THESE COLLECTION, OTHERWISE IT WILL BECOME IN PRODUCTION LEVEL TOO
-     * MEMORY CONSUMING
-     */
     productRepository.saveAll(redisDataModel.getIdsToProducts());
 
     carrierRepository.saveAll(redisDataModel.getIdsToCarriers());

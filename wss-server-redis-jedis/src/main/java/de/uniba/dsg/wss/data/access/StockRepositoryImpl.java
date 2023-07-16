@@ -1,9 +1,10 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.StockData;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -38,17 +39,10 @@ public class StockRepositoryImpl implements StockRepository {
   }
 
   @Override
-  public Map<String, StockData> getStocksByWarehouse(List<String> stockRefsIds) {
+  public List<StockData> getStocksByWarehouse(List<String> stockRefsIds) {
     String hashKey = "stocks";
-    List<StockData> stockDataList = hashOperations.multiGet(hashKey, stockRefsIds);
+    List<StockData> stocks = hashOperations.multiGet(hashKey, stockRefsIds);
 
-    Map<String, StockData> stocksByWarehouse = new HashMap<>();
-    for (StockData stockData : stockDataList) {
-      if (stockData != null) {
-        stocksByWarehouse.put(stockData.getWarehouseRefId(), stockData);
-      }
-    }
-
-    return stocksByWarehouse;
+    return stocks.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 }
