@@ -4,14 +4,13 @@ import de.uniba.dsg.wss.data.model.ProductData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.uniba.dsg.wss.data.model.WarehouseData;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * Implementation of the repository interface for accessing and modifying {@link ProductData products}.
+ * Implementation of the repository interface for accessing and modifying {@link ProductData
+ * products}.
  *
  * @author Andre Maier
  */

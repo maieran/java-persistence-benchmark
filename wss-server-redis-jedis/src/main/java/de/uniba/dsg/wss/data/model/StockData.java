@@ -18,11 +18,10 @@ import org.springframework.data.redis.core.RedisHash;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class StockData extends BaseData implements Serializable {
 
-
   public static int increaseQuantity = 100;
-  //reference via id
+  // reference via id
   private final String warehouseRefId;
-  //reference via id
+  // reference via id
   private final String productRefId;
   private int quantity;
   private double yearToDateBalance;

@@ -12,10 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Converts the generated from {@link DataInitializer} and then deserialized by {@link JacksonParser} to a Redis data model.
+ * Converts the generated from {@link DataInitializer} and then deserialized by {@link
+ * JacksonParser} to a Redis data model.
  *
  * @see DataGeneratorModel
- *
  * @author Andre Maier
  */
 public class RedisDataConverter
@@ -159,8 +159,9 @@ public class RedisDataConverter
   }
 
   /**
-   * Districts are now also added to the warehouse by adding the corresponding id of the District object
-   * to a list of strings in the warehouse to ensure bidirectional relationship, when it is requested
+   * Districts are now also added to the warehouse by adding the corresponding id of the District
+   * object to a list of strings in the warehouse to ensure bidirectional relationship, when it is
+   * requested
    *
    * @param ws warehouses to be converted
    * @param warehouses the already converted warehouses
@@ -175,7 +176,6 @@ public class RedisDataConverter
       for (District d : w.getDistricts()) {
         // referential integrity...
         DistrictData districtData = convertDistrict(d, warehouse);
-
 
         districts.put(districtData.getId(), districtData);
         warehouse.getDistrictRefsIds().add(d.getId());

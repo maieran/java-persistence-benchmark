@@ -9,9 +9,8 @@ import java.util.List;
 import org.springframework.data.redis.core.RedisHash;
 
 /**
- * A warehouse of the wholesale supplier, where itself and it's
- * {@link StockData} and {@link DistrictData} can be retrieved via
- * their unique identifier.
+ * A warehouse of the wholesale supplier, where itself and it's {@link StockData} and {@link
+ * DistrictData} can be retrieved via their unique identifier.
  *
  * @author Benedikt Full
  * @author Johannes Manner

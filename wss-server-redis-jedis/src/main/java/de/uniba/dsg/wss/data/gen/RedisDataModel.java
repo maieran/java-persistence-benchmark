@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Class for storing the converted model data produced by {@link RedisDataConverter} instances.
  *

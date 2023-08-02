@@ -3,7 +3,6 @@ package de.uniba.dsg.wss.data.access;
 import de.uniba.dsg.wss.data.model.WarehouseData;
 import java.util.Map;
 
-
 /**
  * Redis repository for accessing and modifying {@link WarehouseData warehouses}.
  *

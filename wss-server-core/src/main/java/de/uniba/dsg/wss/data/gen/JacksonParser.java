@@ -13,25 +13,25 @@ import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * Handles serialization and deserialization of the generated baseline model from {@link DataModel}.
- * For Serialization, it uses the methods {#serializeXXXToJSON()} to serialize the data and write it to JSON files.
- * For Deserialization, it uses the methods {#deserializeXXXFromJSON} to deserialize the data from the JSON files into Java objects.
- * Serialization and deserialization follows the structure defined in {@link DataGeneratorModel}
+ * For Serialization, it uses the methods {#serializeXXXToJSON()} to serialize the data and write it
+ * to JSON files. For Deserialization, it uses the methods {#deserializeXXXFromJSON} to deserialize
+ * the data from the JSON files into Java objects. Serialization and deserialization follows the
+ * structure defined in {@link DataGeneratorModel}
  *
- * However, if the JSON files already exist, the serialization process is skipped in order to avoid overwriting of existing data.
+ * <p>However, if the JSON files already exist, the serialization process is skipped in order to
+ * avoid overwriting of existing data.
  *
- * Nevertheless, entire process in this class is based on the incremental streaming API approach using Jackson library.
- * This approach allows processing data in smaller chunks, while reducing memory heap problems by avoiding the loading of the entire data (serialization)
- * or JSON (deserialization) into memory at once. This way, only relevant parts of the data are serialized and deserialized during the process.
- * Source(s): https://www.baeldung.com/jackson-streaming-api
+ * <p>Nevertheless, entire process in this class is based on the incremental streaming API approach
+ * using Jackson library. This approach allows processing data in smaller chunks, while reducing
+ * memory heap problems by avoiding the loading of the entire data (serialization) or JSON
+ * (deserialization) into memory at once. This way, only relevant parts of the data are serialized
+ * and deserialized during the process. Source(s): https://www.baeldung.com/jackson-streaming-api
  *
  * @see DataInitializer
  * @see DataGeneratorModel
  * @see DataConverter
- *
- *
  * @author Andre Maier
  */
 public class JacksonParser {
@@ -40,16 +40,16 @@ public class JacksonParser {
   private List<Customer> customers = new ArrayList<>();
   private final HashMap<String, District> districtMap = new HashMap<>();
 
-
   /**
    * Serializes the list of generated Products from {@link DataInitializer} of {@link DataModel} and
-   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
-   * If the file already exists due to precedent serialization then it won't overwrite the data and
-   * therefore provides a simple log warning instead.
+   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods and stores the
+   * data to the specified file. If the file already exists due to precedent serialization then it
+   * won't overwrite the data and therefore provides a simple log warning instead.
    *
    * @param products are the list of warehouses objects, which are to be serialized to JSON.
    * @param filePath is the file path, where the JSON data will be written to.
-   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to
+   *     JSON file.
    */
   public void serializeProductsToJSON(List<Product> products, String filePath) throws IOException {
     File file = new File(filePath);
@@ -59,7 +59,7 @@ public class JacksonParser {
 
       JsonFactory jsonFactory = new JsonFactory();
       try (OutputStream outputStream = new FileOutputStream(filePath);
-           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("products");
@@ -84,19 +84,19 @@ public class JacksonParser {
     }
   }
 
-
   /**
-   * Serializes the list of generated Warehouses from {@link DataInitializer} of {@link DataModel} and
-   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
-   * If the file already exists due to precedent serialization then it won't overwrite the data and
-   * therefore provides a simple log warning instead.
+   * Serializes the list of generated Warehouses from {@link DataInitializer} of {@link DataModel}
+   * and writes them to the JSON-file by using Jackson library in the {writeXXX} methods and stores
+   * the data to the specified file. If the file already exists due to precedent serialization then
+   * it won't overwrite the data and therefore provides a simple log warning instead.
    *
    * @param warehouses are the list of warehouses objects, which are to be serialized to JSON.
    * @param filePath is the file path, where the JSON data will be written to.
-   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to
+   *     JSON file.
    */
   public void serializeWarehousesToJSON(List<Warehouse> warehouses, String filePath)
-          throws IOException {
+      throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
@@ -104,7 +104,7 @@ public class JacksonParser {
 
       JsonFactory jsonFactory = new JsonFactory();
       try (OutputStream outputStream = new FileOutputStream(filePath);
-           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("warehouses");
@@ -130,17 +130,18 @@ public class JacksonParser {
   }
 
   /**
-   * Serializes the list of Employees from {@link DataInitializer} of {@link DataModel} and
-   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
-   * If the file already exists due to precedent serialization then it won't overwrite the data and
-   * therefore provides a simple log warning instead.
+   * Serializes the list of Employees from {@link DataInitializer} of {@link DataModel} and writes
+   * them to the JSON-file by using Jackson library in the {writeXXX} methods and stores the data to
+   * the specified file. If the file already exists due to precedent serialization then it won't
+   * overwrite the data and therefore provides a simple log warning instead.
    *
    * @param employees are the list of employees objects, which are to be serialized to JSON.
    * @param filePath is the file path, where the JSON data will be written to.
-   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to
+   *     JSON file.
    */
   public void serializeEmployeesToJSON(List<Employee> employees, String filePath)
-          throws IOException {
+      throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
@@ -148,7 +149,7 @@ public class JacksonParser {
       JsonFactory jsonFactory = new JsonFactory();
 
       try (OutputStream outputStream = new FileOutputStream(filePath);
-           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("employees");
@@ -174,16 +175,16 @@ public class JacksonParser {
     }
   }
 
-
   /**
-   * Serializes the list of Carriers from {@link DataInitializer} of {@link DataModel} and
-   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
-   * If the file already exists due to precedent serialization then it won't overwrite the data and
-   * therefore provides a simple log warning instead.
+   * Serializes the list of Carriers from {@link DataInitializer} of {@link DataModel} and writes
+   * them to the JSON-file by using Jackson library in the {writeXXX} methods and stores the data to
+   * the specified file. If the file already exists due to precedent serialization then it won't
+   * overwrite the data and therefore provides a simple log warning instead.
    *
    * @param carriers are the list of carriers objects, which are to be serialized to JSON.
    * @param filePath is the file path, where the JSON data will be written to.
-   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to
+   *     JSON file.
    */
   public void serializeCarriersToJSON(List<Carrier> carriers, String filePath) throws IOException {
     File file = new File(filePath);
@@ -193,7 +194,7 @@ public class JacksonParser {
       JsonFactory jsonFactory = new JsonFactory();
 
       try (OutputStream outputStream = new FileOutputStream(filePath);
-           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("carriers");
@@ -218,16 +219,16 @@ public class JacksonParser {
     }
   }
 
-
   /**
-   * Serializes the generated Stats from {@link DataInitializer} of {@link DataModel} and
-   * writes them to the JSON-file by using Jackson library and stores the data to the specified file.
-   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * Serializes the generated Stats from {@link DataInitializer} of {@link DataModel} and writes
+   * them to the JSON-file by using Jackson library and stores the data to the specified file. If
+   * the file already exists due to precedent serialization then it won't overwrite the data and
    * therefore provides a simple log warning instead.
    *
    * @param stats is the stats object, which is to be serialized to JSON
    * @param filePath is the file path, where the JSON data will be written to.
-   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to
+   *     JSON file.
    */
   public void serializeStatsToJSON(Stats stats, String filePath) throws IOException {
     File file = new File(filePath);
@@ -238,7 +239,7 @@ public class JacksonParser {
       JsonFactory jsonFactory = new JsonFactory();
 
       try (OutputStream outputStream = new FileOutputStream(filePath);
-           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
 
@@ -329,7 +330,7 @@ public class JacksonParser {
   }
 
   private void writeDistricts(JsonGenerator jsonGenerator, List<District> districts)
-          throws IOException {
+      throws IOException {
 
     jsonGenerator.writeStartArray();
 
@@ -359,7 +360,7 @@ public class JacksonParser {
   }
 
   private void writeCustomers(JsonGenerator jsonGenerator, List<Customer> customers)
-          throws IOException {
+      throws IOException {
     jsonGenerator.writeStartArray();
 
     for (Customer customer : customers) {
@@ -458,7 +459,7 @@ public class JacksonParser {
   }
 
   private void writeOrderItems(JsonGenerator jsonGenerator, List<OrderItem> orderItems)
-          throws IOException {
+      throws IOException {
 
     jsonGenerator.writeStartArray();
 
@@ -495,7 +496,7 @@ public class JacksonParser {
   }
 
   private void writePayments(JsonGenerator jsonGenerator, List<Payment> payments)
-          throws IOException {
+      throws IOException {
     jsonGenerator.writeStartArray();
 
     for (Payment payment : payments) {
@@ -544,18 +545,19 @@ public class JacksonParser {
     jsonGenerator.writeEndObject();
   }
 
-
   /**
-   * Deserialize a list of Products objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
-   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
-   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   * Deserialize a list of Products objects from a JSON file that is generated in the specified
+   * child class of {@link DataInitializer}. The deserialized data objects reconstruct {@link
+   * DataGeneratorModel} so that later they can be converted by {@link DataConverter} and be stored
+   * by the {@link DataWriter} to the corresponding database.
    *
+   * <p>It reads from the specified file path the stored JSON data and deserializes it into a list
+   * of Product objects using Jackson library in the {readXXX} and {setXXXProperty}methods. The
+   * corresponding JSON file is expected to have "products" field containing an array of Products
+   * objects with all the attributes of Product object.
    *
-   * It reads from the specified file path the stored JSON data and deserializes it into a list
-   * of Product objects using Jackson library in the {readXXX} and {setXXXProperty}methods. The corresponding JSON file is expected to have "products" field containing an
-   * array of Products objects with all the attributes of Product object.
-   *
-   * @param filePath is the file path to the JSON file containing the Product data with all it's attributes
+   * @param filePath is the file path to the JSON file containing the Product data with all it's
+   *     attributes
    * @return A list of Product objects deserialized from the corresponding JSON file.
    * @throws IOException only if I/O error occurs while reading from the JSON file.
    * @see Product
@@ -569,7 +571,7 @@ public class JacksonParser {
 
     JsonFactory jsonFactory = new JsonFactory();
     try (InputStream inputStream = new FileInputStream(filePath);
-         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -593,16 +595,18 @@ public class JacksonParser {
   }
 
   /**
-   * Deserialize a list of Warehouses objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
-   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
-   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   * Deserialize a list of Warehouses objects from a JSON file that is generated in the specified
+   * child class of {@link DataInitializer}. The deserialized data objects reconstruct {@link
+   * DataGeneratorModel} so that later they can be converted by {@link DataConverter} and be stored
+   * by the {@link DataWriter} to the corresponding database.
    *
+   * <p>It reads from the specified file path the stored the JSON data and deserializes it into a
+   * list of Warehouse objects using Jackson library in the {readXXX} and {setXXXProperty} methods.
+   * The corresponding JSON file is expected to have "warehouses" field containing an array of
+   * Warehouse objects with all the attributes of Warehouse object.
    *
-   * It reads from the specified file path the stored the JSON data and deserializes it into a list
-   * of Warehouse objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "warehouses" field containing an
-   * array of Warehouse objects with all the attributes of Warehouse object.
-   *
-   * @param filePath is the file path to the JSON file containing the Warehouse data with all it's attributes
+   * @param filePath is the file path to the JSON file containing the Warehouse data with all it's
+   *     attributes
    * @return A list of Warehouse objects deserialized from the corresponding JSON file.
    * @throws IOException only if I/O error occurs while reading from the JSON file.
    * @see Warehouse
@@ -616,7 +620,7 @@ public class JacksonParser {
 
     JsonFactory jsonFactory = new JsonFactory();
     try (InputStream inputStream = new FileInputStream(filePath);
-         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -634,16 +638,18 @@ public class JacksonParser {
   }
 
   /**
-   * Deserialize a list of Employee objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
-   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
-   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   * Deserialize a list of Employee objects from a JSON file that is generated in the specified
+   * child class of {@link DataInitializer}. The deserialized data objects reconstruct {@link
+   * DataGeneratorModel} so that later they can be converted by {@link DataConverter} and be stored
+   * by the {@link DataWriter} to the corresponding database.
    *
+   * <p>It reads from the specified file path the stored the JSON data and deserializes it into a
+   * list of Employee objects using Jackson library in the {readXXX} and {setXXXProperty} methods.
+   * The corresponding JSON file is expected to have "employees" field containing an array of
+   * Employees objects with all the attributes of Employee object.
    *
-   * It reads from the specified file path the stored the JSON data and deserializes it into a list
-   * of Employee objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "employees" field containing an
-   * array of Employees objects with all the attributes of Employee object.
-   *
-   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's
+   *     attributes
    * @return A list of Employee objects deserialized from the corresponding JSON file.
    * @throws IOException only if I/O error occurs while reading from the JSON file.
    * @see Employee
@@ -658,7 +664,7 @@ public class JacksonParser {
     JsonFactory jsonFactory = new JsonFactory();
 
     try (InputStream inputStream = new FileInputStream(filePath);
-         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -676,16 +682,18 @@ public class JacksonParser {
   }
 
   /**
-   * Deserialize a list of Carrier objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
-   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
-   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   * Deserialize a list of Carrier objects from a JSON file that is generated in the specified child
+   * class of {@link DataInitializer}. The deserialized data objects reconstruct {@link
+   * DataGeneratorModel} so that later they can be converted by {@link DataConverter} and be stored
+   * by the {@link DataWriter} to the corresponding database.
    *
+   * <p>It reads from the specified file path the stored the JSON data and deserializes it into a
+   * list of Carrier objects using Jackson library in the {readXXX} and {setXXXProperty} methods.
+   * The corresponding JSON file is expected to have "employees" field containing an array of
+   * Carrier objects with all the attributes of Carrier object.
    *
-   * It reads from the specified file path the stored the JSON data and deserializes it into a list
-   * of Carrier objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "employees" field containing an
-   * array of Carrier objects with all the attributes of Carrier object.
-   *
-   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's
+   *     attributes
    * @return A list of Employee objects deserialized from the corresponding JSON file.
    * @throws IOException only if I/O error occurs while reading from the JSON file.
    * @see Carrier
@@ -700,7 +708,7 @@ public class JacksonParser {
     JsonFactory jsonFactory = new JsonFactory();
 
     try (InputStream inputStream = new FileInputStream(filePath);
-         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -717,18 +725,17 @@ public class JacksonParser {
     return carriers;
   }
 
-
   /**
-   * Deserialize a Stats object from a JSON file that is generated in the specified child class of {@link DataInitializer}.
-   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
-   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   * Deserialize a Stats object from a JSON file that is generated in the specified child class of
+   * {@link DataInitializer}. The deserialized data objects reconstruct {@link DataGeneratorModel}
+   * so that later they can be converted by {@link DataConverter} and be stored by the {@link
+   * DataWriter} to the corresponding database.
    *
+   * <p>It reads from the specified file path the stored the JSON data and deserializes it into a
+   * Stats object using the Jackson library in the {readStats} method. .
    *
-   * It reads from the specified file path the stored the JSON data and deserializes it into a Stats object
-   * using the Jackson library in the {readStats} method.
-.
-   *
-   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's
+   *     attributes
    * @return A Stats object deserialized from the corresponding JSON file.
    * @throws IOException only if I/O error occurs while reading from the JSON file.
    * @see Stats
@@ -741,12 +748,11 @@ public class JacksonParser {
     JsonFactory jsonFactory = new JsonFactory();
 
     try (InputStream inputStream = new FileInputStream(filePath);
-         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       return readStats(jsonParser);
     }
   }
-
 
   private List<Employee> readEmployees(JsonParser jsonParser) throws IOException {
     List<Employee> employees = new ArrayList<>();
@@ -805,7 +811,7 @@ public class JacksonParser {
   }
 
   private void setCarrierProperty(Carrier carrier, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         carrier.setId(jsonParser.getValueAsString());
@@ -827,7 +833,7 @@ public class JacksonParser {
   }
 
   private void setEmployeeProperty(Employee employee, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         employee.setId(jsonParser.getValueAsString());
@@ -907,7 +913,7 @@ public class JacksonParser {
   }
 
   private void setWarehouseProperty(Warehouse warehouse, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         warehouse.setId(jsonParser.getValueAsString());
@@ -967,7 +973,7 @@ public class JacksonParser {
   }
 
   private void setStockProperty(Stock stock, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         stock.setId(jsonParser.getValueAsString());
@@ -1031,7 +1037,7 @@ public class JacksonParser {
   }
 
   private void setDistrictProperty(District district, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         district.setId(jsonParser.getValueAsString());
@@ -1094,7 +1100,7 @@ public class JacksonParser {
   }
 
   private void setCustomerProperty(Customer customer, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         customer.setId(jsonParser.getValueAsString());
@@ -1120,10 +1126,10 @@ public class JacksonParser {
         break;
       case "since":
         DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 
         customer.setSince(
-                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
       case "payments":
         List<Payment> payments = readPayments(jsonParser);
@@ -1190,7 +1196,7 @@ public class JacksonParser {
   }
 
   private void setPaymentProperty(Payment payment, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         payment.setId(jsonParser.getValueAsString());
@@ -1200,9 +1206,9 @@ public class JacksonParser {
         break;
       case "date":
         DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
         payment.setDate(
-                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
       case "district":
         jsonParser.skipChildren();
@@ -1219,7 +1225,7 @@ public class JacksonParser {
   }
 
   private List<Order> readOrders(JsonParser jsonParser, List<Customer> customers)
-          throws IOException {
+      throws IOException {
     List<Order> orders = new ArrayList<>();
 
     while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
@@ -1248,8 +1254,8 @@ public class JacksonParser {
   }
 
   private void setOrderProperty(
-          Order order, String property, JsonParser jsonParser, List<Customer> customers)
-          throws IOException {
+      Order order, String property, JsonParser jsonParser, List<Customer> customers)
+      throws IOException {
     switch (property) {
       case "id":
         order.setId(jsonParser.getValueAsString());
@@ -1267,9 +1273,9 @@ public class JacksonParser {
         break;
       case "entryDate":
         DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
         order.setEntryDate(
-                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
       case "carrier":
         String nextFieldName = jsonParser.nextFieldName();
@@ -1346,7 +1352,7 @@ public class JacksonParser {
   }
 
   private void setOrderItemProperty(OrderItem orderItem, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         orderItem.setId(jsonParser.getValueAsString());
@@ -1369,9 +1375,9 @@ public class JacksonParser {
           orderItem.setDeliveryDate(null);
         } else {
           DateTimeFormatter formatter =
-                  DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+              DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
           orderItem.setDeliveryDate(
-                  LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+              LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         }
         break;
       case "quantity":
@@ -1434,7 +1440,7 @@ public class JacksonParser {
   }
 
   private void setAddressProperty(Address address, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "street1":
         address.setStreet1(jsonParser.getValueAsString());
@@ -1472,7 +1478,7 @@ public class JacksonParser {
   }
 
   private void setProductProperty(Product product, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     switch (property) {
       case "id":
         product.setId(jsonParser.getValueAsString());
@@ -1512,7 +1518,7 @@ public class JacksonParser {
   }
 
   private void setStatsProperty(Stats stats, String property, JsonParser jsonParser)
-          throws IOException {
+      throws IOException {
     if (jsonParser == null) {
       throw new IllegalArgumentException("jsonParser cannot be null");
     }
@@ -1533,22 +1539,20 @@ public class JacksonParser {
   }
 
   /**
-   * After deserialization of objects , it closes circular references in a Warehouse object and
-   * its associated entities in order to ensure that all bidirectional relationships between entities are properly set and
-   * the object graph is correctly reconstructed, so that no circular reference issues occur.
+   * After deserialization of objects , it closes circular references in a Warehouse object and its
+   * associated entities in order to ensure that all bidirectional relationships between entities
+   * are properly set and the object graph is correctly reconstructed, so that no circular reference
+   * issues occur.
    *
-   * In this way, for each Warehouse, it iterates over its associated entities, namely Stocks and Districts.
-   * For each District, it then iterates over Customers and Orders.
-   * For each Customer, it iterates over Payments.
-   * For each Order, it iterates over its OrderItems.
+   * <p>In this way, for each Warehouse, it iterates over its associated entities, namely Stocks and
+   * Districts. For each District, it then iterates over Customers and Orders. For each Customer, it
+   * iterates over Payments. For each Order, it iterates over its OrderItems.
    *
-   * Then it sets the references from child entities to parent entities:
-   * - Stocks will reference the corresponding Warehouse.
-   * - Districts will reference the corresponding Warehouse.
-   * - Customers will reference the corresponding District.
-   * - Payments will reference both the corresponding Customer and District.
-   * - Orders will reference the corresponding District.
-   * - OrderItems will reference both the corresponding Order and the supplying Warehouse.
+   * <p>Then it sets the references from child entities to parent entities: - Stocks will reference
+   * the corresponding Warehouse. - Districts will reference the corresponding Warehouse. -
+   * Customers will reference the corresponding District. - Payments will reference both the
+   * corresponding Customer and District. - Orders will reference the corresponding District. -
+   * OrderItems will reference both the corresponding Order and the supplying Warehouse.
    *
    * @param warehouse The Warehouse object for which circular references will be closed.
    * @see Warehouse
@@ -1558,7 +1562,6 @@ public class JacksonParser {
    * @see Payment
    * @see Order
    * @see OrderItem
-   *
    */
   private void closeCircularReferencesInWarehouse(Warehouse warehouse) {
     // referencing of stock objects to warehouse

@@ -21,15 +21,16 @@ import org.springframework.data.redis.core.RedisHash;
 @RedisHash("Order")
 public class OrderData extends BaseData implements Serializable {
 
-
   // Reference via ID
   private String districtRefId;
   // Reference via ID
   private String customerRefId;
   // Reference via ID
   private String carrierRefId;
+
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime entryDate;
+
   private int itemCount;
   private final boolean allLocal;
   private boolean fulfilled;

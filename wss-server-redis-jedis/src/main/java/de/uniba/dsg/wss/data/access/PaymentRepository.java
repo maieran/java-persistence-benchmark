@@ -2,8 +2,6 @@ package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.PaymentData;
 import java.util.Map;
-
-import de.uniba.dsg.wss.data.model.StockData;
 import org.springframework.stereotype.Repository;
 
 /**

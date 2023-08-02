@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.redis.core.RedisHash;
 
-
 /**
  * A customer of the wholesale supplier.
  *
@@ -23,7 +22,6 @@ import org.springframework.data.redis.core.RedisHash;
 @RedisHash("Customer")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class CustomerData extends PersonData implements Serializable {
-
 
   // Reference via ID
   private String districtRefId;

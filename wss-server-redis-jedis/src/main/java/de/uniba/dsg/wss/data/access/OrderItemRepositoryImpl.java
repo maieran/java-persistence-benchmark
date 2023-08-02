@@ -3,14 +3,13 @@ package de.uniba.dsg.wss.data.access;
 import de.uniba.dsg.wss.data.model.OrderItemData;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import de.uniba.dsg.wss.data.model.WarehouseData;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * Implementation of the repository interface for accessing and modifying {@link OrderItemData orderItems}.
+ * Implementation of the repository interface for accessing and modifying {@link OrderItemData
+ * orderItems}.
  *
  * @author Andre Maier
  */

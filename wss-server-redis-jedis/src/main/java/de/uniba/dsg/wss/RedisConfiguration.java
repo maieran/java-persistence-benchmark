@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,10 +18,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * Configures the connection and communication with the Redis server as well as handling of the defined data model
- * in {@link de.uniba.dsg.wss.data.gen.DataModel}.
- * Moreover, it provides bean for {@link JedisPoolConfig} and {@link RedisTemplate}, which enables interaction with
- * Redis through JSON-based serialization and deserialization.
+ * Configures the connection and communication with the Redis server as well as handling of the
+ * defined data model in {@link de.uniba.dsg.wss.data.gen.DataModel}. Moreover, it provides bean for
+ * {@link JedisPoolConfig} and {@link RedisTemplate}, which enables interaction with Redis through
+ * JSON-based serialization and deserialization.
  *
  * @author Andre Maier
  */
@@ -39,8 +37,8 @@ public class RedisConfiguration {
   }
 
   /**
-   * Implements and configures the JedisPool that is responsible for connection with Redis.
-   * All configuration are fetched from application environment.
+   * Implements and configures the JedisPool that is responsible for connection with Redis. All
+   * configuration are fetched from application environment.
    *
    * @return the JedisPool bean with configured pool properties for the interaction.
    */
@@ -55,7 +53,6 @@ public class RedisConfiguration {
         Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.pool.min-idle")));
     return poolConfig;
   }
-
 
   /**
    * Provides the connection to the Redis server by setting the host and port of the Redis server.
@@ -72,9 +69,9 @@ public class RedisConfiguration {
   }
 
   /**
-   * Facilitates the interaction with Redis server and enables JSON-based serialization by
-   * setting the necessary serializers with Jackson library for polymorphic type handling during
-   * the serialization process.
+   * Facilitates the interaction with Redis server and enables JSON-based serialization by setting
+   * the necessary serializers with Jackson library for polymorphic type handling during the
+   * serialization process.
    *
    * @return redisTemplate bean with the configured JSON-based serialization and deserialization
    */
@@ -92,7 +89,8 @@ public class RedisConfiguration {
 
     // Set the serializer for values
     ObjectMapper objectMapper = new ObjectMapper();
-    // Registers the JavaTimeModule to assist with serialization/deserialization of LocalDateTime objects
+    // Registers the JavaTimeModule to assist with serialization/deserialization of LocalDateTime
+    // objects
     objectMapper.registerModule(new JavaTimeModule());
 
     /* Validates and controls serialization to JSON and deserialization from Java Objects of polymorphic types

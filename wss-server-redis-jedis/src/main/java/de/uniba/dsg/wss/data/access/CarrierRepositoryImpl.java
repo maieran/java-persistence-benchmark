@@ -2,14 +2,13 @@ package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.CarrierData;
 import java.util.Map;
-
-import de.uniba.dsg.wss.data.model.WarehouseData;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * Implementation of the repository interface for accessing and modifying {@link CarrierData carriers}.
+ * Implementation of the repository interface for accessing and modifying {@link CarrierData
+ * carriers}.
  *
  * @author Andre Maier
  */

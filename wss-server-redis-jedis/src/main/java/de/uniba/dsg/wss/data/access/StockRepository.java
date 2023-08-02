@@ -1,8 +1,6 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.StockData;
-import de.uniba.dsg.wss.data.model.WarehouseData;
-
 import java.util.List;
 import java.util.Map;
 

@@ -17,7 +17,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * This initializer uses the {@link JacksonParser} to deserialize the stored JSON files into
- * supplier data model as {@link DataGeneratorModel} and writes it to the configured MicroStream storage.
+ * supplier data model as {@link DataGeneratorModel} and writes it to the configured MicroStream
+ * storage.
  *
  * @author Benedikt Full
  * @author Andre Maier
