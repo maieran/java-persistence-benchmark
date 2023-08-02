@@ -1,9 +1,16 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.OrderItemData;
+import de.uniba.dsg.wss.data.model.StockData;
+
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Redis repository for accessing and modifying {@link OrderItemData orderItems}.
+ *
+ * @author Andre Maier
+ */
 public interface OrderItemRepository {
   void saveAll(Map<String, OrderItemData> carriers);
 

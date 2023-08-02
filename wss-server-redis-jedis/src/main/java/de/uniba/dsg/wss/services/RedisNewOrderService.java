@@ -15,7 +15,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Implemented similarly to MsNewOrderService of Ms-Sync */
+/**
+ * Implements the transaction to be executed by the {@link NewOrderService} implementation.
+ *
+ * @author Johannes Manner
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Service
 public class RedisNewOrderService extends NewOrderService {
 

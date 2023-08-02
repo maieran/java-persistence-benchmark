@@ -8,6 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * A warehouse of the wholesale supplier, where itself and it's
+ * {@link StockData} and {@link DistrictData} can be retrieved via
+ * their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Warehouse")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class WarehouseData extends BaseData implements Serializable {
@@ -16,14 +25,9 @@ public class WarehouseData extends BaseData implements Serializable {
   private final AddressData address;
   private final double salesTax;
   private double yearToDateBalance;
-
-  // private final Map<String, DistrictData> districtRefs;
-  // private final List<StockData> stockRefs;
-
   // reference over id
   @JsonProperty("stockRefsIds")
   private List<String> stockRefsIds;
-
   // reference over id
   @JsonProperty("districtRefsIds")
   private List<String> districtRefsIds;

@@ -8,6 +8,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Writes the wholesale supplier model to Redis-based storage system via implemented interfaces.
+ *
+ * @author Andre Maier
+ */
 @Component
 public class RedisDataWriter
     implements DataWriter<ProductData, WarehouseData, EmployeeData, CarrierData> {

@@ -6,6 +6,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * A product of the wholesale supplier can be retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Product")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class ProductData extends BaseData implements Serializable {

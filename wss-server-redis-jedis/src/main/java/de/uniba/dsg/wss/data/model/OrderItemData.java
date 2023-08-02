@@ -7,27 +7,24 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * Defines {@link ProductData product}, quantity, supplying {@link WarehouseData warehouse} and
+ * other properties of an individual {@link OrderData order} item, when retrieved via their unique
+ * identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("OrderItem")
 public class OrderItemData extends BaseData implements Serializable {
 
-  // Object reference
-  // private final OrderData orderRef;
-
   // Reference via ID
   private String orderRefId;
-
-  // Object reference
-  // private final ProductData productRef;
-
   // Reference via ID
   private String productRefId;
-
-  // Object reference
-  // private final WarehouseData supplyingWarehouseRef;
-
   // Reference via ID
   private String supplyingWarehouseRefId;
-
   private int number;
   private int quantity;
   private int leftQuantityInStock;

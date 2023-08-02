@@ -19,11 +19,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * Configures the connection and communication with the Redis server as well as handling of the defined data model
+ * in {@link de.uniba.dsg.wss.data.gen.DataModel}.
+ * Moreover, it provides bean for {@link JedisPoolConfig} and {@link RedisTemplate}, which enables interaction with
+ * Redis through JSON-based serialization and deserialization.
+ *
+ * @author Andre Maier
+ */
 @Configuration
 @EnableTransactionManagement
 public class RedisConfiguration {
-
-  private static final Logger LOG = LogManager.getLogger(RedisConfiguration.class);
 
   private final Environment environment;
 
@@ -32,6 +38,12 @@ public class RedisConfiguration {
     this.environment = environment;
   }
 
+  /**
+   * Implements and configures the JedisPool that is responsible for connection with Redis.
+   * All configuration are fetched from application environment.
+   *
+   * @return the JedisPool bean with configured pool properties for the interaction.
+   */
   @Bean
   public JedisPoolConfig jedisPoolConfig() {
     JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -44,6 +56,12 @@ public class RedisConfiguration {
     return poolConfig;
   }
 
+
+  /**
+   * Provides the connection to the Redis server by setting the host and port of the Redis server.
+   *
+   * @return the configured connection to the Redis server.
+   */
   @Bean
   public JedisConnectionFactory jedisConnectionFactory() {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
@@ -53,7 +71,13 @@ public class RedisConfiguration {
     return new JedisConnectionFactory(redisStandaloneConfiguration);
   }
 
-  // Performs connection and communication with redis server and handles the defined data model
+  /**
+   * Facilitates the interaction with Redis server and enables JSON-based serialization by
+   * setting the necessary serializers with Jackson library for polymorphic type handling during
+   * the serialization process.
+   *
+   * @return redisTemplate bean with the configured JSON-based serialization and deserialization
+   */
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
 
@@ -68,8 +92,7 @@ public class RedisConfiguration {
 
     // Set the serializer for values
     ObjectMapper objectMapper = new ObjectMapper();
-    // Registers the JavaTimeModule to assist with serialization/deserialization of LocalDateTime
-    // objects
+    // Registers the JavaTimeModule to assist with serialization/deserialization of LocalDateTime objects
     objectMapper.registerModule(new JavaTimeModule());
 
     /* Validates and controls serialization to JSON and deserialization from Java Objects of polymorphic types

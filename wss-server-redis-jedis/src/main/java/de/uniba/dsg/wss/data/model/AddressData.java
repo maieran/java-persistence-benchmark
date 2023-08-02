@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * An immutable representation of a United States address.
+ *
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @RedisHash("Address")
 public class AddressData {
 

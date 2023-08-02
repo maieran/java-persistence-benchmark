@@ -14,10 +14,15 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implements the transaction to be executed by the {@link DeliveryService} implementation.
+ *
+ * @author Johannes Manner
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Service
 public class RedisDeliveryService extends DeliveryService {
-
-  private static final Logger LOG = LogManager.getLogger(RedisDeliveryService.class);
 
   private final WarehouseRepository warehouseRepository;
   private final CarrierRepository carrierRepository;
@@ -48,7 +53,6 @@ public class RedisDeliveryService extends DeliveryService {
     CarrierData carrierData = carrierRepository.findById(deliveryRequest.getCarrierId());
 
     // Find an order for each district (the oldest unfulfilled order)
-
     List<DistrictData> districts =
         districtRepository.getDistrictsFromWarehouse(warehouse.getDistrictRefsIds());
 
@@ -79,13 +83,6 @@ public class RedisDeliveryService extends DeliveryService {
         .filter(order -> !order.isFulfilled())
         .forEach(
             order -> {
-
-              // TODO: Left for checking out how it will behave when concurrency comes
-              if (order.isFulfilled()) {
-                LOG.info("HOUSTON WE HAVE A PROBLEM!!!!");
-                return;
-              }
-
               CustomerData customer = customerRepository.findById(order.getCustomerRefId());
 
               order.setCarrierRefId(carrier.getId());

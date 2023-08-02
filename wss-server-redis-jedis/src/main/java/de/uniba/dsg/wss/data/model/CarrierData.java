@@ -6,6 +6,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * A carrier is responsible for fulfilling {@link OrderData orders} by delivering the ordered items
+ * to the {@link CustomerData customer}, when retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @RedisHash("Carrier")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class CarrierData extends BaseData implements Serializable {

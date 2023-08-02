@@ -12,25 +12,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.redis.core.RedisHash;
 
+
+/**
+ * A customer of the wholesale supplier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Customer")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class CustomerData extends PersonData implements Serializable {
 
-  // Object reference
-  // private final DistrictData districtRef;
 
   // Reference via ID
   private String districtRefId;
 
-  // Object reference
-  // private final Map<String, OrderData> orderRefs;
-
   // Reference via ID
   @JsonProperty("orderRefsIds")
   private Map<String, String> orderRefsIds;
-
-  // Object reference
-  // private final List<PaymentData> paymentRefs;
 
   // Reference via ID
   @JsonProperty("paymentRefsIds")
@@ -59,9 +59,6 @@ public class CustomerData extends PersonData implements Serializable {
       @JsonProperty("phoneNumber") String phoneNumber,
       @JsonProperty("mail") String mail,
       @JsonProperty("districtRefId") String districtRefId,
-      // Map<String, String> orderRefsIds,
-
-      // List<String> paymentRefsIds,
       @JsonProperty("since") LocalDateTime since,
       @JsonProperty("credit,") String credit,
       @JsonProperty("creditLimit") double creditLimit,
@@ -73,8 +70,6 @@ public class CustomerData extends PersonData implements Serializable {
       @JsonProperty("data") String data) {
     super(id, firstName, middleName, lastName, addressData, phoneNumber, mail);
     this.districtRefId = districtRefId;
-    // this.orderRefsIds = orderRefsIds;
-    // this.paymentRefsIds = paymentRefsIds;
     this.since = since;
     this.credit = credit;
     this.creditLimit = creditLimit;
@@ -112,7 +107,6 @@ public class CustomerData extends PersonData implements Serializable {
     this.paymentCount = customer.paymentCount;
     this.deliveryCount = customer.deliveryCount;
     this.data = customer.data;
-    // TODO: Was ist, wen die beiden null sind ?
     this.orderRefsIds = customer.orderRefsIds;
     this.paymentRefsIds = customer.paymentRefsIds;
   }
@@ -124,7 +118,6 @@ public class CustomerData extends PersonData implements Serializable {
   public void setDistrictRefId(String districtRefId) {
     this.districtRefId = districtRefId;
   }
-
 
   public Map<String, String> getOrderRefsIds() {
     return orderRefsIds;

@@ -6,16 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import de.uniba.dsg.wss.RedisTest;
 import de.uniba.dsg.wss.auth.Privileges;
 import de.uniba.dsg.wss.data.transfer.representations.*;
+import de.uniba.dsg.wss.service.TestRedisConfiguration;
 import java.util.List;
 import org.assertj.core.util.IterableUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 
 @SpringBootTest
+@Import(TestRedisConfiguration.class)
 public class RedisResourceControllerTest extends RedisTest {
 
   @Autowired private RedisResourceController controller;

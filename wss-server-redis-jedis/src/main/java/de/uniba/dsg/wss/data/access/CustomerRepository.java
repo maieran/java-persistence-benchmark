@@ -1,9 +1,16 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.CustomerData;
+import de.uniba.dsg.wss.data.model.StockData;
+
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Redis repository for accessing and modifying {@link CustomerData customers}.
+ *
+ * @author Andre Maier
+ */
 public interface CustomerRepository {
   void saveAll(Map<String, CustomerData> idsToCustomers);
 

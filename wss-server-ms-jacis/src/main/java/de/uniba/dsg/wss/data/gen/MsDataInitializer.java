@@ -16,10 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * This initializer generates a data model based on the associated configuration properties and
- * writes it to the configured MicroStream storage.
+ * This initializer uses the {@link JacksonParser} to deserialize the stored JSON files into
+ * supplier data model as {@link DataGeneratorModel} and writes it to the configured MicroStream storage.
  *
  * @author Benedikt Full
+ * @author Andre Maier
  */
 @Component
 @ConditionalOnProperty(name = "wss.model.initialize", havingValue = "true")

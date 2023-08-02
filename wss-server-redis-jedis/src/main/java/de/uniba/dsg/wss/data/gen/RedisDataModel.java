@@ -5,6 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * Class for storing the converted model data produced by {@link RedisDataConverter} instances.
+ *
+ * <p>While this model implements the {@link DataModel} interface, the primary access to the model
+ * data is facilitated through the {@code getIdsToXxx()} methods, which return maps containing model
+ * objects mapped to their unique identifiers.
+ *
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 public class RedisDataModel
     implements DataModel<ProductData, WarehouseData, EmployeeData, CarrierData> {
 

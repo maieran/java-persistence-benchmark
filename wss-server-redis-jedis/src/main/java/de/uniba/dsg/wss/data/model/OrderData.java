@@ -9,37 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * An order issued by a {@link CustomerData customer} for a certain amount of {@link ProductData
+ * products}, when retrieved via their unique identifier.
+ *
+ * @see OrderItemData
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Order")
 public class OrderData extends BaseData implements Serializable {
 
-  // Object reference
-  // private final DistrictData districtRef;
 
   // Reference via ID
   private String districtRefId;
-
-  // Object reference
-  // private final CustomerData customerRef;
-
   // Reference via ID
   private String customerRefId;
-
-  // Object reference
-  // private CarrierData carrierRef;
-
   // Reference via ID
   private String carrierRefId;
-
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime entryDate;
-
   private int itemCount;
   private final boolean allLocal;
   private boolean fulfilled;
-
-  // Object reference
-  // private final List<OrderItemData> items;
-
   // Reference via Ids
   @JsonProperty("itemsIds")
   private List<String> itemsIds;
@@ -47,9 +40,6 @@ public class OrderData extends BaseData implements Serializable {
   @JsonCreator
   public OrderData(
       @JsonProperty("id") String id,
-      // DistrictData districtRef,
-      // CustomerData customerRef,
-      // CarrierData carrierRef,
       @JsonProperty("districtRefId") String districtRefId,
       @JsonProperty("customerRefId") String customerRefId,
       @JsonProperty("carrierRefId") String carrierRefId,
@@ -69,9 +59,6 @@ public class OrderData extends BaseData implements Serializable {
   }
 
   public OrderData(
-      // DistrictData districtRef,
-      // CustomerData customerRef,
-      // CarrierData carrierRef,
       @JsonProperty("districtRefId") String districtRefId,
       @JsonProperty("customerRefId") String customerRefId,
       @JsonProperty("entryDate") LocalDateTime entryDate,
@@ -138,7 +125,6 @@ public class OrderData extends BaseData implements Serializable {
   public void setFulfilled(boolean fulfilled) {
     this.fulfilled = fulfilled;
   }
-
 
   public List<String> getItemsIds() {
     return itemsIds;

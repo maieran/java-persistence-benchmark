@@ -11,6 +11,13 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Converts the generated from {@link DataInitializer} and then deserialized by {@link JacksonParser} to a Redis data model.
+ *
+ * @see DataGeneratorModel
+ *
+ * @author Andre Maier
+ */
 public class RedisDataConverter
     implements DataConverter<ProductData, WarehouseData, EmployeeData, CarrierData> {
 
@@ -21,25 +28,19 @@ public class RedisDataConverter
 
     Stopwatch stopwatch = new Stopwatch().start();
 
-
     Map<String, ProductData> products = convertProducts(model.getProducts());
     Map<String, CarrierData> carriers = convertCarriers(model.getCarriers());
 
-    Map<String, WarehouseData> warehouses =
-        convertWarehouses(model.getWarehouses());
-    Map<String, StockData> stocks =
-        convertStocks(model.getWarehouses(), warehouses, products);
-    Map<String, DistrictData> districts =
-        convertDistricts(model.getWarehouses(), warehouses);
+    Map<String, WarehouseData> warehouses = convertWarehouses(model.getWarehouses());
+    Map<String, StockData> stocks = convertStocks(model.getWarehouses(), warehouses, products);
+    Map<String, DistrictData> districts = convertDistricts(model.getWarehouses(), warehouses);
     Map<String, EmployeeData> employees = convertEmployees(model.getEmployees());
-    Map<String, CustomerData> customers =
-        convertCustomers(model.getWarehouses(), districts);
+    Map<String, CustomerData> customers = convertCustomers(model.getWarehouses(), districts);
     Map<String, OrderData> orders =
         convertOrders(model.getWarehouses(), districts, customers, carriers);
     Map<String, OrderItemData> orderItems =
         convertOrderItems(model.getWarehouses(), warehouses, products, orders);
-    Map<String, PaymentData> payments =
-        convertPayments(model.getWarehouses(), customers);
+    Map<String, PaymentData> payments = convertPayments(model.getWarehouses(), customers);
     stopwatch.stop();
 
     // Create summary data
@@ -158,7 +159,8 @@ public class RedisDataConverter
   }
 
   /**
-   * Districts are now also added to the warehouse (bidirectional relationship)
+   * Districts are now also added to the warehouse by adding the corresponding id of the District object
+   * to a list of strings in the warehouse to ensure bidirectional relationship, when it is requested
    *
    * @param ws warehouses to be converted
    * @param warehouses the already converted warehouses
@@ -170,11 +172,10 @@ public class RedisDataConverter
     for (Warehouse w : ws) {
       WarehouseData warehouse = warehouses.get(w.getId());
 
-
       for (District d : w.getDistricts()) {
         // referential integrity...
         DistrictData districtData = convertDistrict(d, warehouse);
-        // districtsForWarehouse.put(districtData.getId(), districtData);
+
 
         districts.put(districtData.getId(), districtData);
         warehouse.getDistrictRefsIds().add(d.getId());
@@ -233,11 +234,6 @@ public class RedisDataConverter
       List<Customer> cs, Map<String, DistrictData> districts) {
     Map<String, CustomerData> customers = new HashMap<>();
     for (Customer c : cs) {
-
-      // TODO: Check if it is needed ?
-      HashMap<String, String> ordersIds = fetchOrderIds(c.getOrders());
-      List<String> paymentIds = fetchPaymentIds(c.getPayments());
-
       CustomerData customer =
           new CustomerData(
               c.getId(),
@@ -249,9 +245,6 @@ public class RedisDataConverter
               c.getEmail(),
               // referential integrity
               c.getDistrict().getId(),
-              // TODO: Check if it is needed ?
-              // ordersIds,
-              // paymentIds,
               c.getSince(),
               c.getCredit(),
               c.getCreditLimit(),
@@ -270,26 +263,6 @@ public class RedisDataConverter
     return customers;
   }
 
-  private HashMap<String, String> fetchOrderIds(List<Order> orders) {
-    if (orders != null) {
-      HashMap<String, String> ordersIds = new HashMap<>();
-      for (Order order : orders) {
-        ordersIds.put(order.getId(), order.getId());
-      }
-
-      return ordersIds;
-    }
-    return null;
-  }
-
-  private List<String> fetchPaymentIds(List<Payment> payments) {
-    List<String> paymentRefsIds = new ArrayList<>();
-    for (Payment payment : payments) {
-      paymentRefsIds.add(payment.getId());
-    }
-    return paymentRefsIds;
-  }
-
   private Map<String, OrderData> convertOrders(
       List<Warehouse> ws,
       Map<String, DistrictData> districts,
@@ -305,7 +278,6 @@ public class RedisDataConverter
                   o.getId(),
                   district.getId(),
                   // referential integrity
-                  // customers.get(o.getCustomer().getId()),
                   o.getCustomer().getId(),
                   // referential integrity
                   o.getCarrier() == null ? null : o.getCarrier().getId(),
@@ -316,7 +288,6 @@ public class RedisDataConverter
 
           orders.put(order.getId(), order);
           // referential integrity
-          // district.getOrderRefsIds().put(order.getId(), order.getId());
           district.getOrderRefsIds().add(order.getId());
           customers
               .get(order.getCustomerRefId())

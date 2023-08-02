@@ -1,9 +1,16 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.DistrictData;
+import de.uniba.dsg.wss.data.model.StockData;
+
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Redis repository for accessing and modifying {@link DistrictData districts}.
+ *
+ * @author Andre Maier
+ */
 public interface DistrictRepository {
   void saveAll(Map<String, DistrictData> idsToDistricts);
 

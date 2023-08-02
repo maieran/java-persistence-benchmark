@@ -6,24 +6,24 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * The available amount of a specific {@link ProductData product} at some {@link WarehouseData
+ * warehouse}, which can be retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Stock")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class StockData extends BaseData implements Serializable {
 
-  // Object reference
-  // private final WarehouseData warehouseRef;
 
   public static int increaseQuantity = 100;
-
-  // TODO: Contains only the Id of Warehouse
+  //reference via id
   private final String warehouseRefId;
-
-  // Object reference
-  // private final ProductData productRef;
-
-  // TODO: Contains only the of Id of Product
+  //reference via id
   private final String productRefId;
-
   private int quantity;
   private double yearToDateBalance;
   private int orderCount;

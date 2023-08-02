@@ -13,47 +13,44 @@ import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
+/**
+ * Handles serialization and deserialization of the generated baseline model from {@link DataModel}.
+ * For Serialization, it uses the methods {#serializeXXXToJSON()} to serialize the data and write it to JSON files.
+ * For Deserialization, it uses the methods {#deserializeXXXFromJSON} to deserialize the data from the JSON files into Java objects.
+ * Serialization and deserialization follows the structure defined in {@link DataGeneratorModel}
+ *
+ * However, if the JSON files already exist, the serialization process is skipped in order to avoid overwriting of existing data.
+ *
+ * Nevertheless, entire process in this class is based on the incremental streaming API approach using Jackson library.
+ * This approach allows processing data in smaller chunks, while reducing memory heap problems by avoiding the loading of the entire data (serialization)
+ * or JSON (deserialization) into memory at once. This way, only relevant parts of the data are serialized and deserialized during the process.
+ * Source(s): https://www.baeldung.com/jackson-streaming-api
+ *
+ * @see DataInitializer
+ * @see DataGeneratorModel
+ * @see DataConverter
+ *
+ *
+ * @author Andre Maier
+ */
 public class JacksonParser {
 
   private static final Logger LOG = LogManager.getLogger(JacksonParser.class);
   private List<Customer> customers = new ArrayList<>();
   private final HashMap<String, District> districtMap = new HashMap<>();
 
-  //  public void serializeToJSON(Object data, String filePath, ObjectMapper objectMapper)
-  //      throws IOException {
-  //    File file = new File(filePath);
-  //
-  //    if (!file.exists()) {
-  //      Stopwatch stopwatch = new Stopwatch().start();
-  //      try (FileOutputStream fileOutputStream = new FileOutputStream(file);
-  //          BufferedOutputStream bufferedOutputStream = new
-  // BufferedOutputStream(fileOutputStream)) {
-  //
-  //        JsonFactory jsonFactory = new JsonFactory();
-  //        JsonGenerator jsonGenerator = jsonFactory.createGenerator(bufferedOutputStream);
-  //
-  //        // jsonGenerator.setCodec(objectMapper);
-  //        // DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-  //
-  //        // jsonGenerator.setPrettyPrinter(printer);
-  //        jsonGenerator.writeObject(data);
-  //        jsonGenerator.flush();
-  //        jsonGenerator.close();
-  //
-  //        stopwatch.stop();
-  //
-  //        LOG.info("Serialized data to file: {} and took {}", filePath, stopwatch.getDuration());
-  //
-  //      } catch (IOException e) {
-  //        LOG.error("Error occurred while serializing data to file: {}", filePath);
-  //        throw e;
-  //      }
-  //    } else {
-  //      LOG.warn("File already exists and will be taken for database modelling: {}", filePath);
-  //    }
-  //  }
 
-  // TODO: Dokumentation
+  /**
+   * Serializes the list of generated Products from {@link DataInitializer} of {@link DataModel} and
+   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
+   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * therefore provides a simple log warning instead.
+   *
+   * @param products are the list of warehouses objects, which are to be serialized to JSON.
+   * @param filePath is the file path, where the JSON data will be written to.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   */
   public void serializeProductsToJSON(List<Product> products, String filePath) throws IOException {
     File file = new File(filePath);
 
@@ -62,7 +59,7 @@ public class JacksonParser {
 
       JsonFactory jsonFactory = new JsonFactory();
       try (OutputStream outputStream = new FileOutputStream(filePath);
-          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("products");
@@ -87,68 +84,34 @@ public class JacksonParser {
     }
   }
 
-  private void writeProduct(JsonGenerator jsonGenerator, Product product) throws IOException {
 
-    jsonGenerator.writeStartObject();
-
-    jsonGenerator.writeStringField("id", product.getId());
-    jsonGenerator.writeStringField("imagePath", product.getImagePath());
-    jsonGenerator.writeStringField("name", product.getName());
-    jsonGenerator.writeNumberField("price", product.getPrice());
-    jsonGenerator.writeStringField("data", product.getData());
-
-    jsonGenerator.writeEndObject();
-  }
-
-  // TODO: Dokumentation
-  public void serializeStatsToJSON(Stats stats, String filePath) throws IOException {
+  /**
+   * Serializes the list of generated Warehouses from {@link DataInitializer} of {@link DataModel} and
+   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
+   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * therefore provides a simple log warning instead.
+   *
+   * @param warehouses are the list of warehouses objects, which are to be serialized to JSON.
+   * @param filePath is the file path, where the JSON data will be written to.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   */
+  public void serializeWarehousesToJSON(List<Warehouse> warehouses, String filePath)
+          throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
       Stopwatch stopwatch = new Stopwatch().start();
 
       JsonFactory jsonFactory = new JsonFactory();
-
       try (OutputStream outputStream = new FileOutputStream(filePath);
-          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
-
-        jsonGenerator.writeNumberField("totalModelObjectCount", stats.getTotalModelObjectCount());
-        jsonGenerator.writeNumberField("durationMillis", stats.getDurationMillis());
-        jsonGenerator.writeStringField("duration", stats.getDuration());
-
-        jsonGenerator.writeEndObject();
-        stopwatch.stop();
-
-        LOG.info("Serialized data to file: {} and took {}", filePath, stopwatch.getDuration());
-
-      } catch (IOException e) {
-        LOG.error("Error occurred while serializing data to file: {}", filePath);
-        throw e;
-      }
-    } else {
-      LOG.warn("File already exists and will be taken for database modelling: {}", filePath);
-    }
-  }
-
-  // TODO: Dokumentation
-  public void serializeCarriersToJSON(List<Carrier> carriers, String filePath) throws IOException {
-    File file = new File(filePath);
-
-    if (!file.exists()) {
-      Stopwatch stopwatch = new Stopwatch().start();
-      JsonFactory jsonFactory = new JsonFactory();
-
-      try (OutputStream outputStream = new FileOutputStream(filePath);
-          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
-
-        jsonGenerator.writeStartObject();
-        jsonGenerator.writeFieldName("carriers");
+        jsonGenerator.writeFieldName("warehouses");
         jsonGenerator.writeStartArray();
 
-        for (Carrier carrier : carriers) {
-          writeCarrier(jsonGenerator, carrier);
+        for (Warehouse warehouse : warehouses) {
+          writeWarehouse(jsonGenerator, warehouse);
         }
 
         jsonGenerator.writeEndArray();
@@ -166,21 +129,18 @@ public class JacksonParser {
     }
   }
 
-  private void writeCarrier(JsonGenerator jsonGenerator, Carrier carrier) throws IOException {
-    jsonGenerator.writeStartObject();
-
-    jsonGenerator.writeStringField("id", carrier.getId());
-    jsonGenerator.writeStringField("name", carrier.getName());
-    jsonGenerator.writeStringField("phoneNumber", carrier.getPhoneNumber());
-    jsonGenerator.writeFieldName("address");
-    writeAddress(jsonGenerator, carrier.getAddress());
-
-    jsonGenerator.writeEndObject();
-  }
-
-  // TODO: Dokumentation
+  /**
+   * Serializes the list of Employees from {@link DataInitializer} of {@link DataModel} and
+   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
+   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * therefore provides a simple log warning instead.
+   *
+   * @param employees are the list of employees objects, which are to be serialized to JSON.
+   * @param filePath is the file path, where the JSON data will be written to.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   */
   public void serializeEmployeesToJSON(List<Employee> employees, String filePath)
-      throws IOException {
+          throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
@@ -188,7 +148,7 @@ public class JacksonParser {
       JsonFactory jsonFactory = new JsonFactory();
 
       try (OutputStream outputStream = new FileOutputStream(filePath);
-          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
         jsonGenerator.writeFieldName("employees");
@@ -214,44 +174,33 @@ public class JacksonParser {
     }
   }
 
-  public void writeEmployee(JsonGenerator jsonGenerator, Employee employee) throws IOException {
-    jsonGenerator.writeStartObject();
 
-    jsonGenerator.writeStringField("id", employee.getId());
-    jsonGenerator.writeStringField("firstName", employee.getFirstName());
-    jsonGenerator.writeStringField("middleName", employee.getMiddleName());
-    jsonGenerator.writeStringField("lastName", employee.getLastName());
-    jsonGenerator.writeFieldName("address");
-    writeAddress(jsonGenerator, employee.getAddress());
-    jsonGenerator.writeStringField("phoneNumber", employee.getPhoneNumber());
-    jsonGenerator.writeStringField("email", employee.getEmail());
-    jsonGenerator.writeStringField("title", employee.getTitle());
-    jsonGenerator.writeStringField("username", employee.getUsername());
-    jsonGenerator.writeStringField("password", employee.getPassword());
-    jsonGenerator.writeStringField("role", employee.getRole());
-    jsonGenerator.writeStringField("district", employee.getDistrict().getId());
-
-    jsonGenerator.writeEndObject();
-  }
-
-  // TODO: Dokumentation
-  public void serializeWarehousesToJSON(List<Warehouse> warehouses, String filePath)
-      throws IOException {
+  /**
+   * Serializes the list of Carriers from {@link DataInitializer} of {@link DataModel} and
+   * writes them to the JSON-file by using Jackson library in the {writeXXX} methods  and stores the data to the specified file.
+   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * therefore provides a simple log warning instead.
+   *
+   * @param carriers are the list of carriers objects, which are to be serialized to JSON.
+   * @param filePath is the file path, where the JSON data will be written to.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   */
+  public void serializeCarriersToJSON(List<Carrier> carriers, String filePath) throws IOException {
     File file = new File(filePath);
 
     if (!file.exists()) {
       Stopwatch stopwatch = new Stopwatch().start();
-
       JsonFactory jsonFactory = new JsonFactory();
+
       try (OutputStream outputStream = new FileOutputStream(filePath);
-          JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
 
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeFieldName("warehouses");
+        jsonGenerator.writeFieldName("carriers");
         jsonGenerator.writeStartArray();
 
-        for (Warehouse warehouse : warehouses) {
-          writeWarehouse(jsonGenerator, warehouse);
+        for (Carrier carrier : carriers) {
+          writeCarrier(jsonGenerator, carrier);
         }
 
         jsonGenerator.writeEndArray();
@@ -267,6 +216,61 @@ public class JacksonParser {
     } else {
       LOG.warn("File already exists and will be taken for database modelling: {}", filePath);
     }
+  }
+
+
+  /**
+   * Serializes the generated Stats from {@link DataInitializer} of {@link DataModel} and
+   * writes them to the JSON-file by using Jackson library and stores the data to the specified file.
+   * If the file already exists due to precedent serialization then it won't overwrite the data and
+   * therefore provides a simple log warning instead.
+   *
+   * @param stats is the stats object, which is to be serialized to JSON
+   * @param filePath is the file path, where the JSON data will be written to.
+   * @throws IOException only if I/O error occurs while writing the serialized list of carriers to JSON file.
+   */
+  public void serializeStatsToJSON(Stats stats, String filePath) throws IOException {
+    File file = new File(filePath);
+
+    if (!file.exists()) {
+      Stopwatch stopwatch = new Stopwatch().start();
+
+      JsonFactory jsonFactory = new JsonFactory();
+
+      try (OutputStream outputStream = new FileOutputStream(filePath);
+           JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+
+        jsonGenerator.writeStartObject();
+
+        jsonGenerator.writeNumberField("totalModelObjectCount", stats.getTotalModelObjectCount());
+        jsonGenerator.writeNumberField("durationMillis", stats.getDurationMillis());
+        jsonGenerator.writeStringField("duration", stats.getDuration());
+
+        jsonGenerator.writeEndObject();
+        stopwatch.stop();
+
+        LOG.info("Serialized data to file: {} and took {}", filePath, stopwatch.getDuration());
+
+      } catch (IOException e) {
+        LOG.error("Error occurred while serializing data to file: {}", filePath);
+        throw e;
+      }
+    } else {
+      LOG.warn("File already exists and will be taken for database modelling: {}", filePath);
+    }
+  }
+
+  private void writeProduct(JsonGenerator jsonGenerator, Product product) throws IOException {
+
+    jsonGenerator.writeStartObject();
+
+    jsonGenerator.writeStringField("id", product.getId());
+    jsonGenerator.writeStringField("imagePath", product.getImagePath());
+    jsonGenerator.writeStringField("name", product.getName());
+    jsonGenerator.writeNumberField("price", product.getPrice());
+    jsonGenerator.writeStringField("data", product.getData());
+
+    jsonGenerator.writeEndObject();
   }
 
   private void writeWarehouse(JsonGenerator jsonGenerator, Warehouse warehouse) throws IOException {
@@ -325,7 +329,7 @@ public class JacksonParser {
   }
 
   private void writeDistricts(JsonGenerator jsonGenerator, List<District> districts)
-      throws IOException {
+          throws IOException {
 
     jsonGenerator.writeStartArray();
 
@@ -355,7 +359,7 @@ public class JacksonParser {
   }
 
   private void writeCustomers(JsonGenerator jsonGenerator, List<Customer> customers)
-      throws IOException {
+          throws IOException {
     jsonGenerator.writeStartArray();
 
     for (Customer customer : customers) {
@@ -377,15 +381,13 @@ public class JacksonParser {
     jsonGenerator.writeStringField("phoneNumber", customer.getPhoneNumber());
     jsonGenerator.writeStringField("email", customer.getEmail());
     jsonGenerator.writeStringField("district", customer.getDistrict().getId());
-    // TODO: check how the deserialization of localdateTime will be
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     String formattedSince = customer.getSince().format(formatter).substring(0, 19);
-    ;
+
     jsonGenerator.writeStringField("since", formattedSince);
     jsonGenerator.writeFieldName("payments");
     writePayments(jsonGenerator, customer.getPayments());
-    // TODO:avoiding circular inference
     jsonGenerator.writeStringField("orders", null);
     jsonGenerator.writeStringField("credit", customer.getCredit());
     jsonGenerator.writeNumberField("creditLimit", customer.getCreditLimit());
@@ -395,6 +397,26 @@ public class JacksonParser {
     jsonGenerator.writeNumberField("paymentCount", customer.getPaymentCount());
     jsonGenerator.writeNumberField("deliveryCount", customer.getDeliveryCount());
     jsonGenerator.writeStringField("data", customer.getData());
+
+    jsonGenerator.writeEndObject();
+  }
+
+  public void writeEmployee(JsonGenerator jsonGenerator, Employee employee) throws IOException {
+    jsonGenerator.writeStartObject();
+
+    jsonGenerator.writeStringField("id", employee.getId());
+    jsonGenerator.writeStringField("firstName", employee.getFirstName());
+    jsonGenerator.writeStringField("middleName", employee.getMiddleName());
+    jsonGenerator.writeStringField("lastName", employee.getLastName());
+    jsonGenerator.writeFieldName("address");
+    writeAddress(jsonGenerator, employee.getAddress());
+    jsonGenerator.writeStringField("phoneNumber", employee.getPhoneNumber());
+    jsonGenerator.writeStringField("email", employee.getEmail());
+    jsonGenerator.writeStringField("title", employee.getTitle());
+    jsonGenerator.writeStringField("username", employee.getUsername());
+    jsonGenerator.writeStringField("password", employee.getPassword());
+    jsonGenerator.writeStringField("role", employee.getRole());
+    jsonGenerator.writeStringField("district", employee.getDistrict().getId());
 
     jsonGenerator.writeEndObject();
   }
@@ -425,7 +447,6 @@ public class JacksonParser {
       writeCarrier(jsonGenerator, order.getCarrier());
     }
 
-    // TODO:Breaking the circular references
     jsonGenerator.writeFieldName("items");
     writeOrderItems(jsonGenerator, order.getItems());
 
@@ -437,7 +458,7 @@ public class JacksonParser {
   }
 
   private void writeOrderItems(JsonGenerator jsonGenerator, List<OrderItem> orderItems)
-      throws IOException {
+          throws IOException {
 
     jsonGenerator.writeStartArray();
 
@@ -453,28 +474,19 @@ public class JacksonParser {
     jsonGenerator.writeStartObject();
 
     jsonGenerator.writeStringField("id", orderItem.getId());
-    // TODO:We need to draw references again when building java objects
-    // jsonGenerator.writeFieldName("order");
-    // writeOrderFields(jsonGenerator, orderItem.getOrder());
     jsonGenerator.writeStringField("order", orderItem.getOrder().getId());
     jsonGenerator.writeNumberField("number", orderItem.getNumber());
     jsonGenerator.writeFieldName("product");
     writeProduct(jsonGenerator, orderItem.getProduct());
     jsonGenerator.writeStringField("supplyingWarehouse", orderItem.getSupplyingWarehouse().getId());
-    // TODO: check how the deserialization of localdateTime will be
-
-    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-    // String formattedSince = orderItem.getDeliveryDate().format(formatter);
     if (orderItem.getDeliveryDate() == null) {
       jsonGenerator.writeStringField("deliveryDate", null);
     } else {
-
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
       String formattedDeliveryDate = orderItem.getDeliveryDate().format(formatter).substring(0, 19);
       jsonGenerator.writeStringField("deliveryDate", formattedDeliveryDate);
     }
 
-    // jsonGenerator.writeStringField("deliveryDate", orderItem.getDeliveryDate().toString());
     jsonGenerator.writeNumberField("quantity", orderItem.getQuantity());
     jsonGenerator.writeNumberField("amount", orderItem.getAmount());
     jsonGenerator.writeStringField("distInfo", orderItem.getDistInfo());
@@ -483,7 +495,7 @@ public class JacksonParser {
   }
 
   private void writePayments(JsonGenerator jsonGenerator, List<Payment> payments)
-      throws IOException {
+          throws IOException {
     jsonGenerator.writeStartArray();
 
     for (Payment payment : payments) {
@@ -498,10 +510,8 @@ public class JacksonParser {
 
     jsonGenerator.writeStringField("id", payment.getId());
     jsonGenerator.writeStringField("customer", payment.getCustomer().getId());
-    // TODO: check how the deserialization of localdateTime will be
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     String formattedDate = payment.getDate().format(formatter).substring(0, 19);
-    ;
     jsonGenerator.writeStringField("date", formattedDate);
     jsonGenerator.writeStringField("district", payment.getDistrict().getId());
     jsonGenerator.writeNumberField("amount", payment.getAmount());
@@ -522,154 +532,51 @@ public class JacksonParser {
     jsonGenerator.writeEndObject();
   }
 
-  //  public DataModel<Product, Warehouse, Employee, Carrier> deserializeFromJSONModel(
-  //      String filePath, ObjectMapper objectMapper) throws IOException {
-  //    LOG.info("Data model deserializing from file: {} to Java Objects", filePath);
-  //
-  //    Stopwatch stopwatch = new Stopwatch().start();
-  //    List<Product> products = null;
-  //    List<Warehouse> warehouses = null;
-  //    List<Employee> employees = null;
-  //    List<Carrier> carriers = null;
-  //    Stats stats = null;
-  //
-  //    Map<String, District> districtMap = new HashMap<>();
-  //
-  //    try (InputStream inputStream = new FileInputStream(filePath);
-  //        // ObjectMapper objectMapper = new ObjectMapper();
-  //        // objectMapper.registerModule(new JavaTimeModule());
-  //        // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-  //        // JsonFactory jsonFactory = objectMapper.getFactory();
-  //
-  //        JsonParser jsonParser = objectMapper.getFactory().createParser(inputStream)) {
-  //
-  //      // Read the start of the JSON object
-  //      if (jsonParser.nextToken() != JsonToken.START_OBJECT) {
-  //        throw new IOException("Invalid JSON file format. Expected the start of an object.");
-  //      }
-  //
-  //      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-  //        String fieldName = jsonParser.getCurrentName();
-  //
-  //        // Read the "products" array
-  //        if ("products".equals(fieldName)) {
-  //          jsonParser.nextToken();
-  //          while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-  //            Product product = objectMapper.readValue(jsonParser, Product.class);
-  //            products.add(product);
-  //          }
-  //        }
-  //
-  //        // Read the "warehouses" array
-  //        else if ("warehouses".equals(fieldName)) {
-  //          jsonParser.nextToken();
-  //          while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-  //            Warehouse warehouse = objectMapper.readValue(jsonParser, Warehouse.class);
-  //            warehouses.add(warehouse);
-  //            mapDistrictByIdModel(districtMap, warehouse);
-  //          }
-  //        }
-  //
-  //        // Central idea:
-  //        // Employee objects will be read and instantiated to close the circular reference in
-  // Java
-  //        // objects
-  //        // Read the "employees" array
-  //        else if ("employees".equals(fieldName)) {
-  //          jsonParser.nextToken();
-  //          while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-  //            Employee employee = readEmployeeModel(jsonParser, districtMap, warehouses);
-  //            employees.add(employee);
-  //          }
-  //        }
-  //
-  //        // Read the "carriers" array
-  //        else if ("carriers".equals(fieldName)) {
-  //          jsonParser.nextToken();
-  //          while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-  //            Carrier carrier = objectMapper.readValue(jsonParser, Carrier.class);
-  //            carriers.add(carrier);
-  //          }
-  //        }
-  //
-  //        // Read the "stats" object
-  //        else if ("stats".equals(fieldName)) {
-  //          jsonParser.nextToken();
-  //          stats = objectMapper.readValue(jsonParser, Stats.class);
-  //        }
-  //      }
-  //      jsonParser.close();
-  //    }
-  //
-  //    stopwatch.stop();
-  //    LOG.info("Deserialization took : {}", stopwatch.getDuration());
-  //
-  //    return new DataGeneratorModel(products, warehouses, employees, carriers, stats);
-  //  }
+  private void writeCarrier(JsonGenerator jsonGenerator, Carrier carrier) throws IOException {
+    jsonGenerator.writeStartObject();
 
-  // TODO: Dokumentation
-  public Stats deserializeStatsFromJSON(String filePath) throws IOException {
-    JsonFactory jsonFactory = new JsonFactory();
+    jsonGenerator.writeStringField("id", carrier.getId());
+    jsonGenerator.writeStringField("name", carrier.getName());
+    jsonGenerator.writeStringField("phoneNumber", carrier.getPhoneNumber());
+    jsonGenerator.writeFieldName("address");
+    writeAddress(jsonGenerator, carrier.getAddress());
 
-    try (InputStream inputStream = new FileInputStream(filePath);
-        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
-
-      return readStats(jsonParser);
-    }
+    jsonGenerator.writeEndObject();
   }
 
-  private Stats readStats(JsonParser jsonParser) throws IOException {
-    Stats stats = new Stats();
 
-    if (jsonParser != null && jsonParser.nextToken() == JsonToken.START_OBJECT) {
-      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-        if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
-          String property = jsonParser.getCurrentName();
-          jsonParser.nextToken(); // Move to the value token
-
-          setStatsProperty(stats, property, jsonParser);
-        }
-      }
-    }
-
-    return stats;
-  }
-
-  private void setStatsProperty(Stats stats, String property, JsonParser jsonParser)
-      throws IOException {
-    if (jsonParser == null) {
-      throw new IllegalArgumentException("jsonParser cannot be null");
-    }
-    switch (property) {
-      case "totalModelObjectCount":
-        stats.setTotalModelObjectCount(jsonParser.getIntValue());
-        break;
-      case "durationMillis":
-        stats.setDurationMillis(jsonParser.getLongValue());
-        break;
-      case "duration":
-        stats.setDuration(jsonParser.getValueAsString());
-        break;
-      default:
-        // Ignore unknown properties
-        break;
-    }
-  }
-
-  // TODO: Dokumentation
+  /**
+   * Deserialize a list of Products objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
+   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
+   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   *
+   *
+   * It reads from the specified file path the stored JSON data and deserializes it into a list
+   * of Product objects using Jackson library in the {readXXX} and {setXXXProperty}methods. The corresponding JSON file is expected to have "products" field containing an
+   * array of Products objects with all the attributes of Product object.
+   *
+   * @param filePath is the file path to the JSON file containing the Product data with all it's attributes
+   * @return A list of Product objects deserialized from the corresponding JSON file.
+   * @throws IOException only if I/O error occurs while reading from the JSON file.
+   * @see Product
+   * @see DataInitializer
+   * @see DataGeneratorModel
+   * @see DataConverter
+   * @see DataWriter
+   */
   public List<Product> deserializeProductsFromJSON(String filePath) throws IOException {
     List<Product> products = new ArrayList<>();
 
     JsonFactory jsonFactory = new JsonFactory();
     try (InputStream inputStream = new FileInputStream(filePath);
-        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
 
         // Find the "products" field in the JSON object
         if ("products".equals(fieldName)) {
-          jsonParser.nextToken(); // Move to the start of the array
+          jsonParser.nextToken();
 
           // Deserialize each product in the array
           while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
@@ -685,13 +592,31 @@ public class JacksonParser {
     return products;
   }
 
-  // TODO: Dokumentation
+  /**
+   * Deserialize a list of Warehouses objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
+   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
+   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   *
+   *
+   * It reads from the specified file path the stored the JSON data and deserializes it into a list
+   * of Warehouse objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "warehouses" field containing an
+   * array of Warehouse objects with all the attributes of Warehouse object.
+   *
+   * @param filePath is the file path to the JSON file containing the Warehouse data with all it's attributes
+   * @return A list of Warehouse objects deserialized from the corresponding JSON file.
+   * @throws IOException only if I/O error occurs while reading from the JSON file.
+   * @see Warehouse
+   * @see DataInitializer
+   * @see DataGeneratorModel
+   * @see DataConverter
+   * @see DataWriter
+   */
   public List<Warehouse> deserializeWarehousesFromJSON(String filePath) throws IOException {
     List<Warehouse> warehouses = new ArrayList<>();
 
     JsonFactory jsonFactory = new JsonFactory();
     try (InputStream inputStream = new FileInputStream(filePath);
-        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -708,14 +633,32 @@ public class JacksonParser {
     return warehouses;
   }
 
-  // TODO: Dokumentation
+  /**
+   * Deserialize a list of Employee objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
+   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
+   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   *
+   *
+   * It reads from the specified file path the stored the JSON data and deserializes it into a list
+   * of Employee objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "employees" field containing an
+   * array of Employees objects with all the attributes of Employee object.
+   *
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @return A list of Employee objects deserialized from the corresponding JSON file.
+   * @throws IOException only if I/O error occurs while reading from the JSON file.
+   * @see Employee
+   * @see DataInitializer
+   * @see DataGeneratorModel
+   * @see DataConverter
+   * @see DataWriter
+   */
   public List<Employee> deserializeEmployeesFromJSON(String filePath) throws IOException {
     List<Employee> employees = new ArrayList<>();
 
     JsonFactory jsonFactory = new JsonFactory();
 
     try (InputStream inputStream = new FileInputStream(filePath);
-        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
 
       while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String fieldName = jsonParser.getCurrentName();
@@ -731,6 +674,79 @@ public class JacksonParser {
 
     return employees;
   }
+
+  /**
+   * Deserialize a list of Carrier objects from a JSON file that is generated in the specified child class of {@link DataInitializer}.
+   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
+   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   *
+   *
+   * It reads from the specified file path the stored the JSON data and deserializes it into a list
+   * of Carrier objects using Jackson library in the {readXXX} and {setXXXProperty} methods. The corresponding JSON file is expected to have "employees" field containing an
+   * array of Carrier objects with all the attributes of Carrier object.
+   *
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @return A list of Employee objects deserialized from the corresponding JSON file.
+   * @throws IOException only if I/O error occurs while reading from the JSON file.
+   * @see Carrier
+   * @see DataInitializer
+   * @see DataGeneratorModel
+   * @see DataConverter
+   * @see DataWriter
+   */
+  public List<Carrier> deserializeCarriersFromJSON(String filePath) throws IOException {
+    List<Carrier> carriers = new ArrayList<>();
+
+    JsonFactory jsonFactory = new JsonFactory();
+
+    try (InputStream inputStream = new FileInputStream(filePath);
+         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+
+      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+        String fieldName = jsonParser.getCurrentName();
+
+        // Find the "carriers" field in the JSON object
+        if ("carriers".equals(fieldName)) {
+          jsonParser.nextToken(); // Move to the start of the carriers array
+          carriers = readCarriers(jsonParser);
+          break; // Found the "carriers" field, exit the loop
+        }
+      }
+    }
+
+    return carriers;
+  }
+
+
+  /**
+   * Deserialize a Stats object from a JSON file that is generated in the specified child class of {@link DataInitializer}.
+   * The deserialized data objects reconstruct {@link DataGeneratorModel} so that later
+   * they can be converted by {@link DataConverter} and be stored by the {@link DataWriter} to the corresponding database.
+   *
+   *
+   * It reads from the specified file path the stored the JSON data and deserializes it into a Stats object
+   * using the Jackson library in the {readStats} method.
+.
+   *
+   * @param filePath is the file path to the JSON file containing the Employee data with all it's attributes
+   * @return A Stats object deserialized from the corresponding JSON file.
+   * @throws IOException only if I/O error occurs while reading from the JSON file.
+   * @see Stats
+   * @see DataInitializer
+   * @see DataGeneratorModel
+   * @see DataConverter
+   * @see DataWriter
+   */
+  public Stats deserializeStatsFromJSON(String filePath) throws IOException {
+    JsonFactory jsonFactory = new JsonFactory();
+
+    try (InputStream inputStream = new FileInputStream(filePath);
+         JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
+
+      return readStats(jsonParser);
+    }
+  }
+
 
   private List<Employee> readEmployees(JsonParser jsonParser) throws IOException {
     List<Employee> employees = new ArrayList<>();
@@ -760,30 +776,6 @@ public class JacksonParser {
     return employee;
   }
 
-  // TODO: Dokumentation
-  public List<Carrier> deserializeCarriersFromJSON(String filePath) throws IOException {
-    List<Carrier> carriers = new ArrayList<>();
-
-    JsonFactory jsonFactory = new JsonFactory();
-
-    try (InputStream inputStream = new FileInputStream(filePath);
-        JsonParser jsonParser = jsonFactory.createParser(inputStream)) {
-
-      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-        String fieldName = jsonParser.getCurrentName();
-
-        // Find the "carriers" field in the JSON object
-        if ("carriers".equals(fieldName)) {
-          jsonParser.nextToken(); // Move to the start of the carriers array
-          carriers = readCarriers(jsonParser);
-          break; // Found the "carriers" field, exit the loop
-        }
-      }
-    }
-
-    return carriers;
-  }
-
   private List<Carrier> readCarriers(JsonParser jsonParser) throws IOException {
     List<Carrier> carriers = new ArrayList<>();
 
@@ -803,7 +795,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setCarrierProperty(carrier, property, jsonParser);
       }
@@ -813,7 +805,7 @@ public class JacksonParser {
   }
 
   private void setCarrierProperty(Carrier carrier, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         carrier.setId(jsonParser.getValueAsString());
@@ -830,13 +822,12 @@ public class JacksonParser {
         carrier.setAddress(address);
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
 
   private void setEmployeeProperty(Employee employee, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         employee.setId(jsonParser.getValueAsString());
@@ -882,7 +873,6 @@ public class JacksonParser {
         }
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -901,47 +891,13 @@ public class JacksonParser {
     return warehouses;
   }
 
-  // TODO: Dokumentation
-  private void closeCircularReferencesInWarehouse(Warehouse warehouse) {
-    // referencing of stock objects to warehouse
-    for (Stock stock : warehouse.getStocks()) {
-      stock.setWarehouse(warehouse);
-    }
-
-    // referencing of districts to warehouse
-    for (District district : warehouse.getDistricts()) {
-      district.setWarehouse(warehouse);
-
-      for (Customer customer : district.getCustomers()) {
-        // referencing from customer to district
-        customer.setDistrict(district);
-        // referencing from customer's payment to customer and district
-        for (Payment payment : customer.getPayments()) {
-          payment.setCustomer(customer);
-          payment.setDistrict(district);
-        }
-      }
-
-      // referencing from order to district
-      for (Order order : district.getOrders()) {
-        order.setDistrict(district);
-
-        // referencing from orderItem to order and supplyingWarehouse
-        for (OrderItem orderItem : order.getItems()) {
-          orderItem.setOrder(order);
-          orderItem.setSupplyingWarehouse(warehouse);
-        }
-      }
-    }
-  }
-
   private Warehouse readWarehouse(JsonParser jsonParser) throws IOException {
     Warehouse warehouse = new Warehouse();
 
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setWarehouseProperty(warehouse, property, jsonParser);
       }
@@ -951,7 +907,7 @@ public class JacksonParser {
   }
 
   private void setWarehouseProperty(Warehouse warehouse, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         warehouse.setId(jsonParser.getValueAsString());
@@ -978,7 +934,6 @@ public class JacksonParser {
         warehouse.setYearToDateBalance(jsonParser.getValueAsDouble());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1012,7 +967,7 @@ public class JacksonParser {
   }
 
   private void setStockProperty(Stock stock, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         stock.setId(jsonParser.getValueAsString());
@@ -1024,7 +979,6 @@ public class JacksonParser {
       case "quantity":
         stock.setQuantity(jsonParser.getValueAsInt());
         break;
-        // TODO: set reference later
       case "warehouse":
         jsonParser.skipChildren();
         break;
@@ -1077,17 +1031,14 @@ public class JacksonParser {
   }
 
   private void setDistrictProperty(District district, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         district.setId(jsonParser.getValueAsString());
         break;
       case "warehouse":
-        // TODO: set reference later
-        // we will add the reference by iterating over the warehouse's districts
         jsonParser.skipChildren();
         break;
-        // Muss mal anschauen, ob man die Customer-Liste nicht irgendwie besser hineingeben kann
       case "customers":
         customers = readCustomers(jsonParser);
         district.setCustomers(customers);
@@ -1110,7 +1061,6 @@ public class JacksonParser {
         district.setYearToDateBalance(jsonParser.getValueAsDouble());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1134,7 +1084,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setCustomerProperty(customer, property, jsonParser);
       }
@@ -1144,7 +1094,7 @@ public class JacksonParser {
   }
 
   private void setCustomerProperty(Customer customer, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         customer.setId(jsonParser.getValueAsString());
@@ -1170,16 +1120,15 @@ public class JacksonParser {
         break;
       case "since":
         DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 
         customer.setSince(
-            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
       case "payments":
         List<Payment> payments = readPayments(jsonParser);
         customer.setPayments(payments);
         break;
-        // TODO: set reference later , aber hier ist eigentlich immer null
       case "orders":
         jsonParser.skipChildren();
         break;
@@ -1208,7 +1157,6 @@ public class JacksonParser {
         customer.setData(jsonParser.getValueAsString());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1242,22 +1190,20 @@ public class JacksonParser {
   }
 
   private void setPaymentProperty(Payment payment, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         payment.setId(jsonParser.getValueAsString());
         break;
-        // TODO: set reference later
       case "customer":
         jsonParser.skipChildren();
         break;
       case "date":
         DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
         payment.setDate(
-            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
-        // TODO: set reference later
       case "district":
         jsonParser.skipChildren();
         break;
@@ -1267,15 +1213,13 @@ public class JacksonParser {
       case "data":
         payment.setData(jsonParser.getValueAsString());
         break;
-
       default:
-        // Ignore unknown properties
         break;
     }
   }
 
   private List<Order> readOrders(JsonParser jsonParser, List<Customer> customers)
-      throws IOException {
+          throws IOException {
     List<Order> orders = new ArrayList<>();
 
     while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
@@ -1304,13 +1248,12 @@ public class JacksonParser {
   }
 
   private void setOrderProperty(
-      Order order, String property, JsonParser jsonParser, List<Customer> customers)
-      throws IOException {
+          Order order, String property, JsonParser jsonParser, List<Customer> customers)
+          throws IOException {
     switch (property) {
       case "id":
         order.setId(jsonParser.getValueAsString());
         break;
-        // TODO: set reference later
       case "district":
         jsonParser.skipChildren();
         break;
@@ -1324,11 +1267,10 @@ public class JacksonParser {
         break;
       case "entryDate":
         DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
         order.setEntryDate(
-            LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+                LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         break;
-        // TODO: set reference later, aber ist eigentlich null
       case "carrier":
         String nextFieldName = jsonParser.nextFieldName();
         if (Objects.equals(nextFieldName, "items")) {
@@ -1353,7 +1295,6 @@ public class JacksonParser {
         order.setFulfilled(jsonParser.getBooleanValue());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1366,7 +1307,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setCarrierProperty(carrier, property, jsonParser);
       }
@@ -1395,7 +1336,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setOrderItemProperty(orderItem, property, jsonParser);
       }
@@ -1405,12 +1346,11 @@ public class JacksonParser {
   }
 
   private void setOrderItemProperty(OrderItem orderItem, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         orderItem.setId(jsonParser.getValueAsString());
         break;
-        // TODO: set reference later
       case "order":
         jsonParser.skipChildren();
         break;
@@ -1421,7 +1361,6 @@ public class JacksonParser {
         Product product = readProduct(jsonParser);
         orderItem.setProduct(product);
         break;
-        // TODO: set reference later
       case "supplyingWarehouse":
         jsonParser.skipChildren();
         break;
@@ -1430,9 +1369,9 @@ public class JacksonParser {
           orderItem.setDeliveryDate(null);
         } else {
           DateTimeFormatter formatter =
-              DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+                  DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
           orderItem.setDeliveryDate(
-              LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
+                  LocalDateTime.parse(jsonParser.getValueAsString().substring(0, 19), formatter));
         }
         break;
       case "quantity":
@@ -1445,7 +1384,6 @@ public class JacksonParser {
         orderItem.setDistInfo(jsonParser.getValueAsString());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1471,7 +1409,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setDistrictProperty(district, property, jsonParser);
       }
@@ -1486,7 +1424,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setAddressProperty(address, property, jsonParser);
       }
@@ -1496,7 +1434,7 @@ public class JacksonParser {
   }
 
   private void setAddressProperty(Address address, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "street1":
         address.setStreet1(jsonParser.getValueAsString());
@@ -1514,7 +1452,6 @@ public class JacksonParser {
         address.setState(jsonParser.getValueAsString());
         break;
       default:
-        // Ignore unknown properties
         break;
     }
   }
@@ -1525,7 +1462,7 @@ public class JacksonParser {
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
         String property = jsonParser.getCurrentName();
-        jsonParser.nextToken(); // Move to the value token
+        jsonParser.nextToken();
 
         setProductProperty(product, property, jsonParser);
       }
@@ -1535,7 +1472,7 @@ public class JacksonParser {
   }
 
   private void setProductProperty(Product product, String property, JsonParser jsonParser)
-      throws IOException {
+          throws IOException {
     switch (property) {
       case "id":
         product.setId(jsonParser.getValueAsString());
@@ -1553,97 +1490,106 @@ public class JacksonParser {
         product.setData(jsonParser.getValueAsString());
         break;
       default:
+        break;
+    }
+  }
+
+  private Stats readStats(JsonParser jsonParser) throws IOException {
+    Stats stats = new Stats();
+
+    if (jsonParser != null && jsonParser.nextToken() == JsonToken.START_OBJECT) {
+      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+        if (jsonParser.getCurrentToken() == JsonToken.FIELD_NAME) {
+          String property = jsonParser.getCurrentName();
+          jsonParser.nextToken(); // Move to the value token
+
+          setStatsProperty(stats, property, jsonParser);
+        }
+      }
+    }
+
+    return stats;
+  }
+
+  private void setStatsProperty(Stats stats, String property, JsonParser jsonParser)
+          throws IOException {
+    if (jsonParser == null) {
+      throw new IllegalArgumentException("jsonParser cannot be null");
+    }
+    switch (property) {
+      case "totalModelObjectCount":
+        stats.setTotalModelObjectCount(jsonParser.getIntValue());
+        break;
+      case "durationMillis":
+        stats.setDurationMillis(jsonParser.getLongValue());
+        break;
+      case "duration":
+        stats.setDuration(jsonParser.getValueAsString());
+        break;
+      default:
         // Ignore unknown properties
         break;
     }
   }
 
-  // End of methods which are used in Streaming APIs parse JSON data incrementally
-
-  // When using whole Model
-  public static District fetchDistrictByIdModel(String districtID, List<Warehouse> warehouses) {
-    for (Warehouse warehouse : warehouses) {
-      for (int k = 0; k < warehouse.getDistricts().size(); k++)
-        if (Objects.equals(districtID, warehouse.getDistricts().get(k).getId())) {
-          return warehouse.getDistricts().get(k);
-        }
+  /**
+   * After deserialization of objects , it closes circular references in a Warehouse object and
+   * its associated entities in order to ensure that all bidirectional relationships between entities are properly set and
+   * the object graph is correctly reconstructed, so that no circular reference issues occur.
+   *
+   * In this way, for each Warehouse, it iterates over its associated entities, namely Stocks and Districts.
+   * For each District, it then iterates over Customers and Orders.
+   * For each Customer, it iterates over Payments.
+   * For each Order, it iterates over its OrderItems.
+   *
+   * Then it sets the references from child entities to parent entities:
+   * - Stocks will reference the corresponding Warehouse.
+   * - Districts will reference the corresponding Warehouse.
+   * - Customers will reference the corresponding District.
+   * - Payments will reference both the corresponding Customer and District.
+   * - Orders will reference the corresponding District.
+   * - OrderItems will reference both the corresponding Order and the supplying Warehouse.
+   *
+   * @param warehouse The Warehouse object for which circular references will be closed.
+   * @see Warehouse
+   * @see Stock
+   * @see District
+   * @see Customer
+   * @see Payment
+   * @see Order
+   * @see OrderItem
+   *
+   */
+  private void closeCircularReferencesInWarehouse(Warehouse warehouse) {
+    // referencing of stock objects to warehouse
+    for (Stock stock : warehouse.getStocks()) {
+      stock.setWarehouse(warehouse);
     }
-    return null;
-  }
 
-  private void mapDistrictByIdModel(Map<String, District> districtMap, Warehouse warehouse) {
-    List<District> districtsList = warehouse.getDistricts();
-    for (District district : districtsList) {
-      districtMap.put(district.getId(), district);
-    }
-  }
+    // referencing of districts to warehouse
+    for (District district : warehouse.getDistricts()) {
+      district.setWarehouse(warehouse);
 
-  private Employee readEmployeeModel(
-      JsonParser jsonParser, Map<String, District> districtMap, List<Warehouse> warehouses)
-      throws IOException {
-    Employee employee = new Employee();
-    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-      String property = jsonParser.getCurrentName();
-      jsonParser.nextToken(); // Move to the value token
-
-      if ("id".equals(property)) {
-        employee.setId(jsonParser.getText());
-      } else if ("firstName".equals(property)) {
-        employee.setFirstName(jsonParser.getText());
-      } else if ("middleName".equals(property)) {
-        employee.setMiddleName(jsonParser.getText());
-      } else if ("lastName".equals(property)) {
-        employee.setLastName(jsonParser.getText());
-      } else if ("address".equals(property)) {
-        Address address = readAddressModel(jsonParser);
-        employee.setAddress(address);
-      } else if ("phoneNumber".equals(property)) {
-        employee.setPhoneNumber(jsonParser.getText());
-      } else if ("email".equals(property)) {
-        employee.setEmail(jsonParser.getText());
-      } else if ("title".equals(property)) {
-        employee.setTitle(jsonParser.getText());
-      } else if ("username".equals(property)) {
-        employee.setUsername(jsonParser.getText());
-      } else if ("password".equals(property)) {
-        employee.setPassword(jsonParser.getText());
-      } else if ("role".equals(property)) {
-        employee.setRole(jsonParser.getText());
-      } else if ("district".equals(property)) {
-        String districtID = jsonParser.getText();
-        District district = districtMap.get(districtID);
-
-        if (district == null) {
-          district = fetchDistrictByIdModel(districtID, warehouses);
-          districtMap.put(districtID, district);
+      for (Customer customer : district.getCustomers()) {
+        // referencing from customer to district
+        customer.setDistrict(district);
+        // referencing from customer's payment to customer and district
+        for (Payment payment : customer.getPayments()) {
+          payment.setCustomer(customer);
+          payment.setDistrict(district);
         }
+      }
 
-        employee.setDistrict(district);
+      // referencing from order to district
+      for (Order order : district.getOrders()) {
+        order.setDistrict(district);
+
+        // referencing from orderItem to order and supplyingWarehouse
+        for (OrderItem orderItem : order.getItems()) {
+          orderItem.setOrder(order);
+          orderItem.setSupplyingWarehouse(warehouse);
+        }
       }
     }
-
-    return employee;
-  }
-
-  private Address readAddressModel(JsonParser jsonParser) throws IOException {
-    Address address = new Address();
-    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-      String addressProperty = jsonParser.getCurrentName();
-      jsonParser.nextToken(); // Move to the value token
-
-      if ("street1".equals(addressProperty)) {
-        address.setStreet1(jsonParser.getText());
-      } else if ("street2".equals(addressProperty)) {
-        address.setStreet2(jsonParser.getText());
-      } else if ("zipCode".equals(addressProperty)) {
-        address.setZipCode(jsonParser.getText());
-      } else if ("city".equals(addressProperty)) {
-        address.setCity(jsonParser.getText());
-      } else if ("state".equals(addressProperty)) {
-        address.setState(jsonParser.getText());
-      }
-    }
-
-    return address;
   }
 }

@@ -1,10 +1,11 @@
 package de.uniba.dsg.wss.service;
 
 /**
- * Can be thrown whenever some sort of issue prevents a data transaction involving MicroStream from
+ * Can be thrown whenever some sort of issue prevents a data transaction involving Redis from
  * successful completion.
  *
  * @author Johannes Manner
+ * @author Andre Maier
  */
 public class MsTransactionException extends RuntimeException {
 

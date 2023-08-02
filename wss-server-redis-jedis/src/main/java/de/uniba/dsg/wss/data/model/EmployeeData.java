@@ -6,6 +6,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * An employee of the wholesale supplier. Employees are the user group meant to perform the business
+ * transactions, i.e. create new orders, or add new payments.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Employee")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class EmployeeData extends PersonData implements Serializable {

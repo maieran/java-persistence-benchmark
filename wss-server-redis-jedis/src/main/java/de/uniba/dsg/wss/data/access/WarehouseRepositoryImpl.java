@@ -6,6 +6,12 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+
+/**
+ * Implementation of the repository interface for accessing and modifying {@link WarehouseData warehouses}.
+ *
+ * @author Andre Maier
+ */
 @Repository
 public class WarehouseRepositoryImpl implements WarehouseRepository {
   private final HashOperations<String, String, WarehouseData> hashOperations;

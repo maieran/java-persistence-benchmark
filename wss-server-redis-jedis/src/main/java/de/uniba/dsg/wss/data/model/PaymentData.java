@@ -7,18 +7,21 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * A payment made by a {@link CustomerData customer}, when retrieved
+ * via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("Payment")
 public class PaymentData extends BaseData implements Serializable {
 
-  // Object reference
-  // private CustomerData customerRef;
-
   // Reference via ID
   private String customerRefId;
-
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime date;
-
   private double amount;
   private String data;
 

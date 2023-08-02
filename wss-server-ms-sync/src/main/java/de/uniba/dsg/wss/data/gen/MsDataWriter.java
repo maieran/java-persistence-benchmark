@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Can be used to write a wholesale supplier data model to MicroStream-based storage via the JACIS
- * stores.
+ * Can be used to write a wholesale supplier data model to MicroStream-based storage via the
+ * {@link EmbeddedStorageManager}.
  *
  * @author Benedikt Full
  * @author Johannes Manner

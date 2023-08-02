@@ -8,12 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.redis.core.RedisHash;
 
+/**
+ * A district is one of ten areas supplied by a specific {@link WarehouseData warehouse}. Each
+ * district is administered by a single {@link EmployeeData employee} and has 3000 {@link
+ * CustomerData customers}, when retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RedisHash("District")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class DistrictData extends BaseData implements Serializable {
 
-  // Object reference
-  // private final WarehouseData warehouseRef;
   // Reference over the ID
   private final String warehouseRefId;
 
@@ -21,16 +28,10 @@ public class DistrictData extends BaseData implements Serializable {
   private final AddressData address;
   private final double salesTax;
   private double yearToDateBalance;
-
-  // Object reference
-  // private final List<CustomerData> customerRefs;
-
   // Reference over the ID
   @JsonProperty("customerRefsIds")
   private List<String> customerRefsIds;
-
-  // Object reference
-  // private final Map<String, OrderData> orderRefs;
+  // Reference over the ID
   @JsonProperty("orderRefsIds")
   private List<String> orderRefsIds;
 
