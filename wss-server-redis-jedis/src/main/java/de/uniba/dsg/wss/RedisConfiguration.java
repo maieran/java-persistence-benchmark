@@ -64,7 +64,8 @@ public class RedisConfiguration {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
     redisStandaloneConfiguration.setHostName(
         environment.getRequiredProperty("wss.redis.jedis.host"));
-    redisStandaloneConfiguration.setPort(6379);
+    redisStandaloneConfiguration.setPort(
+        Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.port")));
     return new JedisConnectionFactory(redisStandaloneConfiguration);
   }
 

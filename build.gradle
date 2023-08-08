@@ -80,4 +80,8 @@ subprojects {
     // Check formatting everytime code is being compiled
     compileJava.dependsOn 'spotlessJavaCheck'
     compileJava.dependsOn 'spotlessMiscCheck'
+
+    test {
+        systemProperty 'spring.profiles.active', 'test'
+    }
 }
