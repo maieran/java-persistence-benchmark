@@ -4,4 +4,6 @@ include 'wss-data-gen'
 include 'wss-server-jpa-pg'
 include 'wss-server-ms-jacis'
 include 'wss-server-ms-sync'
+include 'wss-server-redis-jedis'
 include 'wss-commons'
+

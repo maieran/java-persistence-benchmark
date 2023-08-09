@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.gen;
 
 import static java.util.Objects.requireNonNull;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ import java.util.List;
  * @param <C> the type representing a carrier
  * @author Benedikt Full
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public abstract class BaseDataModel<P, W, E, C> implements DataModel<P, W, E, C> {
 
   private final List<P> products;

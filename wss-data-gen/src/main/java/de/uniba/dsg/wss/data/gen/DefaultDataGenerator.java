@@ -144,10 +144,10 @@ public class DefaultDataGenerator implements DataGenerator {
       customersPerDistrictCount = 3_000;
       ordersPerDistrictCount = 3_000;
     } else {
-      productCount = 1_000;
-      districtsPerWarehouseCount = 10;
-      customersPerDistrictCount = 30;
-      ordersPerDistrictCount = 30;
+      productCount = 10;
+      districtsPerWarehouseCount = 3;
+      customersPerDistrictCount = 3;
+      ordersPerDistrictCount = 3;
     }
     faker = new Faker(Locale.US);
     salesTaxRandom = new UniformRandom(0.0, 0.2, 1);

@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':wss-server-core')
+    // Redis persistence
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.alidaodao.app:spring-boot-redis-starter:2.0.6'
+    //implementation 'com.redis:spring-batch-redis:3.6.3'
+    //implementation 'redis.clients:jedis:4.3.1'
+    // Tests
+    testImplementation(testFixtures(project(":wss-data-gen")))
+}

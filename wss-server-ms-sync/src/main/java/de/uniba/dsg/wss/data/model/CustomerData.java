@@ -35,7 +35,7 @@ public class CustomerData extends PersonData {
       String middleName,
       String lastName,
       AddressData addressData,
-      String phoneNumer,
+      String phoneNumber,
       String mail,
       DistrictData districtRef,
       LocalDateTime since,
@@ -47,7 +47,7 @@ public class CustomerData extends PersonData {
       int paymentCount,
       int deliveryCount,
       String data) {
-    super(id, firstName, middleName, lastName, addressData, phoneNumer, mail);
+    super(id, firstName, middleName, lastName, addressData, phoneNumber, mail);
     this.districtRef = districtRef;
     this.since = since;
     this.credit = credit;
