@@ -1,6 +1,6 @@
 dependencies {
-	implementation project(':wss-server-core')
-	// Aerospike persistence
-	implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '4.1.0'
-	testImplementation(testFixtures(project(":wss-data-gen")))
+    implementation project(':wss-server-core')
+    // Aerospike persistence
+    implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '4.1.0'
+    testImplementation(testFixtures(project(":wss-data-gen")))
 }
