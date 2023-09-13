@@ -33,6 +33,27 @@ public class OrderData extends BaseData implements Comparable<OrderData> {
     this.items = new ArrayList<>();
   }
 
+  // JPA conversion constructor
+  public OrderData(
+      String id,
+      DistrictData districtRef,
+      CustomerData customerRef,
+      CarrierData carrierRef,
+      LocalDateTime entryDate,
+      int itemCount,
+      boolean allLocal,
+      boolean fulfilled) {
+    super(id);
+    this.districtRef = districtRef;
+    this.customerRef = customerRef;
+    this.carrierRef = carrierRef;
+    this.entryDate = entryDate;
+    this.itemCount = itemCount;
+    this.allLocal = allLocal;
+    this.fulfilled = fulfilled;
+    this.items = new ArrayList<>();
+  }
+
   public DistrictData getDistrictRef() {
     return districtRef;
   }
