@@ -81,7 +81,6 @@ public class AerospikeDataModel
     return orderItems;
   }
 
-
   public Map<String, PaymentData> getIdsToPayments() {
     return payments;
   }
@@ -110,6 +109,4 @@ public class AerospikeDataModel
   public Stats getStats() {
     return stats;
   }
-
-
 }

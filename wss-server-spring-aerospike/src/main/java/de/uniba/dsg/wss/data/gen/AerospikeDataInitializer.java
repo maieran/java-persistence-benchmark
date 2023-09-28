@@ -77,7 +77,7 @@ public class AerospikeDataInitializer extends DataInitializer {
     dataWriter.write(aerospikeDataModel);
 
     LOG.info(
-        "Total amount of deserialized objects: {} for Redis",
+        "Total amount of deserialized objects: {} for Aerospike",
         aerospikeDataModel.getStats().getTotalModelObjectCount());
   }
 }

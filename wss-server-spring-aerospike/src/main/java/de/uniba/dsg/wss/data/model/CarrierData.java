@@ -1,5 +1,8 @@
 package de.uniba.dsg.wss.data.model;
 
+import org.springframework.data.aerospike.mapping.Document;
+
+@Document(collection = "Carrier")
 public class CarrierData extends BaseData {
 
   private final String name;

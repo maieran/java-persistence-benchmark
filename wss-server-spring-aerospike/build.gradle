@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':wss-server-core')
     // Aerospike persistence
-    implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '4.1.0'
+    implementation group: 'com.aerospike', name: 'spring-data-aerospike', version: '3.5.0'
+    //annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     testImplementation(testFixtures(project(":wss-data-gen")))
 }

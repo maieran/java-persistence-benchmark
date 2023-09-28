@@ -29,10 +29,10 @@ public class AerospikeDataConverter
     Map<String, CustomerData> customers = convertCustomers(model.getWarehouses(), districts);
     Map<String, OrderData> orders =
         convertOrders(model.getWarehouses(), districts, customers, carriers);
-    //convertOrderItems(model.getWarehouses(), warehouses, products, orders);
-    //convertPayments(model.getWarehouses(), customers);
+    // convertOrderItems(model.getWarehouses(), warehouses, products, orders);
+    // convertPayments(model.getWarehouses(), customers);
     Map<String, OrderItemData> orderItems =
-            convertOrderItems(model.getWarehouses(), warehouses, products, orders);
+        convertOrderItems(model.getWarehouses(), warehouses, products, orders);
     Map<String, PaymentData> payments = convertPayments(model.getWarehouses(), customers);
 
     stopwatch.stop();
@@ -43,25 +43,25 @@ public class AerospikeDataConverter
     stats.setDurationMillis(stopwatch.getDurationMillis());
     stats.setDuration(stopwatch.getDuration());
 
-//    // Wrap everything in model instance
-//    AerospikeDataModel generatedModel =
-//        new AerospikeDataModel(
-//            products, warehouses, employees, stocks, carriers, customers, orders, stats);
+    //    // Wrap everything in model instance
+    //    AerospikeDataModel generatedModel =
+    //        new AerospikeDataModel(
+    //            products, warehouses, employees, stocks, carriers, customers, orders, stats);
 
     // Wrap everything in model instance
     AerospikeDataModel generatedModel =
-            new AerospikeDataModel(
-                    products,
-                    warehouses,
-                    districts,
-                    employees,
-                    stocks,
-                    carriers,
-                    customers,
-                    payments,
-                    orderItems,
-                    orders,
-                    stats);
+        new AerospikeDataModel(
+            products,
+            warehouses,
+            districts,
+            employees,
+            stocks,
+            carriers,
+            customers,
+            payments,
+            orderItems,
+            orders,
+            stats);
 
     LOG.info("Converted model data to Aerospike data, took {}", stopwatch.getDuration());
 
@@ -188,7 +188,8 @@ public class AerospikeDataConverter
               e.getUsername(),
               e.getPassword(),
               e.getRole(),
-              districts.get(e.getDistrict().getId()));
+              // districts.get(e.getDistrict().getId()), districtRefId);
+              e.getDistrict().getId());
 
       employees.put(employee.getUsername(), employee);
     }
@@ -273,7 +274,7 @@ public class AerospikeDataConverter
     return orders;
   }
 
-/*  private List<OrderItemData> convertOrderItems(
+  /*  private List<OrderItemData> convertOrderItems(
       List<Warehouse> ws,
       Map<String, WarehouseData> warehouses,
       Map<String, ProductData> products,
@@ -307,12 +308,11 @@ public class AerospikeDataConverter
     return ois;
   }*/
 
-
   private Map<String, OrderItemData> convertOrderItems(
-          List<Warehouse> ws,
-          Map<String, WarehouseData> warehouses,
-          Map<String, ProductData> products,
-          Map<String, OrderData> orders) {
+      List<Warehouse> ws,
+      Map<String, WarehouseData> warehouses,
+      Map<String, ProductData> products,
+      Map<String, OrderData> orders) {
     Map<String, OrderItemData> ois = new HashMap<>();
     for (Warehouse w : ws) {
       for (District d : w.getDistricts()) {
@@ -320,17 +320,17 @@ public class AerospikeDataConverter
           OrderData order = orders.get(o.getId());
           for (OrderItem i : o.getItems()) {
             OrderItemData item =
-                    new OrderItemData(
-                            i.getId(),
-                            order,
-                            products.get(i.getProduct().getId()),
-                            warehouses.get(i.getSupplyingWarehouse().getId()),
-                            i.getNumber(),
-                            i.getDeliveryDate(),
-                            i.getQuantity(),
-                            0, // ok for this initial values
-                            i.getAmount(),
-                            i.getDistInfo());
+                new OrderItemData(
+                    i.getId(),
+                    order,
+                    products.get(i.getProduct().getId()),
+                    warehouses.get(i.getSupplyingWarehouse().getId()),
+                    i.getNumber(),
+                    i.getDeliveryDate(),
+                    i.getQuantity(),
+                    0, // ok for this initial values
+                    i.getAmount(),
+                    i.getDistInfo());
 
             ois.put(i.getId(), item);
             // referential integrity
@@ -341,8 +341,6 @@ public class AerospikeDataConverter
     }
     return ois;
   }
-
-
 
   private Map<String, PaymentData> convertPayments(
       List<Warehouse> ws, Map<String, CustomerData> customers) {
@@ -360,8 +358,12 @@ public class AerospikeDataConverter
     Map<String, PaymentData> payments = new HashMap<>();
     for (Payment p : ps) {
       PaymentData payment =
-              new PaymentData(
-                      p.getId(),  customers.get(p.getCustomer().getId()), p.getDate(), p.getAmount(), p.getData());
+          new PaymentData(
+              p.getId(),
+              customers.get(p.getCustomer().getId()),
+              p.getDate(),
+              p.getAmount(),
+              p.getData());
 
       payments.put(p.getId(), payment);
       // referential integrity

@@ -1,16 +1,14 @@
 package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.CarrierData;
+import java.util.Map;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
-import java.util.Map;
+public interface CarrierRepository
+    extends AerospikeRepository<CarrierData, String>, CarrierRepositoryOperations {
 
-public interface CarrierRepository extends AerospikeRepository<CarrierData, Integer> {
+  void saveAll(Map<String, CarrierData> idsToCarriers);
 
-
-
-    <S extends CarrierData> Iterable<S> saveAll(Map<String, CarrierData> idsToCarriers);
-
-    @Override
-    Iterable<CarrierData> findAll();
+  @Override
+  Iterable<CarrierData> findAll();
 }

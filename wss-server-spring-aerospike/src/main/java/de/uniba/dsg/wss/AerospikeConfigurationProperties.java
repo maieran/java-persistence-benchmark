@@ -2,10 +2,12 @@ package de.uniba.dsg.wss;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
+@Configuration
 @ConfigurationProperties(prefix = "aerospike")
 public class AerospikeConfigurationProperties {
 

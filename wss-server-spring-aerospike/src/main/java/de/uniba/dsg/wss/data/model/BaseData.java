@@ -1,10 +1,10 @@
 package de.uniba.dsg.wss.data.model;
 
 import java.util.UUID;
+import org.springframework.data.annotation.Id;
 
 public abstract class BaseData {
-
-  protected final String id;
+  @Id protected final String id;
 
   public BaseData() {
     id = UUID.randomUUID().toString();

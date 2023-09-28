@@ -20,7 +20,7 @@ public class AerospikeEmployeeUserDetailsService extends EmployeeUserDetailsServ
 
   @Override
   public EmployeeUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    EmployeeData employee = employeeRepository.findEmployeeByName(username);
+    EmployeeData employee = employeeRepository.findEmployeeDataByUsername(username);
     if (employee == null) {
       throw new UsernameNotFoundException("Unable to find user with name " + username);
     }

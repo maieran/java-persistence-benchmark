@@ -63,23 +63,25 @@ public class AerospikeDataWriter
 
     productRepository.saveAll(aerospikeDataModel.getIdsToProducts());
 
-    carrierRepository.saveAll(aerospikeDataModel.getIdsToCarriers());
-
-    warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
-
-    stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());
-
-    districtRepository.saveAll(aerospikeDataModel.getIdsToDistricts());
-
     employeeRepository.saveAll(aerospikeDataModel.getIdsToEmployees());
 
-    customerRepository.saveAll(aerospikeDataModel.getIdsToCustomers());
+    carrierRepository.saveAll(aerospikeDataModel.getIdsToCarriers());
 
-    orderRepository.saveAll(aerospikeDataModel.getIdsToOrders());
+    /*
+    warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
 
-    orderItemRepository.saveAll(aerospikeDataModel.getIdsToOrderItems());
+        stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());
 
-    paymentRepository.saveAll(aerospikeDataModel.getIdsToPayments());
+        districtRepository.saveAll(aerospikeDataModel.getIdsToDistricts());
+
+        customerRepository.saveAll(aerospikeDataModel.getIdsToCustomers());
+
+        orderRepository.saveAll(aerospikeDataModel.getIdsToOrders());
+
+        orderItemRepository.saveAll(aerospikeDataModel.getIdsToOrderItems());
+
+        paymentRepository.saveAll(aerospikeDataModel.getIdsToPayments());
+    */
 
     stopwatch.stop();
     LOG.info("Wrote model data to database, took {}", stopwatch.getDuration());

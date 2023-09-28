@@ -1,12 +1,21 @@
 package de.uniba.dsg.wss.data.model;
 
+import com.aerospike.client.query.IndexType;
+import org.springframework.data.aerospike.annotation.Indexed;
+import org.springframework.data.aerospike.mapping.Document;
+
+@Document(collection = "Employee")
 public class EmployeeData extends PersonData {
 
   private final String title;
+
+  @Indexed(name = "username", type = IndexType.STRING)
   private final String username;
+
   private final String password;
   private final String role;
-  private final DistrictData districtRef;
+  // private final DistrictData districtRef;
+  private final String districtRefId;
 
   public EmployeeData(
       String id,
@@ -20,13 +29,14 @@ public class EmployeeData extends PersonData {
       String username,
       String password,
       String role,
-      DistrictData districtRef) {
+      String districtRefId) {
     super(id, firstName, middleName, lastName, address, phoneNumber, email);
     this.title = title;
     this.username = username;
     this.password = password;
     this.role = role;
-    this.districtRef = districtRef;
+    this.districtRefId = districtRefId;
+    // this.districtRef = districtRef;
   }
 
   public String getTitle() {
@@ -45,7 +55,10 @@ public class EmployeeData extends PersonData {
     return role;
   }
 
-  public DistrictData getDistrictRef() {
+  /*  public DistrictData getDistrictRef() {
     return districtRef;
+  }*/
+  public String getDistrictRefId() {
+    return districtRefId;
   }
 }

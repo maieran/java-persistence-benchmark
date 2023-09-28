@@ -1,14 +1,14 @@
 package de.uniba.dsg.wss.data.access;
 
-import de.uniba.dsg.wss.data.gen.model.Product;
 import de.uniba.dsg.wss.data.model.ProductData;
+import java.util.Map;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
-import java.util.Map;
+public interface ProductRepository
+    extends AerospikeRepository<ProductData, String>, ProductRepositoryOperations {
 
-public interface ProductRepository extends AerospikeRepository<ProductData, Integer> {
-    <S extends ProductData> Iterable<S> saveAll(Map<String, ProductData> idsToProducts);
+  void saveAll(Map<String, ProductData> idsToProducts);
 
-    @Override
-    Iterable<ProductData> findAll();
+  @Override
+  Iterable<ProductData> findAll();
 }

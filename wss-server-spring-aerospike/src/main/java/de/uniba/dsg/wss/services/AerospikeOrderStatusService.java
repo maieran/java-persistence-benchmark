@@ -1,4 +1,14 @@
 package de.uniba.dsg.wss.services;
 
-public class AerospikeOrderStatusService {
+import de.uniba.dsg.wss.data.transfer.messages.OrderStatusRequest;
+import de.uniba.dsg.wss.data.transfer.messages.OrderStatusResponse;
+import de.uniba.dsg.wss.service.OrderStatusService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AerospikeOrderStatusService extends OrderStatusService {
+  @Override
+  public OrderStatusResponse process(OrderStatusRequest orderStatusRequest) {
+    return null;
+  }
 }
