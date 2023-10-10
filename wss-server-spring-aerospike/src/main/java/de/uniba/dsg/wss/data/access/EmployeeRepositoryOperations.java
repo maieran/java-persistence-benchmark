@@ -6,5 +6,5 @@ import java.util.Map;
 public interface EmployeeRepositoryOperations {
   EmployeeData findEmployeeDataByUsername(String username);
 
-  void saveAll(Map<String, EmployeeData> getIdsToEmployees);
+  void saveAll(Map<String, EmployeeData> idsToEmployees);
 }

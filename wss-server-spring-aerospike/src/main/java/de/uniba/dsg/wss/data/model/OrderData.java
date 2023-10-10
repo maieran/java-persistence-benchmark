@@ -3,67 +3,98 @@ package de.uniba.dsg.wss.data.model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.aerospike.mapping.Document;
 
-public class OrderData extends BaseData implements Comparable<OrderData> {
+@Document(collection = "Order")
+public class OrderData extends BaseData {
 
-  private final DistrictData districtRef;
-  private final CustomerData customerRef;
-  private CarrierData carrierRef;
+  // Reference via ID
+  private String districtRefId;
+  // Reference via ID
+  private String customerRefId;
+  // Reference via ID
+  private String carrierRefId;
 
-  private final LocalDateTime entryDate;
-  private final int itemCount;
+  // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime entryDate;
+
+  private int itemCount;
   private final boolean allLocal;
   private boolean fulfilled;
+  // Reference via Ids
 
-  private final List<OrderItemData> items;
+  private List<String> itemsIds;
 
-  public OrderData(
-      DistrictData districtRef,
-      CustomerData customerRef,
-      LocalDateTime entryDate,
-      int itemCount,
-      boolean allLocal) {
-    super();
-    this.districtRef = districtRef;
-    this.customerRef = customerRef;
-    this.entryDate = entryDate;
-    this.itemCount = itemCount;
-    this.allLocal = allLocal;
-    this.fulfilled = false;
-    this.items = new ArrayList<>();
-  }
-
-  // JPA conversion constructor
   public OrderData(
       String id,
-      DistrictData districtRef,
-      CustomerData customerRef,
-      CarrierData carrierRef,
+      String districtRefId,
+      String customerRefId,
+      String carrierRefId,
       LocalDateTime entryDate,
       int itemCount,
       boolean allLocal,
       boolean fulfilled) {
     super(id);
-    this.districtRef = districtRef;
-    this.customerRef = customerRef;
-    this.carrierRef = carrierRef;
+    this.districtRefId = districtRefId;
+    this.customerRefId = customerRefId;
+    this.carrierRefId = carrierRefId;
     this.entryDate = entryDate;
     this.itemCount = itemCount;
     this.allLocal = allLocal;
     this.fulfilled = fulfilled;
-    this.items = new ArrayList<>();
+    this.itemsIds = new ArrayList<>();
   }
 
-  public DistrictData getDistrictRef() {
-    return districtRef;
+  public OrderData(
+      String districtRefId,
+      String customerRefId,
+      LocalDateTime entryDate,
+      int itemCount,
+      boolean allLocal) {
+    super();
+    this.districtRefId = districtRefId;
+    this.customerRefId = customerRefId;
+    this.entryDate = entryDate;
+    this.itemCount = itemCount;
+    this.allLocal = allLocal;
+    this.fulfilled = false;
+    this.itemsIds = new ArrayList<>();
   }
 
-  public CustomerData getCustomerRef() {
-    return customerRef;
+  public void setDistrictRefId(String districtRefId) {
+    this.districtRefId = districtRefId;
+  }
+
+  public String getDistrictRefId() {
+    return districtRefId;
+  }
+
+  public void setCustomerRefId(String customerRefId) {
+    this.customerRefId = customerRefId;
+  }
+
+  public String getCustomerRefId() {
+    return customerRefId;
+  }
+
+  public String getCarrierRefId() {
+    return carrierRefId;
+  }
+
+  public void setCarrierRefId(String carrierRefId) {
+    this.carrierRefId = carrierRefId;
   }
 
   public LocalDateTime getEntryDate() {
     return entryDate;
+  }
+
+  public void setEntryDate(LocalDateTime entryDate) {
+    this.entryDate = entryDate;
+  }
+
+  public void setItemCount(int itemCount) {
+    this.itemCount = itemCount;
   }
 
   public int getItemCount() {
@@ -74,36 +105,23 @@ public class OrderData extends BaseData implements Comparable<OrderData> {
     return allLocal;
   }
 
-  public List<OrderItemData> getItems() {
-    return items;
-  }
-
-  public CarrierData getCarrierRef() {
-    return carrierRef;
-  }
-
-  public void updateCarrier(CarrierData carrier) {
-
-    this.carrierRef = carrier;
-  }
-
-  public void setAsFulfilled() {
-
-    this.fulfilled = true;
-  }
-
-  public boolean isNotFulfilled() {
-
-    return !fulfilled;
-  }
-
   public boolean isFulfilled() {
-
     return fulfilled;
   }
 
-  @Override
-  public int compareTo(OrderData o) {
-    return this.entryDate.compareTo(o.entryDate);
+  public void setFulfilled(boolean fulfilled) {
+    this.fulfilled = fulfilled;
+  }
+
+  public List<String> getItemsIds() {
+    return itemsIds;
+  }
+
+  public void setItemsIds(List<String> itemsIds) {
+    this.itemsIds = itemsIds;
+  }
+
+  public void setAsFulFilled() {
+    this.fulfilled = true;
   }
 }

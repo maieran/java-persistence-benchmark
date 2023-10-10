@@ -1,27 +1,32 @@
 package de.uniba.dsg.wss.data.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.springframework.data.aerospike.mapping.Document;
 
+@Document(collection = "Warehouse")
 public class WarehouseData extends BaseData {
 
   private final String name;
   private final AddressData address;
   private final double salesTax;
   private double yearToDateBalance;
-  private final Map<String, DistrictData> districtRefs;
-  private final List<StockData> stockRefs;
+  // reference over id
 
-  public WarehouseData(String id, String name, AddressData address, double salesTax) {
+  private List<String> stockRefsIds;
+  // reference over id
+
+  private List<String> districtRefsIds;
+
+  public WarehouseData(
+      String id, String name, AddressData address, double salesTax, double yearToDateBalance) {
     super(id);
     this.name = name;
     this.address = address;
     this.salesTax = salesTax;
-    yearToDateBalance = 0.0;
-    districtRefs = new HashMap<>();
-    stockRefs = new ArrayList<>();
+    this.yearToDateBalance = yearToDateBalance;
+    stockRefsIds = new ArrayList<>();
+    districtRefsIds = new ArrayList<>();
   }
 
   public String getName() {
@@ -36,19 +41,31 @@ public class WarehouseData extends BaseData {
     return salesTax;
   }
 
-  public Map<String, DistrictData> getDistricts() {
-    return this.districtRefs;
+  public List<String> getDistrictRefsIds() {
+    return this.districtRefsIds;
   }
 
-  public List<StockData> getStocks() {
-    return this.stockRefs;
+  public void setDistrictRefsIds(List<String> districtRefsIds) {
+    this.districtRefsIds = districtRefsIds;
   }
 
-  public void increaseYearToBalance(double amount) {
-    this.yearToDateBalance += amount;
+  public List<String> getStockRefsIds() {
+    return this.stockRefsIds;
+  }
+
+  public void setStockRefsIds(List<String> stockRefsIds) {
+    this.stockRefsIds = stockRefsIds;
   }
 
   public double getYearToDateBalance() {
     return yearToDateBalance;
+  }
+
+  public void setYearToDateBalance(double yearToDateBalance) {
+    this.yearToDateBalance = yearToDateBalance;
+  }
+
+  public void increaseYearToBalance(double amount) {
+    this.yearToDateBalance += amount;
   }
 }

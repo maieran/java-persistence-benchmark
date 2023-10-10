@@ -23,6 +23,7 @@ public class CarrierRepositoryOperationsImpl implements CarrierRepositoryOperati
   public void saveAll(Map<String, CarrierData> idsToCarriers) {
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
+
     idsToCarriers.forEach((id, carrier) -> aerospikeTemplate.save(carrier));
   }
 }

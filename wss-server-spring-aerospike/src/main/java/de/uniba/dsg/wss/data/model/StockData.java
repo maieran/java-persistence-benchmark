@@ -1,10 +1,15 @@
 package de.uniba.dsg.wss.data.model;
 
+import org.springframework.data.aerospike.mapping.Document;
+
+@Document(collection = "Stock")
 public class StockData extends BaseData {
 
   public static int increaseQuantity = 100;
-  private final WarehouseData warehouseRef;
-  private final ProductData productRef;
+  // reference via id
+  private final String warehouseRefId;
+  // reference via id
+  private final String productRefId;
   private int quantity;
   private double yearToDateBalance;
   private int orderCount;
@@ -22,8 +27,9 @@ public class StockData extends BaseData {
   private final String dist10;
 
   public StockData(
-      WarehouseData warehouseRef,
-      ProductData productRef,
+      String id,
+      String warehouseRefId,
+      String productRefId,
       int quantity,
       double yearToDateBalance,
       int orderCount,
@@ -40,9 +46,9 @@ public class StockData extends BaseData {
       String dist09,
       String dist10) {
     // optimization
-    super(warehouseRef.getId() + productRef.getId());
-    this.warehouseRef = warehouseRef;
-    this.productRef = productRef;
+    super(id);
+    this.warehouseRefId = warehouseRefId;
+    this.productRefId = productRefId;
     this.quantity = quantity;
     this.yearToDateBalance = yearToDateBalance;
     this.orderCount = orderCount;
@@ -60,28 +66,44 @@ public class StockData extends BaseData {
     this.dist10 = dist10;
   }
 
-  public WarehouseData getWarehouseRef() {
-    return warehouseRef;
+  public String getWarehouseRefId() {
+    return this.warehouseRefId;
   }
 
-  public ProductData getProductRef() {
-    return productRef;
+  public String getProductRefId() {
+    return this.productRefId;
   }
 
   public int getQuantity() {
     return quantity;
   }
 
+  public void setQuantity(int quantity) {
+    this.quantity = quantity;
+  }
+
   public double getYearToDateBalance() {
     return yearToDateBalance;
+  }
+
+  public void setYearToDateBalance(double yearToDateBalance) {
+    this.yearToDateBalance = yearToDateBalance;
   }
 
   public int getOrderCount() {
     return orderCount;
   }
 
+  public void setOrderCount(int orderCount) {
+    this.orderCount = orderCount;
+  }
+
   public int getRemoteCount() {
     return remoteCount;
+  }
+
+  public void setRemoteCount(int remoteCount) {
+    this.remoteCount = remoteCount;
   }
 
   public String getData() {
@@ -129,10 +151,7 @@ public class StockData extends BaseData {
   }
 
   public boolean reduceQuantity(int quantity) {
-
     if (this.quantity < quantity) {
-      // avoid permanent out-of-stock scenarios, but let this order fail and retry
-      // replace the NewOrderService#determineNewStockQuantity functionality
       this.quantity += increaseQuantity;
       return false;
     }
@@ -140,12 +159,5 @@ public class StockData extends BaseData {
     this.yearToDateBalance += quantity;
     this.orderCount++;
     return true;
-  }
-
-  public void undoReduceQuantityOperation(int quantity) {
-
-    this.quantity += quantity;
-    this.yearToDateBalance -= quantity;
-    this.orderCount--;
   }
 }

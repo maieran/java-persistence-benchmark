@@ -10,5 +10,5 @@ public interface EmployeeRepository
     extends AerospikeRepository<EmployeeData, String>, EmployeeRepositoryOperations {
   EmployeeData findEmployeeDataByUsername(String username);
 
-  void saveAll(Map<String, EmployeeData> getIdsToEmployees);
+  void saveAll(Map<String, EmployeeData> idsToEmployees);
 }

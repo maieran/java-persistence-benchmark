@@ -17,6 +17,13 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
     this.aerospikeTemplate = aerospikeTemplate;
   }
 
+  /**
+   *  IS USING A SECONDARY INDEX: USERNAME
+   *  https://docs.aerospike.com/server/features
+   *  https://docs.aerospike.com/server/architecture/secondary-index
+   * @param username
+   * @return
+   */
   public EmployeeData findEmployeeDataByUsername(String username) {
     Statement stmt = new Statement();
     stmt.setNamespace(aerospikeTemplate.getNamespace());
@@ -47,7 +54,7 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
   }
 
   @Override
-  public void saveAll(Map<String, EmployeeData> getIdsToEmployees) {
+  public void saveAll(Map<String, EmployeeData> idsToEmployees) {
     /*    WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
 
@@ -55,6 +62,9 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
 
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
+
+
+    idsToEmployees.forEach((id, employeeData) -> aerospikeTemplate.save(employeeData));
 
     // aerospikeTemplate.getAerospikeClient().put((getIdsToEmployees.keySet()),
     // getIdsToEmployees.values());

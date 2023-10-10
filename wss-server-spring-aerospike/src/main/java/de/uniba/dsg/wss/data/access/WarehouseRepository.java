@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
-public interface WarehouseRepository extends AerospikeRepository<WarehouseData, Integer> {
+public interface WarehouseRepository extends AerospikeRepository<WarehouseData, String>, WarehouseRepositoryOperations {
 
-  <S extends WarehouseData> Iterable<S> saveAll(Map<String, WarehouseData> warehouses);
+  void saveAll(Map<String, WarehouseData> warehouses);
 
   @Override
   Iterable<WarehouseData> findAll();
 
   @Override
-  Optional<WarehouseData> findById(Integer integer);
+  Optional<WarehouseData> findById(String id);
 }

@@ -2,40 +2,43 @@ package de.uniba.dsg.wss.data.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.data.aerospike.mapping.Document;
 
+@Document(collection = "District")
 public class DistrictData extends BaseData {
 
-  private final WarehouseData warehouseRef;
+  private final String warehouseRefId;
 
   private final String name;
   private final AddressData address;
   private final double salesTax;
   private double yearToDateBalance;
+  // Reference over the ID
 
-  private final List<CustomerData> customerRefs;
-  private final Map<String, OrderData> orderRefs;
+  private List<String> customerRefsIds;
+  // Reference over the ID
+
+  private List<String> orderRefsIds;
 
   public DistrictData(
       String id,
-      WarehouseData warehouse,
+      String warehouseRefId,
       String name,
       AddressData address,
       double salesTax,
       double yearToDateBalance) {
     super(id);
-    this.warehouseRef = warehouse;
+    this.warehouseRefId = warehouseRefId;
     this.name = name;
     this.address = address;
     this.salesTax = salesTax;
     this.yearToDateBalance = yearToDateBalance;
-    this.customerRefs = new ArrayList<>();
-    this.orderRefs = new ConcurrentHashMap<>();
+    this.customerRefsIds = new ArrayList<>();
+    this.orderRefsIds = new ArrayList<>();
   }
 
-  public WarehouseData getWarehouse() {
-    return warehouseRef;
+  public String getWarehouseRefId() {
+    return warehouseRefId;
   }
 
   public String getName() {
@@ -50,21 +53,31 @@ public class DistrictData extends BaseData {
     return salesTax;
   }
 
-  public List<CustomerData> getCustomers() {
-    return this.customerRefs;
+  public double getYearToDateBalance() {
+    return yearToDateBalance;
   }
 
-  public Map<String, OrderData> getOrders() {
-    return this.orderRefs;
+  public void setYearToDateBalance(double yearToDateBalance) {
+    this.yearToDateBalance = yearToDateBalance;
+  }
+
+  public List<String> getCustomerRefsIds() {
+    return customerRefsIds;
+  }
+
+  public void setCustomerRefsIds(List<String> customerRefsIds) {
+    this.customerRefsIds = customerRefsIds;
+  }
+
+  public List<String> getOrderRefsIds() {
+    return orderRefsIds;
+  }
+
+  public void setOrderRefsIds(List<String> orderRefsIds) {
+    this.orderRefsIds = orderRefsIds;
   }
 
   public void increaseYearToBalance(double amount) {
-
     this.yearToDateBalance += amount;
-  }
-
-  public double getYearToDateBalance() {
-
-    return yearToDateBalance;
   }
 }

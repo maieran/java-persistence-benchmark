@@ -1,11 +1,11 @@
 package de.uniba.dsg.wss.api.controllers;
 
 import de.uniba.dsg.wss.data.access.*;
-import de.uniba.dsg.wss.data.model.DistrictData;
-import de.uniba.dsg.wss.data.model.EmployeeData;
-import de.uniba.dsg.wss.data.model.WarehouseData;
+import de.uniba.dsg.wss.data.model.*;
 import de.uniba.dsg.wss.data.transfer.representations.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -58,6 +58,15 @@ public class AerospikeResourceController implements ResourceController {
             .collect(Collectors.toList()));
   }
 
+  /*  @Override
+  public ResponseEntity<Iterable<ProductRepresentation>> getProducts() {
+    return ResponseEntity.ok(
+            productRepository.getAllProducts().entrySet().stream()
+                    .parallel()
+                    .map(p -> modelMapper.map(p.getValue(), ProductRepresentation.class))
+                    .collect(Collectors.toList()));
+  }*/
+
   @Override
   public ResponseEntity<EmployeeRepresentation> getEmployee(String username) {
     EmployeeData employee = employeeRepository.findEmployeeDataByUsername(username);
@@ -75,7 +84,7 @@ public class AerospikeResourceController implements ResourceController {
             .collect(Collectors.toList()));
   }
 
-  @Override
+  /*  @Override
   public ResponseEntity<List<DistrictRepresentation>> getWarehouseDistricts(String warehouseId) {
     Optional<WarehouseData> warehouseDataOptional =
         warehouseRepository.findById(Integer.parseInt(warehouseId));
@@ -90,12 +99,38 @@ public class AerospikeResourceController implements ResourceController {
             .collect(Collectors.toList());
 
     return ResponseEntity.ok(districtRepresentations);
-  }
+  }*/
 
   @Override
+  public ResponseEntity<List<DistrictRepresentation>> getWarehouseDistricts(String warehouseId) {
+    Optional<WarehouseData> warehouse = warehouseRepository.findById(warehouseId);
+
+    if (warehouse.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+
+    List<DistrictRepresentation> districtRepresentations =
+        // BATCH CALL
+        // TODO: implement getDistrictsFromWarehouse
+        districtRepository.getDistrictsFromWarehouse(warehouse.get().getDistrictRefsIds()).stream()
+            .map(
+                district -> {
+                  DistrictRepresentation districtRepresentation =
+                      modelMapper.map(district, DistrictRepresentation.class);
+                  districtRepresentation.setWarehouse(warehouseRepresentation);
+                  return districtRepresentation;
+                })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(districtRepresentations);
+  }
+
+  /*  @Override
   public ResponseEntity<List<StockRepresentation>> getWarehouseStocks(String warehouseId) {
-    Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(Integer.parseInt(warehouseId));
+    Optional<WarehouseData> warehouseDataOptional = warehouseRepository.findById(warehouseId);
     if (warehouseDataOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
@@ -106,13 +141,54 @@ public class AerospikeResourceController implements ResourceController {
             .map(s -> modelMapper.map(s, StockRepresentation.class))
             .collect(Collectors.toList());
     return ResponseEntity.ok(stockRepresentations);
-  }
+  }*/
 
   @Override
+  public ResponseEntity<List<StockRepresentation>> getWarehouseStocks(String warehouseId) {
+    Optional<WarehouseData> warehouse = warehouseRepository.findById(warehouseId);
+
+    if (warehouse.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+    List<String> stockIds = warehouse.get().getStockRefsIds();
+    // BATCH CALL
+    // TODO: Implement getStocksByWarehouse
+    List<StockData> stocks = stockRepository.getStocksByWarehouse(stockIds);
+    List<String> productIds =
+        stocks.stream().map(StockData::getProductRefId).collect(Collectors.toList());
+
+    // BATCH CALL
+    // TODO: Implement getProductsFromStocks
+    Map<String, ProductData> products = productRepository.getProductsFromStocks(productIds);
+
+    List<StockRepresentation> stockRepresentations =
+        stocks.stream()
+            .map(
+                stock -> {
+                  ProductData product = products.get(stock.getProductRefId());
+
+                  StockRepresentation stockRepresentation =
+                      modelMapper.map(stock, StockRepresentation.class);
+                  ProductRepresentation productRepresentation =
+                      modelMapper.map(product, ProductRepresentation.class);
+
+                  stockRepresentation.setProduct(productRepresentation);
+                  stockRepresentation.setWarehouse(warehouseRepresentation);
+                  return stockRepresentation;
+                })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(stockRepresentations);
+  }
+
+  /*  @Override
   public ResponseEntity<List<CustomerRepresentation>> getDistrictCustomers(
       String warehouseId, String districtId) {
     Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(Integer.parseInt(warehouseId));
+        warehouseRepository.findById(warehouseId);
     if (warehouseDataOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
@@ -129,13 +205,51 @@ public class AerospikeResourceController implements ResourceController {
             .map(c -> modelMapper.map(c, CustomerRepresentation.class))
             .collect(Collectors.toList());
     return ResponseEntity.ok(customerRepresentations);
-  }
+  }*/
 
   @Override
+  public ResponseEntity<List<CustomerRepresentation>> getDistrictCustomers(
+      String warehouseId, String districtId) {
+    Optional<WarehouseData> warehouse = warehouseRepository.findById(warehouseId);
+
+    if (warehouse.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    Optional<DistrictData> district = districtRepository.findById(districtId);
+
+    if (district.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    DistrictRepresentation districtRepresentation =
+        modelMapper.map(district, DistrictRepresentation.class);
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+    districtRepresentation.setWarehouse(warehouseRepresentation);
+
+    List<CustomerRepresentation> customerRepresentations =
+        // BATCH CALL
+        // TODO: Implement getCustomersByDistricts
+        customerRepository.getCustomersByDistricts(district.get().getCustomerRefsIds()).stream()
+            .map(
+                customer -> {
+                  CustomerRepresentation customerRepresentation =
+                      modelMapper.map(customer, CustomerRepresentation.class);
+                  customerRepresentation.setDistrict(districtRepresentation);
+                  return customerRepresentation;
+                })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(customerRepresentations);
+  }
+
+  /*  @Override
   public ResponseEntity<List<OrderRepresentation>> getDistrictOrders(
       String warehouseId, String districtId) {
     Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(Integer.parseInt(warehouseId));
+        warehouseRepository.findById(warehouseId);
+
     if (warehouseDataOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
@@ -151,6 +265,82 @@ public class AerospikeResourceController implements ResourceController {
         district.getOrders().entrySet().parallelStream()
             .map(o -> modelMapper.map(o.getValue(), OrderRepresentation.class))
             .collect(Collectors.toList());
+    return ResponseEntity.ok(orderRepresentations);
+  }*/
+
+  @Override
+  public ResponseEntity<List<OrderRepresentation>> getDistrictOrders(
+      String warehouseId, String districtId) {
+    Optional<WarehouseData> warehouse = warehouseRepository.findById(warehouseId);
+    if (warehouse.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    Optional<DistrictData> district = districtRepository.findById(districtId);
+
+    if (district.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    DistrictRepresentation districtRepresentation =
+        modelMapper.map(district, DistrictRepresentation.class);
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+    districtRepresentation.setWarehouse(warehouseRepresentation);
+
+    List<OrderRepresentation> orderRepresentations = new ArrayList<>();
+    List<OrderItemRepresentation> orderItemRepresentations = new ArrayList<>();
+
+    // BATCH CALL
+    //TODO: Implement getOrdersFromDistrict
+    List<OrderData> orders = orderRepository.getOrdersFromDistrict(district.get().getOrderRefsIds());
+
+    for (OrderData order : orders) {
+      OrderRepresentation orderRepresentation = modelMapper.map(order, OrderRepresentation.class);
+
+      Optional<CarrierData> carrier = carrierRepository.findById(order.getCarrierRefId());
+      if (carrier.isPresent()) {
+        CarrierRepresentation carrierRepresentation =
+            modelMapper.map(carrier, CarrierRepresentation.class);
+        orderRepresentation.setCarrier(carrierRepresentation);
+      } else {
+        orderRepresentation.setCarrier(null);
+      }
+
+      Optional<CustomerData> customer = customerRepository.findById(order.getCustomerRefId());
+      CustomerRepresentation customerRepresentation =
+          modelMapper.map(customer, CustomerRepresentation.class);
+      customerRepresentation.setDistrict(districtRepresentation);
+
+      // orderRepresentation.setCarrier(carrierRepresentation);
+      orderRepresentation.setCustomer(customerRepresentation);
+      orderRepresentation.setDistrict(districtRepresentation);
+
+      // BATCH CALL
+      //TODO: Implement getOrderItemsByOrder
+      List<OrderItemData> orderItems =
+          orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
+
+      for (OrderItemData orderItem : orderItems) {
+        OrderItemRepresentation orderItemRepresentation =
+            modelMapper.map(orderItem, OrderItemRepresentation.class);
+
+        Optional<ProductData> product = productRepository.findById(orderItem.getProductRefId());
+        ProductRepresentation productRepresentation =
+            modelMapper.map(product, ProductRepresentation.class);
+
+        orderItemRepresentation.setProduct(productRepresentation);
+        orderItemRepresentation.setSupplyingWarehouse(warehouseRepresentation);
+
+        orderItemRepresentations.add(orderItemRepresentation);
+      }
+      orderRepresentation.setItems(orderItemRepresentations);
+
+      for (OrderItemRepresentation orderItemRepresentation : orderRepresentation.getItems()) {
+        orderItemRepresentation.setOrder(orderRepresentation);
+      }
+      orderRepresentations.add(orderRepresentation);
+    }
     return ResponseEntity.ok(orderRepresentations);
   }
 
