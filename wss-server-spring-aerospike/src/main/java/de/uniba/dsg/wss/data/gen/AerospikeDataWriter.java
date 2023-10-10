@@ -67,21 +67,20 @@ public class AerospikeDataWriter
 
     carrierRepository.saveAll(aerospikeDataModel.getIdsToCarriers());
 
-    /*
+    //
     warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
 
-        stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());
+    stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());
 
-        districtRepository.saveAll(aerospikeDataModel.getIdsToDistricts());
+    districtRepository.saveAll(aerospikeDataModel.getIdsToDistricts());
 
-        customerRepository.saveAll(aerospikeDataModel.getIdsToCustomers());
+    customerRepository.saveAll(aerospikeDataModel.getIdsToCustomers());
 
-        orderRepository.saveAll(aerospikeDataModel.getIdsToOrders());
+    orderRepository.saveAll(aerospikeDataModel.getIdsToOrders());
 
-        orderItemRepository.saveAll(aerospikeDataModel.getIdsToOrderItems());
+    orderItemRepository.saveAll(aerospikeDataModel.getIdsToOrderItems());
 
-        paymentRepository.saveAll(aerospikeDataModel.getIdsToPayments());
-    */
+    paymentRepository.saveAll(aerospikeDataModel.getIdsToPayments());
 
     stopwatch.stop();
     LOG.info("Wrote model data to database, took {}", stopwatch.getDuration());
