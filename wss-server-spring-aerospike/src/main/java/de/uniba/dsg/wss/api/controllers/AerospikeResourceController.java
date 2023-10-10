@@ -292,8 +292,9 @@ public class AerospikeResourceController implements ResourceController {
     List<OrderItemRepresentation> orderItemRepresentations = new ArrayList<>();
 
     // BATCH CALL
-    //TODO: Implement getOrdersFromDistrict
-    List<OrderData> orders = orderRepository.getOrdersFromDistrict(district.get().getOrderRefsIds());
+    // TODO: Implement getOrdersFromDistrict
+    List<OrderData> orders =
+        orderRepository.getOrdersFromDistrict(district.get().getOrderRefsIds());
 
     for (OrderData order : orders) {
       OrderRepresentation orderRepresentation = modelMapper.map(order, OrderRepresentation.class);
@@ -317,7 +318,7 @@ public class AerospikeResourceController implements ResourceController {
       orderRepresentation.setDistrict(districtRepresentation);
 
       // BATCH CALL
-      //TODO: Implement getOrderItemsByOrder
+      // TODO: Implement getOrderItemsByOrder
       List<OrderItemData> orderItems =
           orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
 

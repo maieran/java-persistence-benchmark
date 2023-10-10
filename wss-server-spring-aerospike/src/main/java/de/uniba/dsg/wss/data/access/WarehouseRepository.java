@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
-public interface WarehouseRepository extends AerospikeRepository<WarehouseData, String>, WarehouseRepositoryOperations {
+public interface WarehouseRepository
+    extends AerospikeRepository<WarehouseData, String>, WarehouseRepositoryOperations {
 
   void saveAll(Map<String, WarehouseData> warehouses);
 

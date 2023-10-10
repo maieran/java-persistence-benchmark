@@ -18,9 +18,9 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
   }
 
   /**
-   *  IS USING A SECONDARY INDEX: USERNAME
-   *  https://docs.aerospike.com/server/features
-   *  https://docs.aerospike.com/server/architecture/secondary-index
+   * IS USING A SECONDARY INDEX: USERNAME https://docs.aerospike.com/server/features
+   * https://docs.aerospike.com/server/architecture/secondary-index
+   *
    * @param username
    * @return
    */
@@ -62,7 +62,6 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
 
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
-
 
     idsToEmployees.forEach((id, employeeData) -> aerospikeTemplate.save(employeeData));
 
