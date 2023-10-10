@@ -1,17 +1,10 @@
 package de.uniba.dsg.wss.data.access;
 
-import com.aerospike.client.BatchRead;
-import com.aerospike.client.Key;
-import com.aerospike.client.Record;
-import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.DistrictData;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.convert.MappingAerospikeConverter;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
@@ -23,12 +16,13 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
   private MappingAerospikeConverter aerospikeConverter;
 
   @Autowired
-  public DistrictRepositoryOperationsImpl(AerospikeTemplate aerospikeTemplate, MappingAerospikeConverter aerospikeConverter) {
+  public DistrictRepositoryOperationsImpl(
+      AerospikeTemplate aerospikeTemplate, MappingAerospikeConverter aerospikeConverter) {
     this.aerospikeTemplate = aerospikeTemplate;
     this.aerospikeConverter = aerospikeConverter;
   }
 
-//TODO: HOW TO BATCH READ ?!
+  // TODO: HOW TO BATCH READ ?!
   @Override
   public List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds) {
     List<DistrictData> districts = new ArrayList<>();
@@ -46,11 +40,6 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
 
     return districts;
   }
-
-
-
-
-
 
   @Override
   public void saveAll(Map<String, DistrictData> idsToDistricts) {
