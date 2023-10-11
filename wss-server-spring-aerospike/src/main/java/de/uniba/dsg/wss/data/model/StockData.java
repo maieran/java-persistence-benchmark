@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.data.model;
 
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.aerospike.mapping.Field;
 
 @Document(collection = "Stock")
 public class StockData extends BaseData {
@@ -11,7 +12,10 @@ public class StockData extends BaseData {
   // reference via id
   private final String productRefId;
   private int quantity;
+
+  @Field("ytdBalance")
   private double yearToDateBalance;
+
   private int orderCount;
   private int remoteCount;
   private final String data;

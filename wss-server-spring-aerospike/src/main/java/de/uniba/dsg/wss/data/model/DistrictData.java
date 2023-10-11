@@ -3,6 +3,7 @@ package de.uniba.dsg.wss.data.model;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.aerospike.mapping.Field;
 
 @Document(collection = "District")
 public class DistrictData extends BaseData {
@@ -12,6 +13,8 @@ public class DistrictData extends BaseData {
   private final String name;
   private final AddressData address;
   private final double salesTax;
+
+  @Field("ytdBalance")
   private double yearToDateBalance;
   // Reference over the ID
 

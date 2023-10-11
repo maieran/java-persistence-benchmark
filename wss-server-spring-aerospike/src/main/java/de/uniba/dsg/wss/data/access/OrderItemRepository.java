@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
-public interface OrderItemRepository extends AerospikeRepository<OrderItemData, Integer> {
+public interface OrderItemRepository
+    extends AerospikeRepository<OrderItemData, String>, OrderItemRepositoryOperations {
   void saveAll(Map<String, OrderItemData> getIdsToOrderItems);
 
   List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds);

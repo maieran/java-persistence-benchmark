@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.model;
 
 import java.time.LocalDateTime;
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.aerospike.mapping.Field;
 
 @Document(collection = "OrderItem")
 public class OrderItemData extends BaseData {
@@ -11,10 +12,15 @@ public class OrderItemData extends BaseData {
   // Reference via ID
   private String productRefId;
   // Reference via ID
+  @Field("supplWareRefId")
   private String supplyingWarehouseRefId;
+
   private int number;
   private int quantity;
+
+  @Field("lftQtyInStck")
   private int leftQuantityInStock;
+
   private String distInfo;
   private double amount;
 

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.aerospike.mapping.Field;
 
 @Document(collection = "Customer")
 public class CustomerData extends PersonData {
@@ -32,7 +33,10 @@ public class CustomerData extends PersonData {
   private int deliveryCount;
   private String data;
   private double balance;
+
+  @Field("ytdPayment")
   private double yearToDatePayment;
+
   private int paymentCount;
 
   public CustomerData(
