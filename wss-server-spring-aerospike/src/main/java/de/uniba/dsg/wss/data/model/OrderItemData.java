@@ -3,6 +3,7 @@ package de.uniba.dsg.wss.data.model;
 import java.time.LocalDateTime;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 @Document(collection = "OrderItem")
 public class OrderItemData extends BaseData {
@@ -27,11 +28,12 @@ public class OrderItemData extends BaseData {
   // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime deliveryDate;
 
+  @PersistenceConstructor
   public OrderItemData(
       String id,
-      String orderRef,
-      String productRef,
-      String supplyingWarehouseRef,
+      String orderRefId,
+      String productRefId,
+      String supplyingWarehouseRefId,
       int number,
       LocalDateTime deliveryDate,
       int quantity,
@@ -51,9 +53,9 @@ public class OrderItemData extends BaseData {
   }
 
   public OrderItemData(
-      String orderRef,
-      String productRef,
-      String supplyingWarehouseRef,
+      String orderRefId,
+      String productRefId,
+      String supplyingWarehouseRefId,
       int number,
       LocalDateTime deliveryDate,
       int quantity,

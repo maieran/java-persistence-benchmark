@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 @Document(collection = "Order")
 public class OrderData extends BaseData {
@@ -24,6 +25,7 @@ public class OrderData extends BaseData {
 
   private List<String> itemsIds;
 
+  @PersistenceConstructor
   public OrderData(
       String id,
       String districtRefId,

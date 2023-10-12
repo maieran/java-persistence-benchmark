@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 @Document(collection = "Customer")
 public class CustomerData extends PersonData {
@@ -35,7 +36,7 @@ public class CustomerData extends PersonData {
 
   private int paymentCount;
 
-  // @PersistenceConstructor
+  @PersistenceConstructor
   public CustomerData(
       String id,
       String firstName,

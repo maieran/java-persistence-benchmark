@@ -3,10 +3,7 @@ package de.uniba.dsg.wss.api.controllers;
 import de.uniba.dsg.wss.data.access.*;
 import de.uniba.dsg.wss.data.model.*;
 import de.uniba.dsg.wss.data.transfer.representations.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.modelmapper.ModelMapper;
@@ -184,29 +181,6 @@ public class AerospikeResourceController implements ResourceController {
     return ResponseEntity.ok(stockRepresentations);
   }
 
-  /*  @Override
-  public ResponseEntity<List<CustomerRepresentation>> getDistrictCustomers(
-      String warehouseId, String districtId) {
-    Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(warehouseId);
-    if (warehouseDataOptional.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    WarehouseData warehouse = warehouseDataOptional.get();
-
-    DistrictData district = warehouse.getDistricts().get(districtId);
-    if (district == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    List<CustomerRepresentation> customerRepresentations =
-        district.getCustomers().parallelStream()
-            .map(c -> modelMapper.map(c, CustomerRepresentation.class))
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(customerRepresentations);
-  }*/
-
   @Override
   public ResponseEntity<List<CustomerRepresentation>> getDistrictCustomers(
       String warehouseId, String districtId) {
@@ -244,30 +218,6 @@ public class AerospikeResourceController implements ResourceController {
     return ResponseEntity.ok(customerRepresentations);
   }
 
-  /*  @Override
-  public ResponseEntity<List<OrderRepresentation>> getDistrictOrders(
-      String warehouseId, String districtId) {
-    Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(warehouseId);
-
-    if (warehouseDataOptional.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    WarehouseData warehouse = warehouseDataOptional.get();
-
-    DistrictData district = warehouse.getDistricts().get(districtId);
-    if (district == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    List<OrderRepresentation> orderRepresentations =
-        district.getOrders().entrySet().parallelStream()
-            .map(o -> modelMapper.map(o.getValue(), OrderRepresentation.class))
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(orderRepresentations);
-  }*/
-
   @Override
   public ResponseEntity<List<OrderRepresentation>> getDistrictOrders(
       String warehouseId, String districtId) {
@@ -299,7 +249,11 @@ public class AerospikeResourceController implements ResourceController {
     for (OrderData order : orders) {
       OrderRepresentation orderRepresentation = modelMapper.map(order, OrderRepresentation.class);
 
-      Optional<CarrierData> carrier = carrierRepository.findById(order.getCarrierRefId());
+      Optional<CarrierData> carrier =
+          order.getCarrierRefId() != null
+              ? carrierRepository.findById(order.getCarrierRefId())
+              : Optional.empty();
+
       if (carrier.isPresent()) {
         CarrierRepresentation carrierRepresentation =
             modelMapper.map(carrier.get(), CarrierRepresentation.class);
@@ -307,6 +261,15 @@ public class AerospikeResourceController implements ResourceController {
       } else {
         orderRepresentation.setCarrier(null);
       }
+
+      /*      Optional<CarrierData> carrier = carrierRepository.findById(order.getCarrierRefId());
+      if (Objects.requireNonNull(carrier).isPresent()) {
+        CarrierRepresentation carrierRepresentation =
+            modelMapper.map(carrier.get(), CarrierRepresentation.class);
+        orderRepresentation.setCarrier(carrierRepresentation);
+      } else {
+        orderRepresentation.setCarrier(null);
+      }*/
 
       Optional<CustomerData> customer = customerRepository.findById(order.getCustomerRefId());
       // TODO: Set ifPresent Check?!
