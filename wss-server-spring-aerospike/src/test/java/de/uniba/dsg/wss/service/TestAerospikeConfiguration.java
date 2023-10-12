@@ -5,10 +5,12 @@ import java.util.Collection;
 import java.util.Collections;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.aerospike.config.AbstractAerospikeDataConfiguration;
 import org.springframework.data.aerospike.config.AerospikeDataSettings;
 
 @TestConfiguration
+@Profile("test")
 public class TestAerospikeConfiguration extends AbstractAerospikeDataConfiguration {
 
   @Override
@@ -24,7 +26,6 @@ public class TestAerospikeConfiguration extends AbstractAerospikeDataConfigurati
   }
 
   @Bean
-  // @Profile("test")
   public AerospikeDataSettings aerospikeDataSettings() {
     return AerospikeDataSettings.builder()
         .scansEnabled(true) // Enable scans
