@@ -16,11 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @Import(TestAerospikeConfiguration.class)
-@ActiveProfiles("test")
 public class AerospikeResourceControllerTest extends AerospikeTest {
 
   @Autowired private AerospikeResourceController controller;
