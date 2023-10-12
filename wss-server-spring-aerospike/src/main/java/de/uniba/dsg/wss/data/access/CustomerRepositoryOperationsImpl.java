@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.CustomerData;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,21 @@ public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOpera
     idsToCustomers.forEach((id, customer) -> aerospikeTemplate.save(customer));
   }
 
+  // TODO: HOW TO BATCH READ -  getCustomersByDistricts ?!
   @Override
   public List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds) {
-    return null;
+    List<CustomerData> customers = new ArrayList<>();
+
+    for (String id : customerRefsIds) {
+      // Read the record for the key
+      CustomerData customer = aerospikeTemplate.findById(id, CustomerData.class);
+
+      // Check if the record exists
+      if (customer != null) {
+        customers.add(customer);
+      }
+    }
+
+    return customers;
   }
 }

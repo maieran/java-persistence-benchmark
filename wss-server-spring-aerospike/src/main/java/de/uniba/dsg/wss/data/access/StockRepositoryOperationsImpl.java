@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.StockData;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,22 @@ public class StockRepositoryOperationsImpl implements StockRepositoryOperations 
     idsToStocks.forEach((id, stock) -> aerospikeTemplate.save(stock));
   }
 
+  // TODO: HOW TO BATCH READ -  getStocksByWarehouse ?!
   @Override
   public List<StockData> getStocksByWarehouse(List<String> stockRefsIds) {
-    return null;
+    List<StockData> stocks = new ArrayList<>();
+
+    // Iterate over the district reference IDs and read each record individually
+    for (String id : stockRefsIds) {
+      // Read the record for the key
+      StockData stockData = aerospikeTemplate.findById(id, StockData.class);
+
+      // Check if the record exists
+      if (stockData != null) {
+        stocks.add(stockData);
+      }
+    }
+
+    return stocks;
   }
 }

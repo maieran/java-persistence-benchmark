@@ -15,7 +15,6 @@ public class OrderData extends BaseData {
   // Reference via ID
   private String carrierRefId;
 
-  // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime entryDate;
 
   private int itemCount;

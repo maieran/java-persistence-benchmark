@@ -110,11 +110,11 @@ public class AerospikeResourceController implements ResourceController {
     }
 
     WarehouseRepresentation warehouseRepresentation =
-        modelMapper.map(warehouse, WarehouseRepresentation.class);
+        modelMapper.map(warehouse.get(), WarehouseRepresentation.class);
 
     List<DistrictRepresentation> districtRepresentations =
         // BATCH CALL
-        // TODO: implement getDistrictsFromWarehouse
+        // TODO: implement Batch getDistrictsFromWarehouse
         districtRepository.getDistrictsFromWarehouse(warehouse.get().getDistrictRefsIds()).stream()
             .map(
                 district -> {
@@ -152,16 +152,16 @@ public class AerospikeResourceController implements ResourceController {
     }
 
     WarehouseRepresentation warehouseRepresentation =
-        modelMapper.map(warehouse, WarehouseRepresentation.class);
+        modelMapper.map(warehouse.get(), WarehouseRepresentation.class);
     List<String> stockIds = warehouse.get().getStockRefsIds();
     // BATCH CALL
-    // TODO: Implement getStocksByWarehouse
+    // TODO: Implement Batch getStocksByWarehouse
     List<StockData> stocks = stockRepository.getStocksByWarehouse(stockIds);
     List<String> productIds =
         stocks.stream().map(StockData::getProductRefId).collect(Collectors.toList());
 
     // BATCH CALL
-    // TODO: Implement getProductsFromStocks
+    // TODO: Implement Batch getProductsFromStocks
     Map<String, ProductData> products = productRepository.getProductsFromStocks(productIds);
 
     List<StockRepresentation> stockRepresentations =
@@ -223,14 +223,14 @@ public class AerospikeResourceController implements ResourceController {
     }
 
     DistrictRepresentation districtRepresentation =
-        modelMapper.map(district, DistrictRepresentation.class);
+        modelMapper.map(district.get(), DistrictRepresentation.class);
     WarehouseRepresentation warehouseRepresentation =
-        modelMapper.map(warehouse, WarehouseRepresentation.class);
+        modelMapper.map(warehouse.get(), WarehouseRepresentation.class);
     districtRepresentation.setWarehouse(warehouseRepresentation);
 
     List<CustomerRepresentation> customerRepresentations =
         // BATCH CALL
-        // TODO: Implement getCustomersByDistricts
+        // TODO: Implement BATCH getCustomersByDistricts
         customerRepository.getCustomersByDistricts(district.get().getCustomerRefsIds()).stream()
             .map(
                 customer -> {
@@ -283,16 +283,16 @@ public class AerospikeResourceController implements ResourceController {
     }
 
     DistrictRepresentation districtRepresentation =
-        modelMapper.map(district, DistrictRepresentation.class);
+        modelMapper.map(district.get(), DistrictRepresentation.class);
     WarehouseRepresentation warehouseRepresentation =
-        modelMapper.map(warehouse, WarehouseRepresentation.class);
+        modelMapper.map(warehouse.get(), WarehouseRepresentation.class);
     districtRepresentation.setWarehouse(warehouseRepresentation);
 
     List<OrderRepresentation> orderRepresentations = new ArrayList<>();
     List<OrderItemRepresentation> orderItemRepresentations = new ArrayList<>();
 
     // BATCH CALL
-    // TODO: Implement getOrdersFromDistrict
+    // TODO: Implement Batch getOrdersFromDistrict
     List<OrderData> orders =
         orderRepository.getOrdersFromDistrict(district.get().getOrderRefsIds());
 
@@ -302,15 +302,16 @@ public class AerospikeResourceController implements ResourceController {
       Optional<CarrierData> carrier = carrierRepository.findById(order.getCarrierRefId());
       if (carrier.isPresent()) {
         CarrierRepresentation carrierRepresentation =
-            modelMapper.map(carrier, CarrierRepresentation.class);
+            modelMapper.map(carrier.get(), CarrierRepresentation.class);
         orderRepresentation.setCarrier(carrierRepresentation);
       } else {
         orderRepresentation.setCarrier(null);
       }
 
       Optional<CustomerData> customer = customerRepository.findById(order.getCustomerRefId());
+      // TODO: Set ifPresent Check?!
       CustomerRepresentation customerRepresentation =
-          modelMapper.map(customer, CustomerRepresentation.class);
+          modelMapper.map(customer.get(), CustomerRepresentation.class);
       customerRepresentation.setDistrict(districtRepresentation);
 
       // orderRepresentation.setCarrier(carrierRepresentation);
@@ -318,7 +319,7 @@ public class AerospikeResourceController implements ResourceController {
       orderRepresentation.setDistrict(districtRepresentation);
 
       // BATCH CALL
-      // TODO: Implement getOrderItemsByOrder
+      // TODO: Implement Batch getOrderItemsByOrder
       List<OrderItemData> orderItems =
           orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
 
@@ -327,8 +328,9 @@ public class AerospikeResourceController implements ResourceController {
             modelMapper.map(orderItem, OrderItemRepresentation.class);
 
         Optional<ProductData> product = productRepository.findById(orderItem.getProductRefId());
+        // TODO: Set ifPresent Check?!
         ProductRepresentation productRepresentation =
-            modelMapper.map(product, ProductRepresentation.class);
+            modelMapper.map(product.get(), ProductRepresentation.class);
 
         orderItemRepresentation.setProduct(productRepresentation);
         orderItemRepresentation.setSupplyingWarehouse(warehouseRepresentation);

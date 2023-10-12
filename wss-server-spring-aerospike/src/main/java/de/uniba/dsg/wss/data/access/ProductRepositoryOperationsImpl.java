@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.ProductData;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,22 @@ public class ProductRepositoryOperationsImpl implements ProductRepositoryOperati
     );*/
   }
 
+  // TODO: HOW TO BATCH READ - getProductsFromStocks ?!
   @Override
   public Map<String, ProductData> getProductsFromStocks(List<String> productIds) {
-    return null;
+    Map<String, ProductData> products = new HashMap<>();
+
+    // Iterate over the district reference IDs and read each record individually
+    for (String id : productIds) {
+      // Read the record for the key
+      ProductData product = aerospikeTemplate.findById(id, ProductData.class);
+
+      // Check if the record exists
+      if (product != null) {
+        products.put(product.getId(), product);
+      }
+    }
+
+    return products;
   }
 }

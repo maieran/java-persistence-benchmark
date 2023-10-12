@@ -1,6 +1,5 @@
 package de.uniba.dsg.wss.data.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +15,11 @@ public class CustomerData extends PersonData {
   private String districtRefId;
 
   // Reference via ID
-  @JsonProperty("orderRefsIds")
   private Map<String, String> orderRefsIds;
 
   // Reference via ID
-
   private List<String> paymentRefsIds;
 
-  // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   private final LocalDateTime since;
 
   private final String credit;
@@ -39,14 +35,15 @@ public class CustomerData extends PersonData {
 
   private int paymentCount;
 
+  // @PersistenceConstructor
   public CustomerData(
       String id,
       String firstName,
       String middleName,
       String lastName,
-      AddressData addressData,
+      AddressData address,
       String phoneNumber,
-      String mail,
+      String email,
       String districtRefId,
       LocalDateTime since,
       String credit,
@@ -57,7 +54,7 @@ public class CustomerData extends PersonData {
       int paymentCount,
       int deliveryCount,
       String data) {
-    super(id, firstName, middleName, lastName, addressData, phoneNumber, mail);
+    super(id, firstName, middleName, lastName, address, phoneNumber, email);
     this.districtRefId = districtRefId;
     this.since = since;
     this.credit = credit;
@@ -119,6 +116,10 @@ public class CustomerData extends PersonData {
   public List<String> getPaymentRefsIds() {
     return paymentRefsIds;
   }
+
+  /*  public void setSince(LocalDateTime since){
+    this.since = since;
+  }*/
 
   public LocalDateTime getSince() {
     return since;
