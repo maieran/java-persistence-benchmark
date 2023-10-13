@@ -34,4 +34,12 @@ public class CarrierRepositoryOperationsImpl implements CarrierRepositoryOperati
         .findAll(CarrierData.class)
         .collect(Collectors.toMap(CarrierData::getId, carrier -> carrier));
   }
+
+  @Override
+  public CarrierData findByCarrierId(String carrierRefId) {
+    if (carrierRefId != null) {
+      return aerospikeTemplate.findById(carrierRefId, CarrierData.class);
+    }
+    return null;
+  }
 }

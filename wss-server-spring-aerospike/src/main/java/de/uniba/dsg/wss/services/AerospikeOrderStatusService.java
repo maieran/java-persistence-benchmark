@@ -87,7 +87,7 @@ public class AerospikeOrderStatusService extends OrderStatusService {
             customer.get().getBalance(),
             mostRecentOrder.getId(),
             mostRecentOrder.getEntryDate(),
-            carrierRepository.findById(mostRecentOrder.getCarrierRefId()).isEmpty()
+            carrierRepository.findByCarrierId(mostRecentOrder.getCarrierRefId()) == null
                 ? null
                 : mostRecentOrder.getCarrierRefId(),
             null // Set 'itemStatus' as null, will be set down below
