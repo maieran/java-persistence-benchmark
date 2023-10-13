@@ -8,4 +8,6 @@ public interface StockRepositoryOperations {
   void saveAll(Map<String, StockData> idsToStocks);
 
   List<StockData> getStocksByWarehouse(List<String> stockRefsIds);
+
+  Map<String, StockData> getStocks();
 }

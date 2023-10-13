@@ -5,6 +5,7 @@ import de.uniba.dsg.wss.data.model.StockData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -42,5 +43,12 @@ public class StockRepositoryOperationsImpl implements StockRepositoryOperations 
     }
 
     return stocks;
+  }
+
+  @Override
+  public Map<String, StockData> getStocks() {
+    return aerospikeTemplate
+        .findAll(StockData.class)
+        .collect(Collectors.toMap(StockData::getId, stock -> stock));
   }
 }

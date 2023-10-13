@@ -10,4 +10,6 @@ public interface OrderItemRepositoryOperations {
   List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds);
 
   void storeUpdatedOrderItem(OrderItemData orderItem);
+
+  void saveOrderItemsInBatch(List<OrderItemData> orderItemsList);
 }

@@ -57,7 +57,6 @@ public class OrderItemData extends BaseData {
       String productRefId,
       String supplyingWarehouseRefId,
       int number,
-      LocalDateTime deliveryDate,
       int quantity,
       int leftQuantityInStock,
       double amount,

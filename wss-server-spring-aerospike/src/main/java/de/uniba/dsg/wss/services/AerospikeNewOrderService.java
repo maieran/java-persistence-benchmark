@@ -1,4 +1,3 @@
-/*
 package de.uniba.dsg.wss.services;
 
 import de.uniba.dsg.wss.data.access.*;
@@ -8,19 +7,18 @@ import de.uniba.dsg.wss.data.transfer.messages.NewOrderRequestItem;
 import de.uniba.dsg.wss.data.transfer.messages.NewOrderResponse;
 import de.uniba.dsg.wss.data.transfer.messages.NewOrderResponseItem;
 import de.uniba.dsg.wss.service.NewOrderService;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class AerospikeNewOrderService extends NewOrderService {
-  private static final Logger LOG = LogManager.getLogger(RedisNewOrderService.class);
+  private static final Logger LOG = LogManager.getLogger(AerospikeNewOrderService.class);
   private final WarehouseRepository warehouseRepository;
   private final DistrictRepository districtRepository;
   private final ProductRepository productRepository;
@@ -31,14 +29,14 @@ public class AerospikeNewOrderService extends NewOrderService {
   public static int maxRetries = 5;
 
   @Autowired
-  public RedisNewOrderService(
-          WarehouseRepository warehouseRepository,
-          DistrictRepository districtRepository,
-          ProductRepository productRepository,
-          StockRepository stockRepository,
-          OrderRepository orderRepository,
-          CustomerRepository customerRepository,
-          OrderItemRepository orderItemRepository) {
+  public AerospikeNewOrderService(
+      WarehouseRepository warehouseRepository,
+      DistrictRepository districtRepository,
+      ProductRepository productRepository,
+      StockRepository stockRepository,
+      OrderRepository orderRepository,
+      CustomerRepository customerRepository,
+      OrderItemRepository orderItemRepository) {
     this.warehouseRepository = warehouseRepository;
     this.districtRepository = districtRepository;
     this.productRepository = productRepository;
@@ -52,14 +50,17 @@ public class AerospikeNewOrderService extends NewOrderService {
   public NewOrderResponse process(NewOrderRequest newOrderRequest) {
     OrderData storedOrder;
 
-    Optional<WarehouseData> warehouseData = warehouseRepository.findById(newOrderRequest.getWarehouseId());
-    Optional<CustomerData> customerData = customerRepository.findById(newOrderRequest.getCustomerId());
+    Optional<WarehouseData> warehouseData =
+        warehouseRepository.findById(newOrderRequest.getWarehouseId());
+    Optional<CustomerData> customerData =
+        customerRepository.findById(newOrderRequest.getCustomerId());
 
     if (warehouseData.isEmpty() || customerData.isEmpty()) {
       throw new IllegalArgumentException();
     }
 
-    Optional<DistrictData> districtData = districtRepository.findById(newOrderRequest.getDistrictId());
+    Optional<DistrictData> districtData =
+        districtRepository.findById(newOrderRequest.getDistrictId());
     if (districtData.isEmpty()) {
       throw new IllegalArgumentException();
     }
@@ -69,7 +70,7 @@ public class AerospikeNewOrderService extends NewOrderService {
 
     for (NewOrderRequestItem item : newOrderRequest.getItems()) {
       StockData stockData =
-              findByWarehouseIdAndProductId(item.getProductId(), item.getSupplyingWarehouseId());
+          findByWarehouseIdAndProductId(item.getProductId(), item.getSupplyingWarehouseId());
       if (stockData == null) {
         throw new IllegalArgumentException();
       }
@@ -82,22 +83,22 @@ public class AerospikeNewOrderService extends NewOrderService {
 
     // Creation of new order
     OrderData order =
-            new OrderData(
-                    districtData.getId(),
-                    customerData.getId(),
-                    LocalDateTime.now(),
-                    stockUpdates.size(),
-                    allLocal);
+        new OrderData(
+            districtData.get().getId(),
+            customerData.get().getId(),
+            LocalDateTime.now(),
+            stockUpdates.size(),
+            allLocal);
     storedOrder = storeOrder(order, stockUpdates);
 
     return getNewOrderResponse(newOrderRequest, storedOrder);
   }
 
   private NewOrderResponse getNewOrderResponse(
-          NewOrderRequest newOrderRequest, OrderData storedOrder) {
+      NewOrderRequest newOrderRequest, OrderData storedOrder) {
     if (storedOrder == null) {
       LOG.info("Cancel order processing");
-      throw new RedisTransactionException("Order is not processable");
+      throw new AerospikeTransactionException("Order is not processable");
     }
 
     double orderItemSum = 0;
@@ -105,53 +106,56 @@ public class AerospikeNewOrderService extends NewOrderService {
     List<NewOrderResponseItem> dtoItems = new ArrayList<>();
 
     List<OrderItemData> orderItems =
-            orderItemRepository.getOrderItemsByOrder(storedOrder.getItemsIds());
+        orderItemRepository.getOrderItemsByOrder(storedOrder.getItemsIds());
 
     for (OrderItemData orderItem : orderItems) {
-      ProductData productData = productRepository.findById(orderItem.getProductRefId());
+      Optional<ProductData> productData = productRepository.findById(orderItem.getProductRefId());
       dtoItems.add(
-              new NewOrderResponseItem(
-                      orderItem.getSupplyingWarehouseRefId(),
-                      productData.getId(),
-                      productData.getName(),
-                      productData.getPrice(),
-                      orderItem.getAmount(),
-                      orderItem.getQuantity(),
-                      orderItem.getLeftQuantityInStock(),
-                      determineBrandGeneric(productData.getData(), "stock data")));
+          new NewOrderResponseItem(
+              orderItem.getSupplyingWarehouseRefId(),
+              productData.get().getId(),
+              productData.get().getName(),
+              productData.get().getPrice(),
+              orderItem.getAmount(),
+              orderItem.getQuantity(),
+              orderItem.getLeftQuantityInStock(),
+              determineBrandGeneric(productData.get().getData(), "stock data")));
       orderItemSum += orderItem.getAmount();
     }
 
-    DistrictData districtData = districtRepository.findById(storedOrder.getDistrictRefId());
-    WarehouseData warehouse = warehouseRepository.findById(districtData.getWarehouseRefId());
-    CustomerData customerData = customerRepository.findById(storedOrder.getCustomerRefId());
+    Optional<DistrictData> districtData =
+        districtRepository.findById(storedOrder.getDistrictRefId());
+    Optional<WarehouseData> warehouse =
+        warehouseRepository.findById(districtData.get().getWarehouseRefId());
+    Optional<CustomerData> customerData =
+        customerRepository.findById(storedOrder.getCustomerRefId());
 
     NewOrderResponse newOrderResponse =
-            newOrderResponse(
-                    newOrderRequest,
-                    storedOrder.getId(),
-                    storedOrder.getEntryDate(),
-                    warehouse.getSalesTax(),
-                    districtData.getSalesTax(),
-                    customerData.getCredit(),
-                    customerData.getDiscount(),
-                    customerData.getLastName());
+        newOrderResponse(
+            newOrderRequest,
+            storedOrder.getId(),
+            storedOrder.getEntryDate(),
+            warehouse.get().getSalesTax(),
+            districtData.get().getSalesTax(),
+            customerData.get().getCredit(),
+            customerData.get().getDiscount(),
+            customerData.get().getLastName());
     newOrderResponse.setTotalAmount(
-            calcOrderTotal(
-                    orderItemSum,
-                    customerData.getDiscount(),
-                    warehouse.getSalesTax(),
-                    districtData.getSalesTax()));
+        calcOrderTotal(
+            orderItemSum,
+            customerData.get().getDiscount(),
+            warehouse.get().getSalesTax(),
+            districtData.get().getSalesTax()));
 
     newOrderResponse.setOrderItems(dtoItems);
     return newOrderResponse;
   }
 
   private OrderData storeOrder(OrderData order, List<StockUpdateDto> stockUpdates)
-          throws RedisTransactionException {
+      throws AerospikeTransactionException {
     List<OrderItemData> itemDataList = updateStock(order, stockUpdates);
     if (itemDataList.isEmpty()) {
-      throw new RedisTransactionException("Order item update failed");
+      throw new AerospikeTransactionException("Order item update failed");
     }
 
     for (OrderItemData orderItem : itemDataList) {
@@ -171,37 +175,36 @@ public class AerospikeNewOrderService extends NewOrderService {
         break;
       } else {
 
-        ProductData productData =
-                productRepository.findById(stockUpdateDto.getStockData().getProductRefId());
+        Optional<ProductData> productData =
+            productRepository.findById(stockUpdateDto.getStockData().getProductRefId());
 
         OrderItemData orderItem =
-                new OrderItemData(
-                        order.getId(),
-                        stockUpdateDto.getStockData().getProductRefId(),
-                        stockUpdateDto.getStockData().getWarehouseRefId(),
-                        i,
-                        stockUpdateDto.getQuantity(),
-                        stockUpdateDto.getStockData().getQuantity(),
-                        stockUpdateDto.getQuantity() * productData.getPrice(),
-                        stockUpdateDto.getStockData().getDist01());
+            new OrderItemData(
+                order.getId(),
+                stockUpdateDto.getStockData().getProductRefId(),
+                stockUpdateDto.getStockData().getWarehouseRefId(),
+                i,
+                stockUpdateDto.getQuantity(),
+                stockUpdateDto.getStockData().getQuantity(),
+                stockUpdateDto.getQuantity() * productData.get().getPrice(),
+                stockUpdateDto.getStockData().getDist01());
 
         // orderItemRepository.save(orderItem);
         orderItemsList.add(orderItem);
       }
     }
-
+    // TODO: BATCH IMPLEMENTATION
     orderItemRepository.saveOrderItemsInBatch(orderItemsList);
     return orderItemsList;
   }
 
   private StockData findByWarehouseIdAndProductId(String productId, String supplyingWarehouseId) {
-    WarehouseData warehouseData = warehouseRepository.findById(supplyingWarehouseId);
-    ProductData productData = productRepository.findById(productId);
+    Optional<WarehouseData> warehouseData = warehouseRepository.findById(supplyingWarehouseId);
+    Optional<ProductData> productData = productRepository.findById(productId);
 
-    return stockRepository.getStocksByWarehouse(warehouseData.getStockRefsIds()).stream()
-            .filter(stock -> stock.getProductRefId().equals(productData.getId()))
-            .findFirst()
-            .orElse(null);
+    return stockRepository.getStocksByWarehouse(warehouseData.get().getStockRefsIds()).stream()
+        .filter(stock -> stock.getProductRefId().equals(productData.get().getId()))
+        .findFirst()
+        .orElse(null);
   }
 }
-*/
