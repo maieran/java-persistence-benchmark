@@ -12,4 +12,6 @@ public interface OrderRepositoryOperations {
   void storeUpdatedOrder(OrderData order);
 
   Map<String, OrderData> getOrders();
+
+  List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds);
 }

@@ -12,4 +12,6 @@ public interface OrderItemRepositoryOperations {
   void storeUpdatedOrderItem(OrderItemData orderItem);
 
   void saveOrderItemsInBatch(List<OrderItemData> orderItemsList);
+
+  Map<String, OrderItemData> getOrderItemsByIds(List<String> itemsIds);
 }

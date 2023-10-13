@@ -55,4 +55,15 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
         .findAll(OrderData.class)
         .collect(Collectors.toMap(OrderData::getId, order -> order));
   }
+
+  // TODO: Can we use this instead of a Batch ?!
+  @Override
+  public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
+    List<String> ids = new ArrayList<>(orderRefsIds.values());
+
+    return aerospikeTemplate
+        .findAll(OrderData.class)
+        .filter(order -> ids.contains(order.getId()))
+        .collect(Collectors.toList());
+  }
 }

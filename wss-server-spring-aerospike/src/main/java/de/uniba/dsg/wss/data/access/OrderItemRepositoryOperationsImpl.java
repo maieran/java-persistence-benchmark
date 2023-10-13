@@ -4,6 +4,7 @@ import com.aerospike.client.*;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.OrderItemData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
   public void storeUpdatedOrderItem(OrderItemData orderItem) {
     aerospikeTemplate.update(orderItem);
   }
-  // TODO: HOW TO BATCH WRITE -  saveOrderItemsInBatch ?!
+  // TODO: HOW TO BATCH WRITE -  saveOrderItemsInBatch - Is this also Batch write?!
   @Override
   public void saveOrderItemsInBatch(List<OrderItemData> orderItemsList) {
     WritePolicy writePolicy = new WritePolicy();
@@ -81,5 +82,18 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
 
       aerospikeTemplate.getAerospikeClient().put(writePolicy, key, bins);
     }
+  }
+
+  // TODO: Do a proper a batch read ...
+  @Override
+  public Map<String, OrderItemData> getOrderItemsByIds(List<String> itemsIds) {
+    Map<String, OrderItemData> orderItemsMap = new HashMap<>();
+
+    aerospikeTemplate
+        .findAll(OrderItemData.class)
+        .filter(orderItem -> itemsIds.contains(orderItem.getId()))
+        .forEach(orderItem -> orderItemsMap.put(orderItem.getId(), orderItem));
+
+    return orderItemsMap;
   }
 }
