@@ -42,4 +42,9 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
 
     return orderItems;
   }
+
+  @Override
+  public void storeUpdatedOrderItem(OrderItemData orderItem) {
+    aerospikeTemplate.update(orderItem);
+  }
 }

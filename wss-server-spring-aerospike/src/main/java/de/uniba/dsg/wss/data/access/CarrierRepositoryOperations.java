@@ -5,4 +5,6 @@ import java.util.Map;
 
 public interface CarrierRepositoryOperations {
   void saveAll(Map<String, CarrierData> idsToCarriers);
+
+  Map<String, CarrierData> getCarriers();
 }

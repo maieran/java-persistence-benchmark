@@ -8,4 +8,6 @@ public interface OrderItemRepositoryOperations {
   void saveAll(Map<String, OrderItemData> getIdsToOrderItems);
 
   List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds);
+
+  void storeUpdatedOrderItem(OrderItemData orderItem);
 }

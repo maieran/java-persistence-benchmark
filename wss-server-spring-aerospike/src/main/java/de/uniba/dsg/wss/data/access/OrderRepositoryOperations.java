@@ -8,4 +8,8 @@ public interface OrderRepositoryOperations {
   void saveAll(Map<String, OrderData> idsToOrders);
 
   List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds);
+
+  void storeUpdatedOrder(OrderData order);
+
+  Map<String, OrderData> getOrders();
 }

@@ -5,6 +5,7 @@ import de.uniba.dsg.wss.data.model.OrderData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -41,5 +42,17 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
     }
 
     return orders;
+  }
+
+  @Override
+  public void storeUpdatedOrder(OrderData order) {
+    aerospikeTemplate.update(order);
+  }
+
+  @Override
+  public Map<String, OrderData> getOrders() {
+    return aerospikeTemplate
+        .findAll(OrderData.class)
+        .collect(Collectors.toMap(OrderData::getId, order -> order));
   }
 }

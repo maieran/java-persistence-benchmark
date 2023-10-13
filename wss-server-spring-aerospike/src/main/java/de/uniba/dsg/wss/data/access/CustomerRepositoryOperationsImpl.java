@@ -5,6 +5,8 @@ import de.uniba.dsg.wss.data.model.CustomerData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -41,5 +43,17 @@ public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOpera
     }
 
     return customers;
+  }
+
+  @Override
+  public void storeUpdatedCustomer(Optional<CustomerData> customer) {
+    aerospikeTemplate.update(customer.get());
+  }
+
+  @Override
+  public Map<String, CustomerData> getCustomers() {
+    return aerospikeTemplate
+        .findAll(CustomerData.class)
+        .collect(Collectors.toMap(CustomerData::getId, customer -> customer));
   }
 }
