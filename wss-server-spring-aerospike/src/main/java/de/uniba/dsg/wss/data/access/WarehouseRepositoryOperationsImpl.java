@@ -3,6 +3,7 @@ package de.uniba.dsg.wss.data.access;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.WarehouseData;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -21,5 +22,12 @@ public class WarehouseRepositoryOperationsImpl implements WarehouseRepositoryOpe
     writePolicy.sendKey = true;
 
     idsToWarehouse.forEach((id, warehouse) -> aerospikeTemplate.save(warehouse));
+  }
+
+  @Override
+  public Map<String, WarehouseData> getWarehouses() {
+    return aerospikeTemplate
+        .findAll(WarehouseData.class)
+        .collect(Collectors.toMap(WarehouseData::getId, warehouse -> warehouse));
   }
 }

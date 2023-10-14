@@ -8,4 +8,6 @@ public interface DistrictRepositoryOperations {
   List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds);
 
   void saveAll(Map<String, DistrictData> idsToDistrict);
+
+  Map<String, DistrictData> getDistricts();
 }

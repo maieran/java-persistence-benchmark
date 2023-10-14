@@ -6,6 +6,7 @@ import de.uniba.dsg.wss.data.model.DistrictData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -131,5 +132,12 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
     writePolicy.sendKey = true;
 
     idsToDistricts.forEach((id, district) -> aerospikeTemplate.save(district));
+  }
+
+  @Override
+  public Map<String, DistrictData> getDistricts() {
+    return aerospikeTemplate
+        .findAll(DistrictData.class)
+        .collect(Collectors.toMap(DistrictData::getId, district -> district));
   }
 }

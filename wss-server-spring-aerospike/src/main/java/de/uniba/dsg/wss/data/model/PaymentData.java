@@ -1,8 +1,8 @@
 package de.uniba.dsg.wss.data.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 @Document(collection = "Payment")
 public class PaymentData extends BaseData {
@@ -15,12 +15,9 @@ public class PaymentData extends BaseData {
   private double amount;
   private String data;
 
+  @PersistenceConstructor
   public PaymentData(
-      String id,
-      String customerRefId,
-      LocalDateTime date,
-      @JsonProperty("amount") double amount,
-      @JsonProperty("data") String data) {
+      String id, String customerRefId, LocalDateTime date, double amount, String data) {
     super(id);
     this.customerRefId = customerRefId;
     this.date = date;
