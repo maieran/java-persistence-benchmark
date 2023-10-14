@@ -5,14 +5,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.data.aerospike.mapping.Document;
+import org.springframework.data.aerospike.mapping.Field;
+import org.springframework.data.annotation.PersistenceConstructor;
 
+@Document(collection = "Customer")
 public class CustomerData extends PersonData {
 
-  private final DistrictData districtRef;
-  private final Map<String, OrderData> orderRefs;
-  private final List<PaymentData> paymentRefs;
+  // Reference via ID
+  private String districtRefId;
+
+  // Reference via ID
+  private Map<String, String> orderRefsIds;
+
+  // Reference via ID
+  private List<String> paymentRefsIds;
 
   private final LocalDateTime since;
+
   private final String credit;
   private final double creditLimit;
   private final double discount;
@@ -20,18 +30,22 @@ public class CustomerData extends PersonData {
   private int deliveryCount;
   private String data;
   private double balance;
+
+  @Field("ytdPayment")
   private double yearToDatePayment;
+
   private int paymentCount;
 
+  @PersistenceConstructor
   public CustomerData(
       String id,
       String firstName,
       String middleName,
       String lastName,
-      AddressData addressData,
+      AddressData address,
       String phoneNumber,
-      String mail,
-      DistrictData districtRef,
+      String email,
+      String districtRefId,
       LocalDateTime since,
       String credit,
       double creditLimit,
@@ -41,8 +55,8 @@ public class CustomerData extends PersonData {
       int paymentCount,
       int deliveryCount,
       String data) {
-    super(id, firstName, middleName, lastName, addressData, phoneNumber, mail);
-    this.districtRef = districtRef;
+    super(id, firstName, middleName, lastName, address, phoneNumber, email);
+    this.districtRefId = districtRefId;
     this.since = since;
     this.credit = credit;
     this.creditLimit = creditLimit;
@@ -52,10 +66,15 @@ public class CustomerData extends PersonData {
     this.paymentCount = paymentCount;
     this.deliveryCount = deliveryCount;
     this.data = data;
-    this.orderRefs = new ConcurrentHashMap<>();
-    this.paymentRefs = new ArrayList<>();
+    this.orderRefsIds = new ConcurrentHashMap<>();
+    this.paymentRefsIds = new ArrayList<>();
   }
 
+  /**
+   * Creates a shallow copy of the provided customer.
+   *
+   * @param customer a customer, must not be {@code null}
+   */
   public CustomerData(CustomerData customer) {
     super(
         customer.getId(),
@@ -65,7 +84,7 @@ public class CustomerData extends PersonData {
         customer.getAddress(),
         customer.getPhoneNumber(),
         customer.getEmail());
-    this.districtRef = customer.districtRef;
+    this.districtRefId = customer.districtRefId;
     this.since = customer.since;
     this.credit = customer.credit;
     this.creditLimit = customer.creditLimit;
@@ -75,13 +94,33 @@ public class CustomerData extends PersonData {
     this.paymentCount = customer.paymentCount;
     this.deliveryCount = customer.deliveryCount;
     this.data = customer.data;
-    this.orderRefs = null;
-    this.paymentRefs = null;
+    this.orderRefsIds = customer.orderRefsIds;
+    this.paymentRefsIds = customer.paymentRefsIds;
   }
 
-  public DistrictData getDistrict() {
-    return this.districtRef;
+  public String getDistrictRefId() {
+    return districtRefId;
   }
+
+  public void setDistrictRefId(String districtRefId) {
+    this.districtRefId = districtRefId;
+  }
+
+  public Map<String, String> getOrderRefsIds() {
+    return orderRefsIds;
+  }
+
+  public void setOrderRefsIds(Map<String, String> orderRefsIds) {
+    this.orderRefsIds = orderRefsIds;
+  }
+
+  public List<String> getPaymentRefsIds() {
+    return paymentRefsIds;
+  }
+
+  /*  public void setSince(LocalDateTime since){
+    this.since = since;
+  }*/
 
   public LocalDateTime getSince() {
     return since;
@@ -99,66 +138,63 @@ public class CustomerData extends PersonData {
     return discount;
   }
 
-  public Map<String, OrderData> getOrderRefs() {
-    return this.orderRefs;
-  }
-
-  public List<PaymentData> getPaymentRefs() {
-    return this.paymentRefs;
-  }
-
-  public void decreaseBalance(double amount) {
-
-    balance -= amount;
-  }
-
-  public void increaseBalance(double amount) {
-
-    balance += amount;
-  }
-
-  public double getBalance() {
-
-    return balance;
-  }
-
-  public void increaseYearToBalance(double amount) {
-
-    this.yearToDatePayment += amount;
-  }
-
-  public double getYearToDatePayment() {
-
-    return yearToDatePayment;
-  }
-
-  public void increasePaymentCount() {
-
-    this.paymentCount++;
-  }
-
-  public int getPaymentCount() {
-
-    return paymentCount;
-  }
-
-  public void increaseDeliveryCount() {
-
-    this.deliveryCount++;
-  }
-
   public int getDeliveryCount() {
-
     return deliveryCount;
   }
 
-  public void updateData(String buildNewCustomerData) {
-
-    this.data = buildNewCustomerData;
+  public void setDeliveryCount(int deliveryCount) {
+    this.deliveryCount = deliveryCount;
   }
 
   public String getData() {
-
     return data;
+  }
+
+  public void setData(String data) {
+    this.data = data;
+  }
+
+  public double getBalance() {
+    return balance;
+  }
+
+  public void setBalance(double balance) {
+    this.balance = balance;
+  }
+
+  public double getYearToDatePayment() {
+    return yearToDatePayment;
+  }
+
+  public void setYearToDatePayment(double yearToDatePayment) {
+    this.yearToDatePayment = yearToDatePayment;
+  }
+
+  public int getPaymentCount() {
+    return paymentCount;
+  }
+
+  public void setPaymentCount(int paymentCount) {
+    this.paymentCount = paymentCount;
+  }
+
+  public void increaseDeliveryCount() {
+    this.deliveryCount++;
+  }
+
+  public void increaseYearToBalance(double amount) {
+    this.yearToDatePayment += amount;
+  }
+
+  public void decreaseBalance(double amount) {
+    balance -= amount;
+  }
+
+  public void increasePaymentCount() {
+    this.paymentCount++;
+  }
+
+  public void updateData(String buildNewCustomerData) {
+    this.data = buildNewCustomerData;
   }
 }
