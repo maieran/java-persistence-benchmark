@@ -1,5 +1,7 @@
 package de.uniba.dsg.wss.data.access;
 
+import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.ProductData;
 import java.util.HashMap;
@@ -26,16 +28,48 @@ public class ProductRepositoryOperationsImpl implements ProductRepositoryOperati
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
 
-    // aerospikeTemplate.persist(idsToProducts, writePolicy);
-
     idsToProducts.forEach((id, product) -> aerospikeTemplate.save(product));
-    // aerospikeTemplate.save(idsToProducts);
-    /*         idsToProducts.forEach((id, product) ->
-            aerospikeTemplate.save(product, writePolicy, product.getId())
-    );*/
   }
 
-  // TODO: HOW TO BATCH READ - getProductsFromStocks ?!
+  @Override
+  public Map<String, ProductData> getProductsFromStocks(List<String> productIds) {
+    Map<String, ProductData> products = new HashMap<>();
+
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
+    Key[] keys = new Key[productIds.size()];
+    for (int i = 0; i < keys.length; i++) {
+      keys[i] =
+          new Key(
+              aerospikeTemplate.getNamespace(),
+              aerospikeTemplate.getSetName(ProductData.class),
+              productIds.get(i));
+    }
+
+    // 2.Step - Retrieve productData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+
+    // 3.Step - Populate the list of stocks
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
+
+        // Create the StockData instance
+        ProductData product =
+            new ProductData(
+                productIds.get(i), // Set the id using the productIds list
+                record.getString("imagePath"),
+                record.getString("name"),
+                record.getDouble("price"),
+                record.getString("data"));
+
+        products.put(productIds.get(i), product);
+      }
+    }
+
+    return products;
+  }
+
+  /*
   @Override
   public Map<String, ProductData> getProductsFromStocks(List<String> productIds) {
     Map<String, ProductData> products = new HashMap<>();
@@ -52,5 +86,5 @@ public class ProductRepositoryOperationsImpl implements ProductRepositoryOperati
     }
 
     return products;
-  }
+  }*/
 }

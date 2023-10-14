@@ -3,10 +3,11 @@ package de.uniba.dsg.wss.data.access;
 import com.aerospike.client.*;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.OrderItemData;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -23,7 +24,6 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
     this.aerospikeClient = aerospikeClient;
   }
 
-  // TODO: HOW TO BATCH WRITE SAVEALL ?!
   @Override
   public void saveAll(Map<String, OrderItemData> idsToOrders) {
     WritePolicy writePolicy = new WritePolicy();
@@ -32,8 +32,57 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
     idsToOrders.forEach((id, orderItem) -> aerospikeTemplate.save(orderItem));
   }
 
-  // TODO: HOW TO BATCH READ -  getOrderItemsByOrder ?!
   @Override
+  public List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds) {
+    List<OrderItemData> orderItems = new ArrayList<>();
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
+    Key[] keys = new Key[itemsIds.size()];
+    for (int i = 0; i < keys.length; i++) {
+      keys[i] =
+          new Key(
+              aerospikeTemplate.getNamespace(),
+              aerospikeTemplate.getSetName(OrderItemData.class),
+              itemsIds.get(i));
+    }
+
+    // 2.Step - Retrieve orderItemData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+
+    // 3.Step - Populate the list of orderItems
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
+
+        // Create the OrderData instance
+        OrderItemData orderItem =
+            new OrderItemData(
+                itemsIds.get(i), // Set the id using the itemsIds list
+                record.getString("orderRefId"),
+                record.getString("productRefId"),
+                record.getString("supplWareRefId"),
+                record.getInt("number"),
+                convertEntryDate(record.getLong("deliveryDate")),
+                record.getInt("quantity"),
+                record.getInt("lftQtyInStck"),
+                record.getDouble("amount"),
+                record.getString("distInfo"));
+
+        orderItems.add(orderItem);
+      }
+    }
+
+    return orderItems.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  private LocalDateTime convertEntryDate(Long entryDateMillis) {
+    if (entryDateMillis != null) {
+      Instant instant = Instant.ofEpochMilli(entryDateMillis);
+      return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+    return null;
+  }
+
+  /*  @Override
   public List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds) {
     List<OrderItemData> orderItems = new ArrayList<>();
 
@@ -48,7 +97,7 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
     }
 
     return orderItems;
-  }
+  }*/
 
   @Override
   public void storeUpdatedOrderItem(OrderItemData orderItem) {

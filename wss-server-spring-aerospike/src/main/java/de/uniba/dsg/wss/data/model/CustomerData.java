@@ -118,6 +118,10 @@ public class CustomerData extends PersonData {
     return paymentRefsIds;
   }
 
+  public void setPaymentRefsIds(List<String> paymentRefsIds) {
+    this.paymentRefsIds = paymentRefsIds;
+  }
+
   /*  public void setSince(LocalDateTime since){
     this.since = since;
   }*/

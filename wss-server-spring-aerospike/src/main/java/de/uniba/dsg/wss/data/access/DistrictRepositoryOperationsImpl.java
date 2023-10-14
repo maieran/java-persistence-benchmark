@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.*;
 import com.aerospike.client.policy.WritePolicy;
+import de.uniba.dsg.wss.data.model.AddressData;
 import de.uniba.dsg.wss.data.model.DistrictData;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,7 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
     this.aerospikeClient = aerospikeClient;
   }
 
-  // TODO: HOW TO BATCH READ - getDistrictsFromWarehouse ?!
-  @Override
+  /*  @Override
   public List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds) {
     List<DistrictData> districts = new ArrayList<>();
 
@@ -39,19 +39,14 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
     }
 
     return districts;
-  }
+  }*/
 
-  // TODO: Attempt to batch read
-  /*  @Override
+  @Override
   public List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds) {
     List<DistrictData> districts = new ArrayList<>();
-    BatchPolicy batchPolicy = new BatchPolicy();
-    batchPolicy.maxConcurrentThreads = 10;
-    BatchWritePolicy batchWritePolicy = new BatchWritePolicy();
-
-    // Create an array of keys for batch retrieval
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
     Key[] keys = new Key[districtRefsIds.size()];
-    for (int i = 0; i < districtRefsIds.size(); i++) {
+    for (int i = 0; i < keys.length; i++) {
       keys[i] =
           new Key(
               aerospikeTemplate.getNamespace(),
@@ -59,42 +54,13 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
               districtRefsIds.get(i));
     }
 
-    */
-  /*    List<Value> mapKeys =
-      Arrays.asList(
-          Value.get("warehouseRefId"),
-          Value.get("name"),
-          Value.get("address"),
-          Value.get("salesTax"),
-          Value.get("ytdBalance"),
-          Value.get("customerRefsIds"),
-          Value.get("orderRefsIds"));
+    // 2.Step - Retrieve districtData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
 
-  BatchResults batchResult =
-      aerospikeClient.operate(
-          batchPolicy,
-          batchWritePolicy,
-          keys,
-          MapOperation.getByKeyList("PK", mapKeys, MapReturnType.VALUE));
-
-  for (BatchRecord batchRecord : batchResult.records) {
-    Record record = batchRecord.record;
-    if (record != null) {
-      System.out.format("Record: %s\\n", record.bins);
-      DistrictData district = null;
-      districts.add(district);
-    }
-  }*/
-  /*
-    ///////////// TRENNUNG
-    // Batch retrieve the records associated with the keys
-    // Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
-
-    Record[] records = aerospikeClient.get(batchPolicy, keys);
-    // BatchResults batchResult = aerospikeClient.operate(batchPolicy, keys);
-    // Process the retrieved records and extract DistrictData
-    for (Record record : records) {
-      if (record != null && !record.bins.isEmpty()) {
+    // 3.Step - Populate the list of districts
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
         // Manually map the bins to DistrictData
 
         Map<String, Object> addressMap = (Map<String, Object>) record.getMap("address");
@@ -110,7 +76,7 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
         // Create the DistrictData instance
         DistrictData district =
             new DistrictData(
-                record.getString("PK"),
+                districtRefsIds.get(i), // Set the id using the districtRefsIds list
                 record.getString("warehouseRefId"),
                 record.getString("name"),
                 addressData, // Set the AddressData instance
@@ -124,7 +90,7 @@ public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOpera
     }
 
     return districts;
-  }*/
+  }
 
   @Override
   public void saveAll(Map<String, DistrictData> idsToDistricts) {
