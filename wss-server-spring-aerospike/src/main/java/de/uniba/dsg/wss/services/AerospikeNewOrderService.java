@@ -193,7 +193,7 @@ public class AerospikeNewOrderService extends NewOrderService {
         orderItemsList.add(orderItem);
       }
     }
-    // TODO: BATCH IMPLEMENTATION
+    // BATCH CALL
     orderItemRepository.saveOrderItemsInBatch(orderItemsList);
     return orderItemsList;
   }

@@ -54,7 +54,6 @@ public class AerospikeDeliveryService extends DeliveryService {
             .map(
                 district -> {
                   List<OrderData> orders =
-                      // TODO: Realize Batch getOrdersFromDistrict
                       orderRepository.getOrdersFromDistrict(district.getOrderRefsIds());
 
                   return orders.stream()

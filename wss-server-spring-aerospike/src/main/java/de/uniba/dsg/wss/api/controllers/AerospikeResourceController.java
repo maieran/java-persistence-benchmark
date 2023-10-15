@@ -240,7 +240,7 @@ public class AerospikeResourceController implements ResourceController {
       orderRepresentation.setCustomer(customerRepresentation);
       orderRepresentation.setDistrict(districtRepresentation);
 
-      // BATCH CALL TODO: FIX IT
+      // BATCH CALL
       List<OrderItemData> orderItems =
           orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
 
