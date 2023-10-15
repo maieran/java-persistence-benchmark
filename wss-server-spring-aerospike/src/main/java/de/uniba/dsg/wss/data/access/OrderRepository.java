@@ -6,6 +6,13 @@ import java.util.Map;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Aerospike repository for accessing and modifying {@link OrderData orders}. Extending this
+ * interface is providing basic CRUD operations by {@link AerospikeRepository} as well as adding
+ * custom operations specific to orders by {@link OrderRepositoryOperations}.
+ *
+ * @author Andre Maier
+ */
 @Transactional(readOnly = true)
 public interface OrderRepository
     extends AerospikeRepository<OrderData, String>, OrderRepositoryOperations {

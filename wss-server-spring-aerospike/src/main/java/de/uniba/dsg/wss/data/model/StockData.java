@@ -3,6 +3,14 @@ package de.uniba.dsg.wss.data.model;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
 
+/**
+ * The available amount of a specific {@link ProductData product} at some {@link WarehouseData
+ * warehouse}, which can be retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Stock")
 public class StockData extends BaseData {
 

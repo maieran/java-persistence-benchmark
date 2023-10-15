@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link OrderRepositoryOperations} interface for
+ * accessing and modifying {@link OrderData orders}.
+ *
+ * @author Andre Maier
+ */
 public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;

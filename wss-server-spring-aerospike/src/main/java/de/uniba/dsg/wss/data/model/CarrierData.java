@@ -2,6 +2,13 @@ package de.uniba.dsg.wss.data.model;
 
 import org.springframework.data.aerospike.mapping.Document;
 
+/**
+ * A carrier is responsible for fulfilling {@link OrderData orders} by delivering the ordered items
+ * to the {@link CustomerData customer}, when retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Document(collection = "Carrier")
 public class CarrierData extends BaseData {
 

@@ -6,8 +6,15 @@ import com.aerospike.client.query.*;
 import de.uniba.dsg.wss.data.model.EmployeeData;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.aerospike.config.AerospikeDataSettings;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link EmployeeRepositoryOperations} interface for
+ * accessing and modifying {@link EmployeeData employees}.
+ *
+ * @author Andre Maier
+ */
 public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;
@@ -18,11 +25,17 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
   }
 
   /**
-   * IS USING A SECONDARY INDEX: USERNAME https://docs.aerospike.com/server/features
+   * Retrieves an instance of {@link EmployeeData} from the Aerospike data model based on the
+   * provided username. This method utilizes a secondary index on the 'username' attribute that is
+   * defined with the annotation at {#link String username} in {@link EmployeeData}. Scan function
+   * in {@link de.uniba.dsg.wss.AerospikeConfiguration} have to enabled in {@link
+   * AerospikeDataSettings aerospikeDataSettings()} to activate the secondary index. For more
+   * information on secondary index usage, see: https://docs.aerospike.com/server/features
    * https://docs.aerospike.com/server/architecture/secondary-index
    *
-   * @param username
-   * @return
+   * @param username the username of the employee to retrieve
+   * @return the EmployeeData instance corresponding to the provided username, or null if no
+   *     employee is found with the given username
    */
   public EmployeeData findEmployeeDataByUsername(String username) {
     Statement stmt = new Statement();
@@ -45,28 +58,12 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
     return null; // Employee not found.
   }
 
-  public EmployeeData findEmployeeDataById(String id) {
-    Key key =
-        new Key(
-            aerospikeTemplate.getNamespace(), aerospikeTemplate.getSetName(EmployeeData.class), id);
-    EmployeeData employeeData = aerospikeTemplate.findById(key, EmployeeData.class);
-    return employeeData;
-  }
-
   @Override
   public void saveAll(Map<String, EmployeeData> idsToEmployees) {
-    /*    WritePolicy writePolicy = new WritePolicy();
-    writePolicy.sendKey = true;
-
-    getIdsToEmployees.forEach((id, employeeData) -> aerospikeTemplate.save(employeeData));*/
 
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
 
     idsToEmployees.forEach((id, employeeData) -> aerospikeTemplate.save(employeeData));
-
-    // aerospikeTemplate.getAerospikeClient().put((getIdsToEmployees.keySet()),
-    // getIdsToEmployees.values());
-
   }
 }

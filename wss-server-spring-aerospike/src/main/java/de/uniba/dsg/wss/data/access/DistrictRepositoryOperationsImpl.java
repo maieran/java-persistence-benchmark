@@ -11,6 +11,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link DistrictRepositoryOperations} interface for
+ * accessing and modifying {@link DistrictData districts}.
+ *
+ * @author Andre Maier
+ */
 public class DistrictRepositoryOperationsImpl implements DistrictRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;

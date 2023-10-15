@@ -5,6 +5,13 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.aerospike.repository.AerospikeRepository;
 
+/**
+ * Aerospike repository for accessing and modifying {@link WarehouseData warehouses}. Extending this
+ * interface is providing basic CRUD operations by {@link AerospikeRepository} as well as adding
+ * custom operations specific to warehouses by {@link WarehouseRepositoryOperations}.
+ *
+ * @author Andre Maier
+ */
 public interface WarehouseRepository
     extends AerospikeRepository<WarehouseData, String>, WarehouseRepositoryOperations {
 

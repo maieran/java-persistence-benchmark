@@ -1,5 +1,10 @@
 package de.uniba.dsg.wss.data.model;
-
+/**
+ * An immutable representation of a United States address.
+ *
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 public class AddressData {
 
   private final String street1;

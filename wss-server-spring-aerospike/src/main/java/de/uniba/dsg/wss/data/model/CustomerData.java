@@ -9,6 +9,13 @@ import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+/**
+ * A customer of the wholesale supplier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Customer")
 public class CustomerData extends PersonData {
 

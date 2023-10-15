@@ -5,6 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * This interface provides custom operations specific to CustomerData in the Aerospike repository,
+ * that are implemented in {@link CustomerRepositoryOperationsImpl} and are extended by {@link
+ * CustomerRepository}.
+ *
+ * @author Andre Maier
+ */
 public interface CustomerRepositoryOperations {
   void saveAll(Map<String, CustomerData> idsToCustomers);
 

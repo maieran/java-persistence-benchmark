@@ -16,6 +16,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implements the transaction to be executed by the {@link NewOrderService} implementation.
+ *
+ * @author Johannes Manner
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Service
 public class AerospikeNewOrderService extends NewOrderService {
   private static final Logger LOG = LogManager.getLogger(AerospikeNewOrderService.class);

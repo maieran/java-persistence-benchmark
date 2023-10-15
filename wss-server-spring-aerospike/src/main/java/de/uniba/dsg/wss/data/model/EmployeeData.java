@@ -4,6 +4,14 @@ import com.aerospike.client.query.IndexType;
 import org.springframework.data.aerospike.annotation.Indexed;
 import org.springframework.data.aerospike.mapping.Document;
 
+/**
+ * An employee of the wholesale supplier. Employees are the user group meant to perform the business
+ * transactions, i.e. create new orders, or add new payments.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Employee")
 public class EmployeeData extends PersonData {
 

@@ -5,6 +5,14 @@ import java.util.List;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
 
+/**
+ * A warehouse of the wholesale supplier, where itself and it's {@link StockData} and {@link
+ * DistrictData} can be retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Warehouse")
 public class WarehouseData extends BaseData {
 

@@ -11,6 +11,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link StockRepositoryOperations} interface for
+ * accessing and modifying {@link StockData stocks}.
+ *
+ * @author Andre Maier
+ */
 public class StockRepositoryOperationsImpl implements StockRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;

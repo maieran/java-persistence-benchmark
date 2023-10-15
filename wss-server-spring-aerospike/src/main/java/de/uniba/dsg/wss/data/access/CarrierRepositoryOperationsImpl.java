@@ -5,18 +5,20 @@ import de.uniba.dsg.wss.data.model.CarrierData;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.aerospike.core.AerospikeOperations;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link CarrierRepositoryOperations} interface for
+ * accessing and modifying {@link CarrierData carriers}.
+ *
+ * @author Andre Maier
+ */
 public class CarrierRepositoryOperationsImpl implements CarrierRepositoryOperations {
 
-  // private final AerospikeOperations aerospikeOperations;
   private final AerospikeTemplate aerospikeTemplate;
 
   @Autowired
-  public CarrierRepositoryOperationsImpl(
-      AerospikeOperations aerospikeOperations, AerospikeTemplate aerospikeTemplate) {
-    // this.aerospikeOperations = aerospikeOperations;
+  public CarrierRepositoryOperationsImpl(AerospikeTemplate aerospikeTemplate) {
     this.aerospikeTemplate = aerospikeTemplate;
   }
 

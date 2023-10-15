@@ -4,6 +4,13 @@ import java.time.LocalDateTime;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+/**
+ * A payment made by a {@link CustomerData customer}, when retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Payment")
 public class PaymentData extends BaseData {
 

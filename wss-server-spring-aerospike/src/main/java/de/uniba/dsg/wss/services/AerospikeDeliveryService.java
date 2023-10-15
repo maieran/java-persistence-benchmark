@@ -13,6 +13,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implements the transaction to be executed by the {@link DeliveryService} implementation.
+ *
+ * @author Johannes Manner
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Service
 public class AerospikeDeliveryService extends DeliveryService {
 

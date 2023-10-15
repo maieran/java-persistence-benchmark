@@ -11,6 +11,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Writes the wholesale supplier model to Aerospike-based storage system via implemented interfaces.
+ *
+ * @author Andre Maier
+ */
 @Component
 public class AerospikeDataWriter
     implements DataWriter<ProductData, WarehouseData, EmployeeData, CarrierData> {
@@ -67,7 +72,6 @@ public class AerospikeDataWriter
 
     carrierRepository.saveAll(aerospikeDataModel.getIdsToCarriers());
 
-    //
     warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
 
     stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());

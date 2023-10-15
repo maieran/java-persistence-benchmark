@@ -11,6 +11,13 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Converts the generated from {@link DataInitializer} and then deserialized by {@link
+ * JacksonParser} to an Aerospike data model.
+ *
+ * @see DataGeneratorModel
+ * @author Andre Maier
+ */
 public class AerospikeDataConverter
     implements DataConverter<ProductData, WarehouseData, EmployeeData, CarrierData> {
 
