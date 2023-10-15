@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
@@ -69,7 +70,7 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
       }
     }
 
-    return orders;
+    return orders.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 
   private LocalDateTime convertEntryDate(Long entryDateMillis) {
@@ -110,7 +111,12 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
         .collect(Collectors.toMap(OrderData::getId, order -> order));
   }
 
-  // TODO: Can we use this instead of a Batch ?!
+  /*  @Override
+  public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
+
+    return null;
+  }*/
+
   @Override
   public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
     List<String> ids = new ArrayList<>(orderRefsIds.values());

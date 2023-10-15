@@ -103,7 +103,20 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
   public void storeUpdatedOrderItem(OrderItemData orderItem) {
     aerospikeTemplate.update(orderItem);
   }
-  // TODO: HOW TO BATCH WRITE -  saveOrderItemsInBatch - Is this also Batch write?!
+
+  /**
+   * There is no direct collective batch operation, but performed as a single operation in a loop,
+   * see in
+   * 'https://github.com/aerospike/aerospike-client-java/blob/master/examples/src/com/aerospike/examples/BatchOperate.java'
+   *
+   * <p>Alternatively, aerospike vendors attempt to masquerade the write-batch operation via
+   * "client.operate(..)" as a batch-write example, see under
+   * 'https://docs.aerospike.com/server/guide/batch#example-batch-readwrite-operations'
+   *
+   * <p>source :
+   * https://github.com/aerospike/aerospike-client-java/blob/master/examples/src/com/aerospike/examples/BatchOperate.java
+   * Transaction operation : https://docs.aerospike.com/server/guide/transactions
+   */
   @Override
   public void saveOrderItemsInBatch(List<OrderItemData> orderItemsList) {
     WritePolicy writePolicy = new WritePolicy();
@@ -133,7 +146,7 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
     }
   }
 
-  // TODO: Do a proper a batch read ...
+  /*
   @Override
   public Map<String, OrderItemData> getOrderItemsByIds(List<String> itemsIds) {
     Map<String, OrderItemData> orderItemsMap = new HashMap<>();
@@ -144,5 +157,48 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
         .forEach(orderItem -> orderItemsMap.put(orderItem.getId(), orderItem));
 
     return orderItemsMap;
+  }*/
+
+  @Override
+  public Map<String, OrderItemData> getOrderItemsByIds(List<String> itemsIds) {
+    Map<String, OrderItemData> orderItems = new HashMap<>();
+
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
+    Key[] keys = new Key[itemsIds.size()];
+    for (int i = 0; i < keys.length; i++) {
+      keys[i] =
+          new Key(
+              aerospikeTemplate.getNamespace(),
+              aerospikeTemplate.getSetName(OrderItemData.class),
+              itemsIds.get(i));
+    }
+
+    // 2.Step - Retrieve orderItemData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+
+    // 3.Step - Populate the list of orderItems
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
+
+        // Create the OrderData instance
+        OrderItemData orderItem =
+            new OrderItemData(
+                itemsIds.get(i), // Set the id using the itemsIds list
+                record.getString("orderRefId"),
+                record.getString("productRefId"),
+                record.getString("supplWareRefId"),
+                record.getInt("number"),
+                convertEntryDate(record.getLong("deliveryDate")),
+                record.getInt("quantity"),
+                record.getInt("lftQtyInStck"),
+                record.getDouble("amount"),
+                record.getString("distInfo"));
+
+        orderItems.put(itemsIds.get(i), orderItem);
+      }
+    }
+
+    return orderItems;
   }
 }
