@@ -111,12 +111,6 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
         .collect(Collectors.toMap(OrderData::getId, order -> order));
   }
 
-  /*  @Override
-  public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
-
-    return null;
-  }*/
-
   @Override
   public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
     List<String> ids = new ArrayList<>(orderRefsIds.values());
