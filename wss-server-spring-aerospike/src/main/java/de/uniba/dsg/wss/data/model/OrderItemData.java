@@ -5,6 +5,15 @@ import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+/**
+ * Defines {@link ProductData product}, quantity, supplying {@link WarehouseData warehouse} and
+ * other properties of an individual {@link OrderData order} item, when retrieved via their unique
+ * identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "OrderItem")
 public class OrderItemData extends BaseData {
 

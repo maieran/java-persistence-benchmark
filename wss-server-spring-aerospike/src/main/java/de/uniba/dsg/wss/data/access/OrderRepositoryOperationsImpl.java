@@ -1,14 +1,26 @@
 package de.uniba.dsg.wss.data.access;
 
+import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.OrderData;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link OrderRepositoryOperations} interface for
+ * accessing and modifying {@link OrderData orders}.
+ *
+ * @author Andre Maier
+ */
 public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;
@@ -26,7 +38,56 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
     idsToOrders.forEach((id, order) -> aerospikeTemplate.save(order));
   }
 
-  // TODO: HOW TO BATCH READ -  getOrdersFromDistrict ?!
+  @Override
+  public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) {
+    List<OrderData> orders = new ArrayList<>();
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
+    Key[] keys = new Key[orderRefsIds.size()];
+    for (int i = 0; i < keys.length; i++) {
+      keys[i] =
+          new Key(
+              aerospikeTemplate.getNamespace(),
+              aerospikeTemplate.getSetName(OrderData.class),
+              orderRefsIds.get(i));
+    }
+
+    // 2.Step - Retrieve orderData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+
+    // 3.Step - Populate the list of orders
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
+
+        // Create the OrderData instance
+        OrderData order =
+            new OrderData(
+                orderRefsIds.get(i), // Set the id using the orderRefsIds list
+                record.getString("districtRefId"),
+                record.getString("customerRefId"),
+                record.getString("carrierRefId"),
+                convertEntryDate(record.getLong("entryDate")),
+                record.getInt("itemCount"),
+                record.getBoolean("allLocal"),
+                record.getBoolean("fulfilled"));
+        order.setItemsIds((List<String>) record.getList("itemsIds"));
+
+        orders.add(order);
+      }
+    }
+
+    return orders.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  private LocalDateTime convertEntryDate(Long entryDateMillis) {
+    if (entryDateMillis != null) {
+      Instant instant = Instant.ofEpochMilli(entryDateMillis);
+      return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+    return null;
+  }
+
+  /*
   @Override
   public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) {
     List<OrderData> orders = new ArrayList<>();
@@ -42,7 +103,7 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
     }
 
     return orders;
-  }
+  }*/
 
   @Override
   public void storeUpdatedOrder(OrderData order) {
@@ -56,7 +117,6 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
         .collect(Collectors.toMap(OrderData::getId, order -> order));
   }
 
-  // TODO: Can we use this instead of a Batch ?!
   @Override
   public List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds) {
     List<String> ids = new ArrayList<>(orderRefsIds.values());

@@ -9,6 +9,13 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implements the transaction to be executed by the {@link StockLevelService} implementation.
+ *
+ * @author Johannes Manner
+ * @author Benedikt Full
+ * @author Andre Maier
+ */
 @Service
 public class AerospikeStockLevelService extends StockLevelService {
   private final WarehouseRepository warehouseRepository;

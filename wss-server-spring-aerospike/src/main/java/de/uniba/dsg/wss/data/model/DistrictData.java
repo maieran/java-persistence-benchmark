@@ -5,6 +5,15 @@ import java.util.List;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.aerospike.mapping.Field;
 
+/**
+ * A district is one of ten areas supplied by a specific {@link WarehouseData warehouse}. Each
+ * district is administered by a single {@link EmployeeData employee} and has 3000 {@link
+ * CustomerData customers}, when retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "District")
 public class DistrictData extends BaseData {
 

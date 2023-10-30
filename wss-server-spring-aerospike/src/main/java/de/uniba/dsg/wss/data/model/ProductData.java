@@ -2,6 +2,13 @@ package de.uniba.dsg.wss.data.model;
 
 import org.springframework.data.aerospike.mapping.Document;
 
+/**
+ * A product of the wholesale supplier can be retrieved via their unique identifier.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Product")
 public class ProductData extends BaseData {
 

@@ -11,6 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * This controller provides read-only access to many of the resources managed by the server.
+ *
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @RestController
 public class AerospikeResourceController implements ResourceController {
 
@@ -55,15 +62,6 @@ public class AerospikeResourceController implements ResourceController {
             .collect(Collectors.toList()));
   }
 
-  /*  @Override
-  public ResponseEntity<Iterable<ProductRepresentation>> getProducts() {
-    return ResponseEntity.ok(
-            productRepository.getAllProducts().entrySet().stream()
-                    .parallel()
-                    .map(p -> modelMapper.map(p.getValue(), ProductRepresentation.class))
-                    .collect(Collectors.toList()));
-  }*/
-
   @Override
   public ResponseEntity<EmployeeRepresentation> getEmployee(String username) {
     EmployeeData employee = employeeRepository.findEmployeeDataByUsername(username);
@@ -81,23 +79,6 @@ public class AerospikeResourceController implements ResourceController {
             .collect(Collectors.toList()));
   }
 
-  /*  @Override
-  public ResponseEntity<List<DistrictRepresentation>> getWarehouseDistricts(String warehouseId) {
-    Optional<WarehouseData> warehouseDataOptional =
-        warehouseRepository.findById(Integer.parseInt(warehouseId));
-    if (warehouseDataOptional.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    }
-
-    WarehouseData warehouse = warehouseDataOptional.get();
-    List<DistrictRepresentation> districtRepresentations =
-        warehouse.getDistricts().entrySet().parallelStream()
-            .map(d -> modelMapper.map(d.getValue(), DistrictRepresentation.class))
-            .collect(Collectors.toList());
-
-    return ResponseEntity.ok(districtRepresentations);
-  }*/
-
   @Override
   public ResponseEntity<List<DistrictRepresentation>> getWarehouseDistricts(String warehouseId) {
     Optional<WarehouseData> warehouse = warehouseRepository.findById(warehouseId);
@@ -111,7 +92,6 @@ public class AerospikeResourceController implements ResourceController {
 
     List<DistrictRepresentation> districtRepresentations =
         // BATCH CALL
-        // TODO: implement Batch getDistrictsFromWarehouse
         districtRepository.getDistrictsFromWarehouse(warehouse.get().getDistrictRefsIds()).stream()
             .map(
                 district -> {
@@ -152,13 +132,11 @@ public class AerospikeResourceController implements ResourceController {
         modelMapper.map(warehouse.get(), WarehouseRepresentation.class);
     List<String> stockIds = warehouse.get().getStockRefsIds();
     // BATCH CALL
-    // TODO: Implement Batch getStocksByWarehouse
     List<StockData> stocks = stockRepository.getStocksByWarehouse(stockIds);
     List<String> productIds =
         stocks.stream().map(StockData::getProductRefId).collect(Collectors.toList());
 
     // BATCH CALL
-    // TODO: Implement Batch getProductsFromStocks
     Map<String, ProductData> products = productRepository.getProductsFromStocks(productIds);
 
     List<StockRepresentation> stockRepresentations =
@@ -204,7 +182,6 @@ public class AerospikeResourceController implements ResourceController {
 
     List<CustomerRepresentation> customerRepresentations =
         // BATCH CALL
-        // TODO: Implement BATCH getCustomersByDistricts
         customerRepository.getCustomersByDistricts(district.get().getCustomerRefsIds()).stream()
             .map(
                 customer -> {
@@ -242,7 +219,6 @@ public class AerospikeResourceController implements ResourceController {
     List<OrderItemRepresentation> orderItemRepresentations = new ArrayList<>();
 
     // BATCH CALL
-    // TODO: Implement Batch getOrdersFromDistrict
     List<OrderData> orders =
         orderRepository.getOrdersFromDistrict(district.get().getOrderRefsIds());
 
@@ -262,17 +238,7 @@ public class AerospikeResourceController implements ResourceController {
         orderRepresentation.setCarrier(null);
       }
 
-      /*      Optional<CarrierData> carrier = carrierRepository.findById(order.getCarrierRefId());
-      if (Objects.requireNonNull(carrier).isPresent()) {
-        CarrierRepresentation carrierRepresentation =
-            modelMapper.map(carrier.get(), CarrierRepresentation.class);
-        orderRepresentation.setCarrier(carrierRepresentation);
-      } else {
-        orderRepresentation.setCarrier(null);
-      }*/
-
       Optional<CustomerData> customer = customerRepository.findById(order.getCustomerRefId());
-      // TODO: Set ifPresent Check?!
       CustomerRepresentation customerRepresentation =
           modelMapper.map(customer.get(), CustomerRepresentation.class);
       customerRepresentation.setDistrict(districtRepresentation);
@@ -282,7 +248,6 @@ public class AerospikeResourceController implements ResourceController {
       orderRepresentation.setDistrict(districtRepresentation);
 
       // BATCH CALL
-      // TODO: Implement Batch getOrderItemsByOrder
       List<OrderItemData> orderItems =
           orderItemRepository.getOrderItemsByOrder(order.getItemsIds());
 
@@ -291,7 +256,6 @@ public class AerospikeResourceController implements ResourceController {
             modelMapper.map(orderItem, OrderItemRepresentation.class);
 
         Optional<ProductData> product = productRepository.findById(orderItem.getProductRefId());
-        // TODO: Set ifPresent Check?!
         ProductRepresentation productRepresentation =
             modelMapper.map(product.get(), ProductRepresentation.class);
 

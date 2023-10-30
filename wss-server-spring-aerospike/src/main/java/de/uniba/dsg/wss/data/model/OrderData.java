@@ -6,6 +6,15 @@ import java.util.List;
 import org.springframework.data.aerospike.mapping.Document;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+/**
+ * An order issued by a {@link CustomerData customer} for a certain amount of {@link ProductData
+ * products}, when retrieved via their unique identifier.
+ *
+ * @see OrderItemData
+ * @author Benedikt Full
+ * @author Johannes Manner
+ * @author Andre Maier
+ */
 @Document(collection = "Order")
 public class OrderData extends BaseData {
 

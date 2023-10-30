@@ -7,6 +7,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link PaymentRepositoryOperations} interface for
+ * accessing and modifying {@link PaymentData payments}.
+ *
+ * @author Andre Maier
+ */
 public class PaymentRepositoryOperationsImpl implements PaymentRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;
@@ -15,7 +21,7 @@ public class PaymentRepositoryOperationsImpl implements PaymentRepositoryOperati
   public PaymentRepositoryOperationsImpl(AerospikeTemplate aerospikeTemplate) {
     this.aerospikeTemplate = aerospikeTemplate;
   }
-  // TODO: Batch write paymentData
+
   @Override
   public void saveAll(Map<String, PaymentData> idsToPayments) {
     WritePolicy writePolicy = new WritePolicy();

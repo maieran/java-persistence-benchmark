@@ -1,7 +1,13 @@
 package de.uniba.dsg.wss.data.access;
 
+import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import com.aerospike.client.policy.WritePolicy;
+import de.uniba.dsg.wss.data.model.AddressData;
 import de.uniba.dsg.wss.data.model.CustomerData;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +16,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
+/**
+ * Implementation of custom defined operations of {@link CustomerRepositoryOperations} interface for
+ * accessing and modifying {@link CustomerData customers}.
+ *
+ * @author Andre Maier
+ */
 public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOperations {
 
   private final AerospikeTemplate aerospikeTemplate;
@@ -27,8 +39,78 @@ public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOpera
     idsToCustomers.forEach((id, customer) -> aerospikeTemplate.save(customer));
   }
 
-  // TODO: HOW TO BATCH READ -  getCustomersByDistricts ?!
   @Override
+  public List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds) {
+    List<CustomerData> customers = new ArrayList<>();
+    // 1.Step - Collect the keys/ids necessary to retrieve the objects
+    Key[] keys = new Key[customerRefsIds.size()];
+    for (int i = 0; i < keys.length; i++) {
+      keys[i] =
+          new Key(
+              aerospikeTemplate.getNamespace(),
+              aerospikeTemplate.getSetName(CustomerData.class),
+              customerRefsIds.get(i));
+    }
+
+    // 2.Step - Retrieve orderItemData from Aerospike data model
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+
+    // 3.Step - Populate the list of orderItems
+    for (int i = 0; i < records.length; i++) {
+      Record record = records[i];
+      if (record != null) {
+
+        // Manually map the bins to CustomerData
+
+        Map<String, Object> addressMap = (Map<String, Object>) record.getMap("address");
+
+        AddressData addressData =
+            new AddressData(
+                (String) addressMap.get("street1"),
+                (String) addressMap.get("street2"),
+                (String) addressMap.get("zipCode"),
+                (String) addressMap.get("city"),
+                (String) addressMap.get("state"));
+
+        // Create the OrderData instance
+        CustomerData customer =
+            new CustomerData(
+                customerRefsIds.get(i), // Set the id using the itemsIds list
+                record.getString("firstName"),
+                record.getString("middleName"),
+                record.getString("lastName"),
+                addressData,
+                record.getString("phoneNumber"),
+                record.getString("email"),
+                record.getString("districtRefId"),
+                convertEntryDate(record.getLong("since")),
+                record.getString("credit"),
+                record.getDouble("creditLimit"),
+                record.getDouble("discount"),
+                record.getDouble("amount"),
+                record.getDouble("ytdPayment"),
+                record.getInt("paymentCount"),
+                record.getInt("deliveryCount"),
+                record.getString("data"));
+        customer.setOrderRefsIds((Map<String, String>) record.getMap("orderRefsIds "));
+        customer.setPaymentRefsIds((List<String>) record.getList("paymentRefsIds"));
+
+        customers.add(customer);
+      }
+    }
+
+    return customers;
+  }
+
+  private LocalDateTime convertEntryDate(Long entryDateMillis) {
+    if (entryDateMillis != null) {
+      Instant instant = Instant.ofEpochMilli(entryDateMillis);
+      return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+    return null;
+  }
+
+  /*  @Override
   public List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds) {
     List<CustomerData> customers = new ArrayList<>();
 
@@ -43,7 +125,7 @@ public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOpera
     }
 
     return customers;
-  }
+  }*/
 
   @Override
   public void storeUpdatedCustomer(Optional<CustomerData> customer) {
