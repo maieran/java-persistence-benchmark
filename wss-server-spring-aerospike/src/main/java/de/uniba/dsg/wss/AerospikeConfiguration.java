@@ -3,7 +3,6 @@ package de.uniba.dsg.wss;
 import com.aerospike.client.Host;
 import java.util.Collection;
 import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,13 +29,16 @@ public class AerospikeConfiguration extends AbstractAerospikeDataConfiguration {
   private final Environment environment;
 
   @Autowired
-  public AerospikeConfiguration(Environment environment){
+  public AerospikeConfiguration(Environment environment) {
     this.environment = environment;
   }
 
   @Override
   protected Collection<Host> getHosts() {
-    return Collections.singleton(new Host(environment.getRequiredProperty("wss.aerospike.host"), Integer.parseInt(environment.getRequiredProperty("wss.aerospike.port"))));
+    return Collections.singleton(
+        new Host(
+            environment.getRequiredProperty("wss.aerospike.host"),
+            Integer.parseInt(environment.getRequiredProperty("wss.aerospike.port"))));
   }
 
   @Override

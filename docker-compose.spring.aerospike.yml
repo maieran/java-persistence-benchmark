@@ -1,0 +1,36 @@
+version: "2.4"
+services:
+  wss-server:
+    container_name: "wss-server"
+    build:
+      context: .
+      dockerfile: Dockerfile-spring-aerospike
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Berlin
+      - SPRING_PROFILES_ACTIVE=prod
+      - WSS_MODEL_INITIALIZE=true
+      - WSS_MODEL_WAREHOUSE_COUNT=1
+      - WSS_MODEL_FULL_SCALE=false
+      - WSS_AEROSPIKE_HOST=db
+      - WSS_AEROSPIKE_PORT=3000
+      - WSS_AEROSPIKE_NAMESPACE=test
+      - JAVA_OPTS=-Xmx14G
+    cpu_count: 4
+    mem_reservation: 12g
+    mem_limit: 14g
+
+  db:
+    container_name: "wss-spring-aerospike"
+    image: "aerospike/aerospike-server:6.4.0.4"
+    volumes:
+      - aerospike_data:/opt/aerospike/data
+      - ./aerospike/aerospike.conf:/opt/aerospike/aerospike.conf
+    ports:
+      - "3000:3000"
+    command: ["--config-file","/opt/aerospike/aerospike.conf"] #ls /etc/aerospike; cat /etc/aerospike/aerospike.conf; asd --config-file /etc/aerospike/aerospike.conf
+volumes:
+  aerospike_data:
