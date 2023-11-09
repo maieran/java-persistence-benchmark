@@ -13,8 +13,8 @@ services:
       - TZ=Europe/Berlin
       - SPRING_PROFILES_ACTIVE=prod
       - WSS_MODEL_INITIALIZE=true
-      - WSS_MODEL_WAREHOUSE_COUNT=1
-      - WSS_MODEL_FULL_SCALE=false
+      - WSS_MODEL_WAREHOUSE_COUNT=5
+      - WSS_MODEL_FULL_SCALE=true
       - WSS_AEROSPIKE_HOST=db
       - WSS_AEROSPIKE_PORT=3000
       - WSS_AEROSPIKE_NAMESPACE=test
@@ -25,12 +25,12 @@ services:
 
   db:
     container_name: "wss-spring-aerospike"
-    image: "aerospike/aerospike-server:6.4.0.4"
+    image: "aerospike/aerospike-server"
     volumes:
       - aerospike_data:/opt/aerospike/data
       - ./aerospike/aerospike.conf:/opt/aerospike/aerospike.conf
     ports:
       - "3000:3000"
-    command: ["--config-file","/opt/aerospike/aerospike.conf"] #ls /etc/aerospike; cat /etc/aerospike/aerospike.conf; asd --config-file /etc/aerospike/aerospike.conf
+    command: ["--config-file","/opt/aerospike/aerospike.conf"]
 volumes:
   aerospike_data:

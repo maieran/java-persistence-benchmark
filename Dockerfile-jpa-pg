@@ -5,6 +5,8 @@ RUN gradle :wss-server-jpa-pg:bootJar
 
 FROM openjdk:11.0.12-jre
 WORKDIR /home/wss
+COPY --chown=gradle:gradle baseline-model-dir.zip /home/wss/baseline-model-dir.zip
+RUN apt-get update && apt-get install -y unzip && unzip /home/wss/baseline-model-dir.zip -d /home/wss/ && rm /home/wss/baseline-model-dir.zip
 COPY --from=BUILD_IMAGE /home/wss/wss-server-jpa-pg/build/libs/wss-server-*.jar app.jar
 EXPOSE 8080
 ENV JAVA_OPTS=""

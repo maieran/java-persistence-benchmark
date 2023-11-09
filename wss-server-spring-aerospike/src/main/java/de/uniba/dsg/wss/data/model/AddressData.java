@@ -1,11 +1,14 @@
 package de.uniba.dsg.wss.data.model;
+
+import java.io.Serializable;
+
 /**
  * An immutable representation of a United States address.
  *
  * @author Benedikt Full
  * @author Andre Maier
  */
-public class AddressData {
+public class AddressData implements Serializable {
 
   private final String street1;
   private final String street2;

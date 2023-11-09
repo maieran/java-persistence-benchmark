@@ -66,13 +66,13 @@ public class AerospikeDataWriter
 
     AerospikeDataModel aerospikeDataModel = (AerospikeDataModel) model;
 
+    warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
+
     productRepository.saveAll(aerospikeDataModel.getIdsToProducts());
 
     employeeRepository.saveAll(aerospikeDataModel.getIdsToEmployees());
 
     carrierRepository.saveAll(aerospikeDataModel.getIdsToCarriers());
-
-    warehouseRepository.saveAll(aerospikeDataModel.getIdsToWarehouses());
 
     stockRepository.saveAll(aerospikeDataModel.getIdsToStocks());
 
