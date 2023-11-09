@@ -22,9 +22,9 @@ public class TestAerospikeConfiguration extends AbstractAerospikeDataConfigurati
   @Bean
   protected Collection<Host> getHosts() {
     return Collections.singleton(
-            new Host(
-                    environment.getRequiredProperty("wss.aerospike.host"),
-                    Integer.parseInt(environment.getRequiredProperty("wss.aerospike.port"))));
+        new Host(
+            environment.getRequiredProperty("wss.aerospike.host"),
+            Integer.parseInt(environment.getRequiredProperty("wss.aerospike.port"))));
   }
 
   @Override
@@ -36,7 +36,7 @@ public class TestAerospikeConfiguration extends AbstractAerospikeDataConfigurati
   @Bean
   public AerospikeDataSettings aerospikeDataSettings() {
     return AerospikeDataSettings.builder()
-            .scansEnabled(true) // Enable scans
-            .build();
+        .scansEnabled(true) // Enable scans
+        .build();
   }
 }
