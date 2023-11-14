@@ -15,8 +15,8 @@ services:
       - WSS_MODEL_INITIALIZE=true
       - WSS_MODEL_WAREHOUSE_COUNT=5
       - WSS_MODEL_FULL_SCALE=true
-      - WSS_REDIS_JEDIS_HOST=db
-      - WSS_REDIS_JEDIS_PORT=6379
+      - SPRING_REDIS_HOST=db
+      - SPRING_REDIS_PORT=6379
       - WSS_REDIS_JEDIS_POOL_MAX-TOTAL=64
       - WSS_REDIS_JEDIS_POOL_MAX-IDLE=32
       - WSS_REDIS_JEDIS_POOL_MIN-IDLE=16
@@ -27,7 +27,7 @@ services:
 
   db:
     container_name: "wss-redis-jedis"
-    image: "redis"
+    image: "redis:7.0.11"
     ports:
       - "6379:6379"
     volumes:

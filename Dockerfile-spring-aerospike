@@ -4,10 +4,22 @@ WORKDIR /home/wss
 RUN gradle :wss-server-spring-aerospike:bootJar
 
 FROM openjdk:11.0.12-jre
+RUN groupadd -r gradle && useradd -r -g gradle gradle
 WORKDIR /home/wss
 COPY --chown=gradle:gradle baseline-model-dir.zip /home/wss/baseline-model-dir.zip
-RUN apt-get update && apt-get install -y unzip && unzip /home/wss/baseline-model-dir.zip -d /home/wss/ && rm /home/wss/baseline-model-dir.zip
+RUN apt-get update && \
+    apt-get install -y unzip && \
+    unzip /home/wss/baseline-model-dir.zip -d /home/wss/ && \
+    rm /home/wss/baseline-model-dir.zip
 COPY --from=BUILD_IMAGE /home/wss/wss-server-spring-aerospike/build/libs/wss-server-*.jar app.jar
+
+# Install dockerize
+ENV DOCKERIZE_VERSION v0.7.0
+RUN apt-get update \
+    && apt-get install -y wget \
+    && wget -O - https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz | tar xzf - -C /usr/local/bin \
+    && apt-get autoremove -yqq --purge wget && rm -rf /var/lib/apt/lists/*
+
 EXPOSE 8080
 ENV JAVA_OPTS=""
-CMD java $JAVA_OPTS -jar app.jar
+CMD dockerize -wait tcp://db:3000 -timeout 30s java $JAVA_OPTS -jar app.jar
