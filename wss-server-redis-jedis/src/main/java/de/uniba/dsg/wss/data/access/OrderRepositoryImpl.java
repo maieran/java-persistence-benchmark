@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
-
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, OrderData> hashOperations;
   private static final Logger LOG = LogManager.getLogger(OrderRepository.class);
@@ -28,10 +29,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
-  @Override
+  /*  @Override
   public void saveAll(Map<String, OrderData> orders) {
     String hashKey = "orders";
     hashOperations.putAll(hashKey, orders);
+  }*/
+
+  @Override
+  public void saveAll(Map<String, OrderData> orders) {
+    String hashKey = "orders";
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < orders.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, orders.size());
+      Map<String, OrderData> batch = getBatch(orders, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, OrderData> getBatch(Map<String, OrderData> orders, int start, int end) {
+    return orders.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class StockRepositoryImpl implements StockRepository {
-
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, StockData> hashOperations;
 
@@ -25,10 +26,31 @@ public class StockRepositoryImpl implements StockRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
-  @Override
+  /*  @Override
   public void saveAll(Map<String, StockData> stocks) {
     String hashKey = "stocks";
     hashOperations.putAll(hashKey, stocks);
+  }*/
+
+  @Override
+  public void saveAll(Map<String, StockData> stocks) {
+    String hashKey = "stocks";
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < stocks.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, stocks.size());
+      Map<String, StockData> batch = getBatch(stocks, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, StockData> getBatch(Map<String, StockData> stocks, int start, int end) {
+    return stocks.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override

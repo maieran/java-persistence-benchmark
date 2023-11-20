@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class CustomerRepositoryImpl implements CustomerRepository {
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, CustomerData> hashOperations;
 
@@ -25,10 +27,32 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
-  @Override
+  /*  @Override
   public void saveAll(Map<String, CustomerData> customers) {
     String hashKey = "customers";
     hashOperations.putAll(hashKey, customers);
+  }*/
+
+  @Override
+  public void saveAll(Map<String, CustomerData> customers) {
+    String hashKey = "customers";
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < customers.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, customers.size());
+      Map<String, CustomerData> batch = getBatch(customers, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, CustomerData> getBatch(
+      Map<String, CustomerData> customers, int start, int end) {
+    return customers.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override

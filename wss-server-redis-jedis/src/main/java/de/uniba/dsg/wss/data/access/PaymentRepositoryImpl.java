@@ -2,6 +2,8 @@ package de.uniba.dsg.wss.data.access;
 
 import de.uniba.dsg.wss.data.model.PaymentData;
 import java.util.*;
+import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class PaymentRepositoryImpl implements PaymentRepository {
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, PaymentData> hashOperations;
 
@@ -22,10 +25,31 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
-  @Override
+  /*  @Override
   public void saveAll(Map<String, PaymentData> payments) {
     String hashKey = "payments";
     hashOperations.putAll(hashKey, payments);
+  }*/
+
+  @Override
+  public void saveAll(Map<String, PaymentData> payments) {
+    String hashKey = "payments";
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < payments.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, payments.size());
+      Map<String, PaymentData> batch = getBatch(payments, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, PaymentData> getBatch(Map<String, PaymentData> payments, int start, int end) {
+    return payments.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override

@@ -4,6 +4,8 @@ import de.uniba.dsg.wss.data.model.ProductData;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ProductRepositoryImpl implements ProductRepository {
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, ProductData> hashOperations;
 
@@ -24,10 +27,33 @@ public class ProductRepositoryImpl implements ProductRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
+  /*
+    @Override
+    public void saveAll(Map<String, ProductData> products) {
+      String hashKey = "products";
+      hashOperations.putAll(hashKey, products);
+    }
+  */
+
   @Override
   public void saveAll(Map<String, ProductData> products) {
     String hashKey = "products";
-    hashOperations.putAll(hashKey, products);
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < products.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, products.size());
+      Map<String, ProductData> batch = getBatch(products, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, ProductData> getBatch(Map<String, ProductData> products, int start, int end) {
+    return products.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override
