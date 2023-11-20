@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -34,6 +35,22 @@ public class RedisConfiguration {
   @Autowired
   public RedisConfiguration(Environment environment) {
     this.environment = environment;
+  }
+
+  /**
+   * Implements and configures the JedisPool that is responsible for connection with Redis. All
+   * configuration are fetched from application environment.
+   *
+   * @return the JedisPool bean with configured pool properties for the interaction.
+   */
+  @Bean
+  public JedisPool jedisPool() {
+    JedisPoolConfig poolConfig = jedisPoolConfig();
+    return new JedisPool(
+        poolConfig,
+        environment.getRequiredProperty("spring.redis.host"),
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.port")),
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
   }
 
   /**
