@@ -17,10 +17,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class CustomerRepositoryImpl implements CustomerRepository {
-
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, CustomerData> hashOperations;
 
   public CustomerRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -60,5 +61,11 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     List<CustomerData> customers = hashOperations.multiGet(hashKey, customerRefsIds);
 
     return customers.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "customers";
+    redisTemplate.delete(hashKey);
   }
 }

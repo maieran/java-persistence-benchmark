@@ -50,4 +50,16 @@ public class StockRepositoryImpl implements StockRepository {
 
     return stocks.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
+
+  @Override
+  public void save(StockData stockData) {
+    String hashKey = "stocks";
+    hashOperations.put(hashKey, stockData.getId(), stockData);
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "stocks";
+    redisTemplate.delete(hashKey);
+  }
 }

@@ -14,9 +14,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class EmployeeRepositoryImpl implements EmployeeRepository {
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, EmployeeData> hashOperations;
 
   public EmployeeRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -30,5 +32,11 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
   public EmployeeData findEmployeeByName(String username) {
     String hashKey = "employees";
     return hashOperations.entries(hashKey).get(username);
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "employees";
+    redisTemplate.delete(hashKey);
   }
 }

@@ -23,4 +23,6 @@ public interface OrderRepository {
   Map<String, OrderData> getOrders();
 
   List<OrderData> getOrdersByCustomer(Map<String, String> orderRefsIds);
+
+  void deleteAll();
 }

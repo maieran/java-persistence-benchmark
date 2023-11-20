@@ -172,4 +172,10 @@ public class StockData extends BaseData {
     this.orderCount++;
     return true;
   }
+
+  public void undoReduceQuantityOperation(int quantity) {
+    this.quantity += quantity;
+    this.yearToDateBalance -= quantity;
+    this.orderCount--;
+  }
 }

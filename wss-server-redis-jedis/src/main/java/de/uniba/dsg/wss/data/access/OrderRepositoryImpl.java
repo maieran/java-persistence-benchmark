@@ -76,4 +76,10 @@ public class OrderRepositoryImpl implements OrderRepository {
         .map(Map.Entry::getValue)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "orders";
+    redisTemplate.delete(hashKey);
+  }
 }

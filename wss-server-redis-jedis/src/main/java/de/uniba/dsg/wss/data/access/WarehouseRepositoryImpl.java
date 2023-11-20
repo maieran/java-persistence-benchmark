@@ -14,9 +14,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class WarehouseRepositoryImpl implements WarehouseRepository {
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, WarehouseData> hashOperations;
 
   public WarehouseRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -42,5 +44,11 @@ public class WarehouseRepositoryImpl implements WarehouseRepository {
   public void save(WarehouseData warehouse) {
     String hashKey = "warehouses";
     hashOperations.put(hashKey, warehouse.getId(), warehouse);
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "warehouses";
+    redisTemplate.delete(hashKey);
   }
 }

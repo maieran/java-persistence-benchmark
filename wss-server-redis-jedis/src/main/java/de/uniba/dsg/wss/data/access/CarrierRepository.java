@@ -14,4 +14,6 @@ public interface CarrierRepository {
   Map<String, CarrierData> getCarriers();
 
   CarrierData findById(String carrierRefId);
+
+  void deleteAll();
 }

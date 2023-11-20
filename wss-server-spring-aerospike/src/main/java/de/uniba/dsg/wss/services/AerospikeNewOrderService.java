@@ -55,8 +55,21 @@ public class AerospikeNewOrderService extends NewOrderService {
 
   @Override
   public NewOrderResponse process(NewOrderRequest newOrderRequest) {
-    OrderData storedOrder;
+    OrderData storedOrder = null;
+    for (int i = 0; i < maxRetries; i++) {
+      try {
+        storedOrder = processOrderRequest(newOrderRequest);
+        break;
+      } catch (AerospikeTransactionException e) {
 
+      }
+    }
+
+    return getNewOrderResponse(newOrderRequest, storedOrder);
+  }
+
+  private OrderData processOrderRequest(NewOrderRequest newOrderRequest) {
+    OrderData storedOrder;
     Optional<WarehouseData> warehouseData =
         warehouseRepository.findById(newOrderRequest.getWarehouseId());
     Optional<CustomerData> customerData =
@@ -97,8 +110,7 @@ public class AerospikeNewOrderService extends NewOrderService {
             stockUpdates.size(),
             allLocal);
     storedOrder = storeOrder(order, stockUpdates);
-
-    return getNewOrderResponse(newOrderRequest, storedOrder);
+    return storedOrder;
   }
 
   private NewOrderResponse getNewOrderResponse(
@@ -169,16 +181,20 @@ public class AerospikeNewOrderService extends NewOrderService {
       order.getItemsIds().add(orderItem.getId());
     }
 
+    // BATCH CALL
+    orderItemRepository.saveOrderItemsInBatch(itemDataList);
     orderRepository.save(order);
     return order;
   }
 
   private List<OrderItemData> updateStock(OrderData order, List<StockUpdateDto> stockUpdates) {
     List<OrderItemData> orderItemsList = new ArrayList<>();
-
-    for (int i = 0; i < stockUpdates.size(); i++) {
+    int i = 0;
+    for (i = 0; i < stockUpdates.size(); i++) {
       StockUpdateDto stockUpdateDto = stockUpdates.get(i);
       if (!stockUpdateDto.getStockData().reduceQuantity(stockUpdateDto.getQuantity())) {
+        // TODO: A tmp-step with save, otherwise quantity update won't remain
+        stockRepository.save(stockUpdateDto.getStockData());
         break;
       } else {
 
@@ -200,8 +216,16 @@ public class AerospikeNewOrderService extends NewOrderService {
         orderItemsList.add(orderItem);
       }
     }
-    // BATCH CALL
-    orderItemRepository.saveOrderItemsInBatch(orderItemsList);
+
+    // compensate the first transactions, if some updates fail
+    if (i != stockUpdates.size()) {
+      for (int j = 0; j < i; j++) {
+        StockUpdateDto stockUpdateDto = stockUpdates.get(j);
+        stockUpdateDto.getStockData().undoReduceQuantityOperation(stockUpdateDto.getQuantity());
+      }
+      return List.of();
+    }
+
     return orderItemsList;
   }
 

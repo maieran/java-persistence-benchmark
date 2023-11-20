@@ -173,4 +173,10 @@ public class StockData extends BaseData implements Serializable {
     this.orderCount++;
     return true;
   }
+
+  public void undoReduceQuantityOperation(int quantity) {
+    this.quantity += quantity;
+    this.yearToDateBalance -= quantity;
+    this.orderCount--;
+  }
 }

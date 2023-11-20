@@ -17,4 +17,8 @@ public interface StockRepository {
   Map<String, StockData> getStocks();
 
   List<StockData> getStocksByWarehouse(List<String> stockRefsIds);
+
+  void save(StockData stockData);
+
+  void deleteAll();
 }

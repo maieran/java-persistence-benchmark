@@ -17,4 +17,6 @@ public interface ProductRepository {
   ProductData findById(String productRefId);
 
   Map<String, ProductData> getProductsFromStocks(List<String> productIds);
+
+  void deleteAll();
 }

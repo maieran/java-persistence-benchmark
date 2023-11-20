@@ -16,4 +16,6 @@ public interface PaymentRepository {
   void save(PaymentData payment);
 
   Map<String, PaymentData> getPayments();
+
+  void deleteAll();
 }

@@ -19,4 +19,6 @@ public interface DistrictRepository {
   Map<String, DistrictData> getDistricts();
 
   List<DistrictData> getDistrictsFromWarehouse(List<String> districtRefsIds);
+
+  void deleteAll();
 }

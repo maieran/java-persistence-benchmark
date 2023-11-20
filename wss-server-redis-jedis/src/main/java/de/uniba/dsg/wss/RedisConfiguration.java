@@ -15,7 +15,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -27,7 +26,6 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author Andre Maier
  */
 @Configuration
-@EnableTransactionManagement
 @EnableRedisRepositories(basePackages = "de.uniba.dsg.wss.data.access")
 public class RedisConfiguration {
 

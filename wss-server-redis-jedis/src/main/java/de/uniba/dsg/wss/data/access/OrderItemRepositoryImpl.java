@@ -15,10 +15,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class OrderItemRepositoryImpl implements OrderItemRepository {
-
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, OrderItemData> hashOperations;
 
   public OrderItemRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -78,5 +79,11 @@ public class OrderItemRepositoryImpl implements OrderItemRepository {
     }
 
     return orderItems;
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "orderItems";
+    redisTemplate.delete(hashKey);
   }
 }

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +33,7 @@ public class AerospikeResourceController implements ResourceController {
   private final CarrierRepository carrierRepository;
   private final ModelMapper modelMapper;
 
+  @Autowired
   public AerospikeResourceController(
       ProductRepository productRepository,
       EmployeeRepository employeeRepository,
@@ -68,7 +70,32 @@ public class AerospikeResourceController implements ResourceController {
     if (employee == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
-    return ResponseEntity.ok(modelMapper.map(employee, EmployeeRepresentation.class));
+    // GET home warehouse districts for Jmeter extraction
+    EmployeeRepresentation employeeRepresentation =
+        modelMapper.map(employee, EmployeeRepresentation.class);
+
+    DistrictData district =
+        districtRepository
+            .findById(employee.getDistrictRefId())
+            .orElseThrow(
+                () -> new RuntimeException("District not found for employee: " + employee.getId()));
+
+    WarehouseData warehouse =
+        warehouseRepository
+            .findById(district.getWarehouseRefId())
+            .orElseThrow(
+                () ->
+                    new RuntimeException("Warehouse not found for district: " + district.getId()));
+
+    DistrictRepresentation districtRepresentation =
+        modelMapper.map(district, DistrictRepresentation.class);
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+
+    districtRepresentation.setWarehouse(warehouseRepresentation);
+    employeeRepresentation.setDistrict(districtRepresentation);
+
+    return ResponseEntity.ok(employeeRepresentation);
   }
 
   @Override

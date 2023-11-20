@@ -15,9 +15,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CarrierRepositoryImpl implements CarrierRepository {
 
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, CarrierData> hashOperations;
 
   public CarrierRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -40,5 +42,11 @@ public class CarrierRepositoryImpl implements CarrierRepository {
       return hashOperations.get(hashKey, carrierRefId);
     }
     return null;
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "carriers";
+    redisTemplate.delete(hashKey);
   }
 }

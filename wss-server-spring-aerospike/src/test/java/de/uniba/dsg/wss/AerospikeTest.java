@@ -52,4 +52,17 @@ public abstract class AerospikeTest {
 
     paymentRepository.saveAll(dataModel.getIdsToPayments());
   }
+
+  public void deleteTestStorage() {
+    productRepository.deleteAll();
+    carrierRepository.deleteAll();
+    warehouseRepository.deleteAll();
+    employeeRepository.deleteAll();
+    stockRepository.deleteAll();
+    districtRepository.deleteAll();
+    paymentRepository.deleteAll();
+    orderRepository.deleteAll();
+    orderItemRepository.deleteAll();
+    customerRepository.deleteAll();
+  }
 }

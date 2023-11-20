@@ -25,12 +25,14 @@ services:
 
   db:
     container_name: "wss-spring-aerospike"
-    image: "aerospike/aerospike-server"
+    image: "aerospike/aerospike-server:6.4.0.4"
     volumes:
       - aerospike_data:/opt/aerospike/data
       - ./aerospike/aerospike.conf:/opt/aerospike/aerospike.conf
     ports:
       - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
     command: ["--config-file","/opt/aerospike/aerospike.conf"]
 volumes:
   aerospike_data:

@@ -14,10 +14,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class PaymentRepositoryImpl implements PaymentRepository {
-
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, PaymentData> hashOperations;
 
   public PaymentRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
 
@@ -37,5 +38,11 @@ public class PaymentRepositoryImpl implements PaymentRepository {
   public Map<String, PaymentData> getPayments() {
     String hashKey = "payments";
     return hashOperations.entries(hashKey);
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "payments";
+    redisTemplate.delete(hashKey);
   }
 }

@@ -56,4 +56,10 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     return productDataMap;
   }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "products";
+    redisTemplate.delete(hashKey);
+  }
 }

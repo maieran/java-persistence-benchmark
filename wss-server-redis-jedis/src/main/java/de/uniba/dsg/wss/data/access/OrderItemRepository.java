@@ -23,4 +23,6 @@ public interface OrderItemRepository {
   void saveOrderItemsInBatch(List<OrderItemData> orderItemsList);
 
   Map<String, OrderItemData> getOrderItemsByIds(List<String> itemIds);
+
+  void deleteAll();
 }

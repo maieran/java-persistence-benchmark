@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,7 @@ public class RedisResourceController implements ResourceController {
   private final CarrierRepository carrierRepository;
   private final ModelMapper modelMapper;
 
+  @Autowired
   public RedisResourceController(
       ProductRepository productRepository,
       EmployeeRepository employeeRepository,
@@ -70,20 +72,40 @@ public class RedisResourceController implements ResourceController {
     if (employee == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
-    return ResponseEntity.ok(modelMapper.map(employee, EmployeeRepresentation.class));
+    // GET home warehouse districts for Jmeter extraction
+    EmployeeRepresentation employeeRepresentation =
+        modelMapper.map(employee, EmployeeRepresentation.class);
+    DistrictData district = districtRepository.findById(employee.getDistrictRefId());
+    WarehouseData warehouse = warehouseRepository.findById(district.getWarehouseRefId());
+    DistrictRepresentation districtRepresentation =
+        modelMapper.map(district, DistrictRepresentation.class);
+    WarehouseRepresentation warehouseRepresentation =
+        modelMapper.map(warehouse, WarehouseRepresentation.class);
+
+    districtRepresentation.setWarehouse(warehouseRepresentation);
+    employeeRepresentation.setDistrict(districtRepresentation);
+
+    return ResponseEntity.ok(employeeRepresentation);
   }
 
   @Override
   public ResponseEntity<List<WarehouseRepresentation>> getWarehouses() {
-    return ResponseEntity.ok(
+    List<WarehouseRepresentation> warehouses =
         warehouseRepository.getWarehouses().values().stream()
             .map(warehouseData -> modelMapper.map(warehouseData, WarehouseRepresentation.class))
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList());
+    return ResponseEntity.ok(warehouses);
+
+    /*    return ResponseEntity.ok(
+    warehouseRepository.getWarehouses().values().stream()
+        .map(warehouseData -> modelMapper.map(warehouseData, WarehouseRepresentation.class))
+        .collect(Collectors.toList()));*/
   }
 
   @Override
   public ResponseEntity<List<DistrictRepresentation>> getWarehouseDistricts(String warehouseId) {
-    WarehouseData warehouse = warehouseRepository.findById(warehouseId);
+    // WarehouseData warehouse = warehouseRepository.findById(warehouseId);
+    WarehouseData warehouse = warehouseRepository.getWarehouses().get(warehouseId);
 
     if (warehouse == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -259,8 +281,8 @@ public class RedisResourceController implements ResourceController {
   @Override
   public ResponseEntity<List<CarrierRepresentation>> getCarriers() {
     return ResponseEntity.ok(
-        carrierRepository.getCarriers().entrySet().parallelStream()
-            .map(c -> modelMapper.map(c.getValue(), CarrierRepresentation.class))
+        carrierRepository.getCarriers().values().stream()
+            .map(carrierData -> modelMapper.map(carrierData, CarrierRepresentation.class))
             .collect(Collectors.toList()));
   }
 }

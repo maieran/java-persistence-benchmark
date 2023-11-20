@@ -57,4 +57,10 @@ public class DistrictRepositoryImpl implements DistrictRepository {
 
     return districts.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "districts";
+    redisTemplate.delete(hashKey);
+  }
 }
