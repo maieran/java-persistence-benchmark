@@ -5,17 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -27,7 +28,8 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author Andre Maier
  */
 @Configuration
-@EnableRedisRepositories(basePackages = "de.uniba.dsg.wss.data.access")
+// @EnableRedisRepositories(basePackages = "de.uniba.dsg.wss.data.access")
+@EnableRedisRepositories
 public class RedisConfiguration {
 
   private final Environment environment;
@@ -35,22 +37,6 @@ public class RedisConfiguration {
   @Autowired
   public RedisConfiguration(Environment environment) {
     this.environment = environment;
-  }
-
-  /**
-   * Implements and configures the JedisPool that is responsible for connection with Redis. All
-   * configuration are fetched from application environment.
-   *
-   * @return the JedisPool bean with configured pool properties for the interaction.
-   */
-  @Bean
-  public JedisPool jedisPool() {
-    JedisPoolConfig poolConfig = jedisPoolConfig();
-    return new JedisPool(
-        poolConfig,
-        environment.getRequiredProperty("spring.redis.host"),
-        Integer.parseInt(environment.getRequiredProperty("spring.redis.port")),
-        Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
   }
 
   /**
@@ -84,7 +70,23 @@ public class RedisConfiguration {
     redisStandaloneConfiguration.setHostName(environment.getRequiredProperty("spring.redis.host"));
     redisStandaloneConfiguration.setPort(
         Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
-    return new JedisConnectionFactory(redisStandaloneConfiguration);
+
+    JedisClientConfiguration jedisClientConfiguration =
+        getJedisClientConfiguration(jedisPoolConfig());
+
+    return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+  }
+
+  @Bean
+  public JedisClientConfiguration getJedisClientConfiguration(JedisPoolConfig poolConfig) {
+    return JedisClientConfiguration.builder()
+        .usePooling()
+        .poolConfig(poolConfig)
+        .and()
+        .readTimeout(
+            Duration.ofMillis(
+                Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout"))))
+        .build();
   }
 
   /**
@@ -96,9 +98,6 @@ public class RedisConfiguration {
    */
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
-    // Solution for Timeout-Problem
-    jedisConnectionFactory()
-        .setTimeout(Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
     /* Uses a String for object IDs and Object as the base class for serialization and deserialization
     of different data model objects, utilizing a polymorphic approach with the help of the Jackson
     Library and GenericJackson2JsonRedisSerializer to access data via JSON. */
