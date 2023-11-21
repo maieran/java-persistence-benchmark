@@ -69,7 +69,7 @@ public class RedisConfiguration {
     poolConfig.setMinIdle(
         Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.pool.min-idle")));
     poolConfig.setMaxWaitMillis(
-        Long.parseLong(environment.getRequiredProperty("spring.redis.timeout")));
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
     return poolConfig;
   }
 
@@ -96,7 +96,9 @@ public class RedisConfiguration {
    */
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
-
+    // Solution for Timeout-Problem
+    jedisConnectionFactory()
+        .setTimeout(Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
     /* Uses a String for object IDs and Object as the base class for serialization and deserialization
     of different data model objects, utilizing a polymorphic approach with the help of the Jackson
     Library and GenericJackson2JsonRedisSerializer to access data via JSON. */
