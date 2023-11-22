@@ -10,11 +10,14 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.time.Duration;
 
 @TestConfiguration
 // @AutoConfigureBefore(RedisConfiguration.class) // Exclude the production Redis configuration
@@ -46,8 +49,24 @@ public class TestRedisConfiguration {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
     redisStandaloneConfiguration.setHostName(environment.getRequiredProperty("spring.redis.host"));
     redisStandaloneConfiguration.setPort(
-        Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
-    return new JedisConnectionFactory(redisStandaloneConfiguration);
+            Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
+
+    JedisClientConfiguration jedisClientConfiguration =
+            getJedisClientConfiguration(jedisPoolConfig());
+
+    return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+  }
+
+  @Bean
+  public JedisClientConfiguration getJedisClientConfiguration(JedisPoolConfig poolConfig) {
+    return JedisClientConfiguration.builder()
+            .usePooling()
+            .poolConfig(poolConfig)
+            .and()
+            .readTimeout(
+                    Duration.ofMillis(
+                            Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout"))))
+            .build();
   }
 
   @Bean
