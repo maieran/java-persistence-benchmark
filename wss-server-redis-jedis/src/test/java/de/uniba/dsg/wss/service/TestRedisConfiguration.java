@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +17,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.time.Duration;
 
 @TestConfiguration
 // @AutoConfigureBefore(RedisConfiguration.class) // Exclude the production Redis configuration
@@ -49,10 +48,10 @@ public class TestRedisConfiguration {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
     redisStandaloneConfiguration.setHostName(environment.getRequiredProperty("spring.redis.host"));
     redisStandaloneConfiguration.setPort(
-            Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
 
     JedisClientConfiguration jedisClientConfiguration =
-            getJedisClientConfiguration(jedisPoolConfig());
+        getJedisClientConfiguration(jedisPoolConfig());
 
     return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
   }
@@ -60,13 +59,13 @@ public class TestRedisConfiguration {
   @Bean
   public JedisClientConfiguration getJedisClientConfiguration(JedisPoolConfig poolConfig) {
     return JedisClientConfiguration.builder()
-            .usePooling()
-            .poolConfig(poolConfig)
-            .and()
-            .readTimeout(
-                    Duration.ofMillis(
-                            Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout"))))
-            .build();
+        .usePooling()
+        .poolConfig(poolConfig)
+        .and()
+        .readTimeout(
+            Duration.ofMillis(
+                Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout"))))
+        .build();
   }
 
   @Bean
