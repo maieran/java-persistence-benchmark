@@ -187,7 +187,6 @@ public class RedisNewOrderService extends NewOrderService {
       // update all the items, if an update fails, compensate the changes
       StockUpdateDto stockUpdateDto = stockUpdates.get(i);
       if (!stockUpdateDto.getStockData().reduceQuantity(stockUpdateDto.getQuantity())) {
-        // TODO: A tmp-step with save, otherwise quantity update won't remain
         stockRepository.save(stockUpdateDto.getStockData());
         break;
       } else {

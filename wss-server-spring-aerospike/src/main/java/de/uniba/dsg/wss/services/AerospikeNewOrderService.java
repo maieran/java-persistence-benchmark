@@ -74,14 +74,15 @@ public class AerospikeNewOrderService extends NewOrderService {
         warehouseRepository.findById(newOrderRequest.getWarehouseId());
     Optional<CustomerData> customerData =
         customerRepository.findById(newOrderRequest.getCustomerId());
-
-    if (warehouseData.isEmpty() || customerData.isEmpty()) {
-      throw new IllegalArgumentException();
-    }
-
     Optional<DistrictData> districtData =
         districtRepository.findById(newOrderRequest.getDistrictId());
-    if (districtData.isEmpty()) {
+
+    if (warehouseData.isEmpty() || customerData.isEmpty() || districtData.isEmpty()) {
+      LOG.info(
+          "Warehouse data or customer data or district data not found for IDs: warehouseId={}, customerId={}, districtId={}",
+          newOrderRequest.getWarehouseId(),
+          newOrderRequest.getCustomerId(),
+          newOrderRequest.getDistrictId());
       throw new IllegalArgumentException();
     }
 
@@ -193,7 +194,6 @@ public class AerospikeNewOrderService extends NewOrderService {
     for (i = 0; i < stockUpdates.size(); i++) {
       StockUpdateDto stockUpdateDto = stockUpdates.get(i);
       if (!stockUpdateDto.getStockData().reduceQuantity(stockUpdateDto.getQuantity())) {
-        // TODO: A tmp-step with save, otherwise quantity update won't remain
         stockRepository.save(stockUpdateDto.getStockData());
         break;
       } else {

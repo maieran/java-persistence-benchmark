@@ -2,10 +2,13 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
+import com.aerospike.client.Operation;
+import com.aerospike.client.Value;
 import com.aerospike.client.cdt.*;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.AddressData;
 import de.uniba.dsg.wss.data.model.WarehouseData;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +35,8 @@ public class WarehouseRepositoryOperationsImpl implements WarehouseRepositoryOpe
 
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
+    writePolicy.totalTimeout = 1000000;
+    writePolicy.socketTimeout = 1800000;
 
     for (Map.Entry<String, WarehouseData> entry : idsToWarehouse.entrySet()) {
       Key key =
@@ -54,56 +59,25 @@ public class WarehouseRepositoryOperationsImpl implements WarehouseRepositoryOpe
                     entry.getValue().getAddress().getState())),
             new Bin("salesTax", entry.getValue().getSalesTax()),
             new Bin("ytdBalance", entry.getValue().getYearToDateBalance()),
+            new Bin("stockRefsIds", new ArrayList<Value>()),
             // new Bin("stockRefsIds", entry.getValue().getStockRefsIds()),
-            // new Bin("stockRefsIds", entry.getValue().getStockRefsIds().get(0)),
             new Bin("districtRefsIds", entry.getValue().getDistrictRefsIds())
           };
 
       aerospikeTemplate.getAerospikeClient().put(writePolicy, key, warehouseBins);
 
-      /*
-      TODO:
-        Somehow need to solve the problem with long time initialization,
-        right now it takes 22 min to initialize the data set. However, otherwise:
-        Caused by: com.aerospike.client.AerospikeException: Error 13,1,0,30000,1000,0,BB9020011AC4202 127.0.0.1 3000: Record too big
-        Supposedly there is an asynchronous variant, which may be faster.
-        https://aerospike.github.io/spring-data-aerospike/  unsere Spring Boot Version gehört zu 2.7.xx
-      */
-
-      /*      List<String> stockRefsIds = entry.getValue().getStockRefsIds();
-      int chunkSize = 100; // Setting the chunk size ~ 29,132 strings can be stored into 1Megabyte
-      int chunks = (int) Math.ceil((double) stockRefsIds.size() / chunkSize);
-
-      for (int i = 0; i < chunks; i++) {
-        int fromIndex = i * chunkSize;
-        int toIndex = Math.min(fromIndex + chunkSize, stockRefsIds.size());
-        List<String> chunk = stockRefsIds.subList(fromIndex, toIndex);
-
-        Operation listOperation =
-            ListOperation.append(
-                ListPolicy.Default, "stockRefsIds", Value.get(chunk.toArray(new String[0])));
-        aerospikeTemplate.getAerospikeClient().operate(writePolicy, key, listOperation);*/
-
       List<String> stockRefsIds = entry.getValue().getStockRefsIds();
       int chunkSize = 20000;
-      // 29000; // there are 100000 stocksRefsIds per warehouse, in total we are having 500000
+
       for (int i = 0; i < stockRefsIds.size(); i += chunkSize) {
         List<String> chunk = stockRefsIds.subList(i, Math.min(stockRefsIds.size(), i + chunkSize));
-        Bin bin = new Bin("stockRefsIds", chunk);
-        aerospikeTemplate.getAerospikeClient().put(writePolicy, key, bin);
+        List<Value> valueList = chunk.stream().map(Value::get).collect(Collectors.toList());
+
+        Operation listOperation = ListOperation.appendItems("stockRefsIds", valueList);
+        aerospikeTemplate.getAerospikeClient().operate(writePolicy, key, listOperation);
       }
     }
   }
-
-  /*
-  private List<List<String>> chunkList(List<String> list, int chunkSize) {
-    List<List<String>> chunks = new ArrayList<>();
-    for (int i = 0; i < list.size(); i += chunkSize) {
-      chunks.add(list.subList(i, Math.min(list.size(), i + chunkSize)));
-    }
-    return chunks;
-  }
-   */
 
   @Override
   public Map<String, WarehouseData> getWarehouses() {

@@ -3,7 +3,7 @@ COPY --chown=gradle:gradle . /home/wss/
 WORKDIR /home/wss
 RUN gradle :wss-server-redis-jedis:bootJar
 
-FROM openjdk:11.0.12-jre
+FROM adoptopenjdk/openjdk11:latest
 RUN groupadd -r gradle && useradd -r -g gradle gradle
 WORKDIR /home/wss
 COPY --chown=gradle:gradle baseline-model-dir.zip /home/wss/baseline-model-dir.zip

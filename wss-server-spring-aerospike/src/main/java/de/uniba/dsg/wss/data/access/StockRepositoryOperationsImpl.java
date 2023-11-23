@@ -2,11 +2,13 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.StockData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
@@ -34,9 +36,14 @@ public class StockRepositoryOperationsImpl implements StockRepositoryOperations 
     idsToStocks.forEach((id, stock) -> aerospikeTemplate.save(stock));
   }
 
+  // TODO: BATCH_SIZE Implementation
   @Override
   public List<StockData> getStocksByWarehouse(List<String> stockRefsIds) {
     List<StockData> stocks = new ArrayList<>();
+    BatchPolicy batchPolicy = new BatchPolicy();
+    int timeout_socket = 1800000;
+    int timeout_read = 1800000;
+    batchPolicy.setTimeouts(timeout_socket, timeout_read);
     // 1.Step - Collect the keys/ids necessary to retrieve the objects
     Key[] keys = new Key[stockRefsIds.size()];
     for (int i = 0; i < keys.length; i++) {
@@ -48,7 +55,7 @@ public class StockRepositoryOperationsImpl implements StockRepositoryOperations 
     }
 
     // 2.Step - Retrieve stockData from Aerospike data model
-    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
 
     // 3.Step - Populate the list of stocks
     for (int i = 0; i < records.length; i++) {
@@ -79,27 +86,8 @@ public class StockRepositoryOperationsImpl implements StockRepositoryOperations 
         stocks.add(stock);
       }
     }
-    return stocks;
+    return stocks.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
-
-  /*
-  @Override
-  public List<StockData> getStocksByWarehouse(List<String> stockRefsIds) {
-    List<StockData> stocks = new ArrayList<>();
-
-    // Iterate over the district reference IDs and read each record individually
-    for (String id : stockRefsIds) {
-      // Read the record for the key
-      StockData stockData = aerospikeTemplate.findById(id, StockData.class);
-
-      // Check if the record exists
-      if (stockData != null) {
-        stocks.add(stockData);
-      }
-    }
-
-    return stocks;
-  }*/
 
   @Override
   public Map<String, StockData> getStocks() {

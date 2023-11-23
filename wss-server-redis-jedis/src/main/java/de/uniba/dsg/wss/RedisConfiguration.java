@@ -113,6 +113,8 @@ public class RedisConfiguration {
     // objects
     objectMapper.registerModule(new JavaTimeModule());
 
+    // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
     /* Validates and controls serialization to JSON and deserialization from Java Objects of polymorphic types
     of classes, which are marked with @JsonTypeInfo and operates in combination with object mapper */
     PolymorphicTypeValidator validator =

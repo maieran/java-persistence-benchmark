@@ -18,10 +18,10 @@ services:
       - WSS_AEROSPIKE_HOST=db
       - WSS_AEROSPIKE_PORT=3000
       - WSS_AEROSPIKE_NAMESPACE=test
-      - JAVA_OPTS=-Xmx14G
+      - JAVA_OPTS=-Xmx21G
     cpu_count: 4
     mem_reservation: 12g
-    mem_limit: 14g
+    mem_limit: 21g
 
   db:
     container_name: "wss-spring-aerospike"

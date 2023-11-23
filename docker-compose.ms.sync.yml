@@ -14,11 +14,11 @@ services:
       - WSS_MODEL_WAREHOUSE_COUNT=5
       - WSS_MODEL_FULL_SCALE=true
       - WSS_MS_STORAGE_DIR=storage
-      - JAVA_OPTS=-Xmx14G
+      - JAVA_OPTS=-Xmx21G
     volumes:
       - ms_data:/home/wss/storage
     cpu_count: 4
     mem_reservation: 12g
-    mem_limit: 14g
+    mem_limit: 21g
 volumes:
   ms_data:
