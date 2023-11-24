@@ -1,7 +1,5 @@
 package de.uniba.dsg.wss.data.model;
 
-import com.aerospike.client.query.IndexType;
-import org.springframework.data.aerospike.annotation.Indexed;
 import org.springframework.data.aerospike.mapping.Document;
 
 /**
@@ -17,7 +15,7 @@ public class EmployeeData extends PersonData {
 
   private final String title;
 
-  @Indexed(name = "username", type = IndexType.STRING)
+  // @Indexed(name = "username", type = IndexType.STRING)
   private final String username;
 
   private final String password;

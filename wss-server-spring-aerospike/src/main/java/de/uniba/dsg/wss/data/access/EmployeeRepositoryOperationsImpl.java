@@ -1,10 +1,11 @@
 package de.uniba.dsg.wss.data.access;
 
-import com.aerospike.client.Key;
 import com.aerospike.client.policy.WritePolicy;
 import com.aerospike.client.query.*;
 import de.uniba.dsg.wss.data.model.EmployeeData;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.config.AerospikeDataSettings;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
@@ -24,6 +25,21 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
     this.aerospikeTemplate = aerospikeTemplate;
   }
 
+  @Override
+  public EmployeeData findEmployeeDataByUsername(String username) {
+    if (username.isBlank() || username.isEmpty()) {
+      throw new IllegalArgumentException("Username cannot be blank or empty");
+    }
+
+    List<EmployeeData> employeeDataList =
+        aerospikeTemplate.findAll(EmployeeData.class).collect(Collectors.toList());
+
+    return employeeDataList.stream()
+        .filter(employee -> username.equals(employee.getUsername()))
+        .findFirst()
+        .orElse(null);
+  }
+
   /**
    * Retrieves an instance of {@link EmployeeData} from the Aerospike data model based on the
    * provided username. This method utilizes a secondary index on the 'username' attribute that is
@@ -33,11 +49,11 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
    * information on secondary index usage, see: https://docs.aerospike.com/server/features
    * https://docs.aerospike.com/server/architecture/secondary-index
    *
-   * @param username the username of the employee to retrieve
+   * @param //username the username of the employee to retrieve
    * @return the EmployeeData instance corresponding to the provided username, or null if no
    *     employee is found with the given username
    */
-  public EmployeeData findEmployeeDataByUsername(String username) {
+  /*  public EmployeeData findEmployeeDataByUsername(String username) {
     Statement stmt = new Statement();
     stmt.setNamespace(aerospikeTemplate.getNamespace());
     stmt.setSetName(aerospikeTemplate.getSetName(EmployeeData.class));
@@ -56,7 +72,7 @@ public class EmployeeRepositoryOperationsImpl implements EmployeeRepositoryOpera
     }
 
     return null; // Employee not found.
-  }
+  }*/
 
   @Override
   public void saveAll(Map<String, EmployeeData> idsToEmployees) {
