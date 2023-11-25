@@ -18,6 +18,7 @@ services:
       - WSS_AEROSPIKE_HOST=db
       - WSS_AEROSPIKE_PORT=3000
       - WSS_AEROSPIKE_NAMESPACE=test
+      - WSS_AEROSPIKE_TIMEOUT=1800000
       - JAVA_OPTS=-Xmx21G
     cpu_count: 4
     mem_reservation: 12g
