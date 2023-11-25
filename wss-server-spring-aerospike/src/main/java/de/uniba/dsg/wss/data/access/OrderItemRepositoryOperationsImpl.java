@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.*;
+import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.OrderItemData;
 import java.time.Instant;
@@ -40,6 +41,9 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
 
   @Override
   public List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds) {
+    // TODO:Changes
+    BatchPolicy batchPolicy = new BatchPolicy();
+    batchPolicy.setTimeouts(100000, 100000);
     List<OrderItemData> orderItems = new ArrayList<>();
     // 1.Step - Collect the keys/ids necessary to retrieve the objects
     Key[] keys = new Key[itemsIds.size()];
@@ -52,7 +56,7 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
     }
 
     // 2.Step - Retrieve orderItemData from Aerospike data model
-    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
 
     // 3.Step - Populate the list of orderItems
     for (int i = 0; i < records.length; i++) {

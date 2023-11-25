@@ -21,18 +21,16 @@ services:
       - JAVA_OPTS=-Xmx21G
     cpu_count: 4
     mem_reservation: 12g
-    mem_limit: 21g
+    mem_limit: 28g
 
   db:
     container_name: "wss-spring-aerospike"
-    image: "aerospike/aerospike-server:6.4.0.4"
+    image: "aerospike/aerospike-server:6.4.0.7_2"
     volumes:
       - aerospike_data:/opt/aerospike/data
       - ./aerospike/aerospike.conf:/opt/aerospike/aerospike.conf
     ports:
       - "3000:3000"
-      - "3001:3001"
-      - "3002:3002"
     command: ["--config-file","/opt/aerospike/aerospike.conf"]
 volumes:
   aerospike_data:

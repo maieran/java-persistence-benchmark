@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss;
 
 import com.aerospike.client.Host;
+import com.aerospike.client.policy.ClientPolicy;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +60,18 @@ public class AerospikeConfiguration extends AbstractAerospikeDataConfiguration {
     return AerospikeDataSettings.builder()
         .scansEnabled(true) // Enable scans
         .build();
+  }
+
+  // TODO:Changes
+  @Override
+  @Bean
+  public ClientPolicy getClientPolicy() {
+    ClientPolicy clientPolicy = super.getClientPolicy();
+
+    // Set timeout (in milliseconds)
+    clientPolicy.timeout =
+        Integer.parseInt(environment.getRequiredProperty("wss.aerospike.timeout"));
+
+    return clientPolicy;
   }
 }

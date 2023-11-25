@@ -1,6 +1,7 @@
 package de.uniba.dsg.wss.service;
 
 import com.aerospike.client.Host;
+import com.aerospike.client.policy.ClientPolicy;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -31,6 +32,19 @@ public class TestAerospikeConfiguration extends AbstractAerospikeDataConfigurati
   @Bean
   protected String nameSpace() {
     return (environment.getRequiredProperty("wss.aerospike.namespace"));
+  }
+
+  // TODO:Changes
+  @Override
+  @Bean
+  public ClientPolicy getClientPolicy() {
+    ClientPolicy clientPolicy = super.getClientPolicy();
+
+    // Set timeout (in milliseconds)
+    clientPolicy.timeout =
+        Integer.parseInt(environment.getRequiredProperty("wss.aerospike.timeout"));
+
+    return clientPolicy;
   }
 
   @Bean

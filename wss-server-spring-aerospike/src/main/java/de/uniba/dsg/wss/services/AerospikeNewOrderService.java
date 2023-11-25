@@ -1,5 +1,7 @@
 package de.uniba.dsg.wss.services;
 
+import com.aerospike.client.policy.Policy;
+import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.access.*;
 import de.uniba.dsg.wss.data.model.*;
 import de.uniba.dsg.wss.data.transfer.messages.NewOrderRequest;
@@ -55,6 +57,10 @@ public class AerospikeNewOrderService extends NewOrderService {
 
   @Override
   public NewOrderResponse process(NewOrderRequest newOrderRequest) {
+    Policy policy = new Policy();
+    WritePolicy writePolicy = new WritePolicy();
+    policy.maxRetries = 5;
+    writePolicy.maxRetries = 5;
     OrderData storedOrder = null;
     for (int i = 0; i < maxRetries; i++) {
       try {
@@ -70,6 +76,7 @@ public class AerospikeNewOrderService extends NewOrderService {
 
   private OrderData processOrderRequest(NewOrderRequest newOrderRequest) {
     OrderData storedOrder;
+
     Optional<WarehouseData> warehouseData =
         warehouseRepository.findById(newOrderRequest.getWarehouseId());
     Optional<CustomerData> customerData =
@@ -124,7 +131,7 @@ public class AerospikeNewOrderService extends NewOrderService {
     double orderItemSum = 0;
     // creation of return dtos
     List<NewOrderResponseItem> dtoItems = new ArrayList<>();
-
+    // TODO:Changes
     List<OrderItemData> orderItems =
         orderItemRepository.getOrderItemsByOrder(storedOrder.getItemsIds());
 
