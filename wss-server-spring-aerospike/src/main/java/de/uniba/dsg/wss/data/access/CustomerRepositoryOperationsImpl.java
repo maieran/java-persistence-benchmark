@@ -2,17 +2,16 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.AddressData;
 import de.uniba.dsg.wss.data.model.CustomerData;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -132,10 +131,84 @@ public class CustomerRepositoryOperationsImpl implements CustomerRepositoryOpera
     aerospikeTemplate.update(customer.get());
   }
 
-  @Override
+  /*  @Override
   public Map<String, CustomerData> getCustomers() {
     return aerospikeTemplate
         .findAll(CustomerData.class)
         .collect(Collectors.toMap(CustomerData::getId, customer -> customer));
+  }*/
+
+  @Override
+  public Map<String, CustomerData> getCustomers() {
+    BatchPolicy batchPolicy = new BatchPolicy();
+    int timeout_socket = 1800000;
+    int timeout_read = 1800000;
+    batchPolicy.setTimeouts(timeout_socket, timeout_read);
+
+    // Retrieve all keys of CustomerData from Aerospike
+    Set<String> customerIds =
+        aerospikeTemplate
+            .findAll(CustomerData.class)
+            .map(CustomerData::getId)
+            .collect(Collectors.toSet());
+
+    Key[] keys =
+        customerIds.stream()
+            .map(
+                id ->
+                    new Key(
+                        aerospikeTemplate.getNamespace(),
+                        aerospikeTemplate.getSetName(CustomerData.class),
+                        id))
+            .toArray(Key[]::new);
+
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
+
+    Map<String, CustomerData> customers =
+        IntStream.range(0, records.length)
+            .parallel()
+            .filter(i -> records[i] != null)
+            .mapToObj(
+                i -> {
+                  Record record = records[i];
+                  String customerId = customerIds.stream().skip(i).findFirst().orElse(null);
+
+                  Map<String, Object> addressMap = (Map<String, Object>) record.getMap("address");
+
+                  AddressData addressData =
+                      new AddressData(
+                          (String) addressMap.get("street1"),
+                          (String) addressMap.get("street2"),
+                          (String) addressMap.get("zipCode"),
+                          (String) addressMap.get("city"),
+                          (String) addressMap.get("state"));
+
+                  CustomerData customer =
+                      new CustomerData(
+                          customerId, // Set the id using the customerIds set
+                          record.getString("firstName"),
+                          record.getString("middleName"),
+                          record.getString("lastName"),
+                          addressData,
+                          record.getString("phoneNumber"),
+                          record.getString("email"),
+                          record.getString("districtRefId"),
+                          convertEntryDate(record.getLong("since")),
+                          record.getString("credit"),
+                          record.getDouble("creditLimit"),
+                          record.getDouble("discount"),
+                          record.getDouble("balance"),
+                          record.getDouble("ytdPayment"),
+                          record.getInt("paymentCount"),
+                          record.getInt("deliveryCount"),
+                          record.getString("data"));
+                  customer.setOrderRefsIds((Map<String, String>) record.getMap("orderRefsIds"));
+                  customer.setPaymentRefsIds((List<String>) record.getList("paymentRefsIds"));
+
+                  return customer;
+                })
+            .collect(Collectors.toMap(CustomerData::getId, customer -> customer));
+
+    return customers;
   }
 }

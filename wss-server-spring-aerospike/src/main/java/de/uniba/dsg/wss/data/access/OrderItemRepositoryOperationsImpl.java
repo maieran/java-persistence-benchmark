@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -41,47 +42,46 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
 
   @Override
   public List<OrderItemData> getOrderItemsByOrder(List<String> itemsIds) {
-    // TODO:Changes
     BatchPolicy batchPolicy = new BatchPolicy();
-    batchPolicy.setTimeouts(100000, 100000);
-    List<OrderItemData> orderItems = new ArrayList<>();
-    // 1.Step - Collect the keys/ids necessary to retrieve the objects
-    Key[] keys = new Key[itemsIds.size()];
-    for (int i = 0; i < keys.length; i++) {
-      keys[i] =
-          new Key(
-              aerospikeTemplate.getNamespace(),
-              aerospikeTemplate.getSetName(OrderItemData.class),
-              itemsIds.get(i));
-    }
+    int timeout_socket = 1800000;
+    int timeout_read = 1800000;
+    batchPolicy.setTimeouts(timeout_socket, timeout_read);
 
-    // 2.Step - Retrieve orderItemData from Aerospike data model
+    Key[] keys =
+        itemsIds.stream()
+            .map(
+                id ->
+                    new Key(
+                        aerospikeTemplate.getNamespace(),
+                        aerospikeTemplate.getSetName(OrderItemData.class),
+                        id))
+            .toArray(Key[]::new);
+
     Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
 
-    // 3.Step - Populate the list of orderItems
-    for (int i = 0; i < records.length; i++) {
-      Record record = records[i];
-      if (record != null) {
+    List<OrderItemData> orderItems =
+        IntStream.range(0, records.length)
+            .filter(i -> records[i] != null)
+            .mapToObj(
+                i -> {
+                  Record record = records[i];
+                  String itemId = itemsIds.get(i);
+                  return new OrderItemData(
+                      itemId,
+                      record.getString("orderRefId"),
+                      record.getString("productRefId"),
+                      record.getString("supplWareRefId"),
+                      record.getInt("number"),
+                      convertEntryDate(record.getLong("deliveryDate")),
+                      record.getInt("quantity"),
+                      record.getInt("lftQtyInStck"),
+                      record.getDouble("amount"),
+                      record.getString("distInfo"));
+                })
+            .collect(Collectors.toList());
 
-        // Create the OrderData instance
-        OrderItemData orderItem =
-            new OrderItemData(
-                itemsIds.get(i), // Set the id using the itemsIds list
-                record.getString("orderRefId"),
-                record.getString("productRefId"),
-                record.getString("supplWareRefId"),
-                record.getInt("number"),
-                convertEntryDate(record.getLong("deliveryDate")),
-                record.getInt("quantity"),
-                record.getInt("lftQtyInStck"),
-                record.getDouble("amount"),
-                record.getString("distInfo"));
-
-        orderItems.add(orderItem);
-      }
-    }
-
-    return orderItems.stream().filter(Objects::nonNull).collect(Collectors.toList());
+    return orderItems;
+    // return orderItems.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 
   private LocalDateTime convertEntryDate(Long entryDateMillis) {
@@ -131,6 +131,7 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
   public void saveOrderItemsInBatch(List<OrderItemData> orderItemsList) {
     WritePolicy writePolicy = new WritePolicy();
     writePolicy.sendKey = true;
+    writePolicy.setTimeout(1800000);
 
     for (OrderItemData orderItem : orderItemsList) {
       Key key =
@@ -171,43 +172,45 @@ public class OrderItemRepositoryOperationsImpl implements OrderItemRepositoryOpe
 
   @Override
   public Map<String, OrderItemData> getOrderItemsByIds(List<String> itemsIds) {
-    Map<String, OrderItemData> orderItems = new HashMap<>();
+    BatchPolicy batchPolicy = new BatchPolicy();
+    int timeout_socket = 1800000;
+    int timeout_read = 1800000;
+    batchPolicy.setTimeouts(timeout_socket, timeout_read);
 
-    // 1.Step - Collect the keys/ids necessary to retrieve the objects
-    Key[] keys = new Key[itemsIds.size()];
-    for (int i = 0; i < keys.length; i++) {
-      keys[i] =
-          new Key(
-              aerospikeTemplate.getNamespace(),
-              aerospikeTemplate.getSetName(OrderItemData.class),
-              itemsIds.get(i));
-    }
+    Key[] keys =
+        itemsIds.stream()
+            .map(
+                id ->
+                    new Key(
+                        aerospikeTemplate.getNamespace(),
+                        aerospikeTemplate.getSetName(OrderItemData.class),
+                        id))
+            .toArray(Key[]::new);
 
-    // 2.Step - Retrieve orderItemData from Aerospike data model
-    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
 
-    // 3.Step - Populate the list of orderItems
-    for (int i = 0; i < records.length; i++) {
-      Record record = records[i];
-      if (record != null) {
-
-        // Create the OrderData instance
-        OrderItemData orderItem =
-            new OrderItemData(
-                itemsIds.get(i), // Set the id using the itemsIds list
-                record.getString("orderRefId"),
-                record.getString("productRefId"),
-                record.getString("supplWareRefId"),
-                record.getInt("number"),
-                convertEntryDate(record.getLong("deliveryDate")),
-                record.getInt("quantity"),
-                record.getInt("lftQtyInStck"),
-                record.getDouble("amount"),
-                record.getString("distInfo"));
-
-        orderItems.put(itemsIds.get(i), orderItem);
-      }
-    }
+    Map<String, OrderItemData> orderItems =
+        IntStream.range(0, records.length)
+            .parallel()
+            .filter(i -> records[i] != null)
+            .boxed()
+            .collect(
+                Collectors.toConcurrentMap(
+                    itemsIds::get,
+                    i -> {
+                      Record record = records[i];
+                      return new OrderItemData(
+                          itemsIds.get(i),
+                          record.getString("orderRefId"),
+                          record.getString("productRefId"),
+                          record.getString("supplWareRefId"),
+                          record.getInt("number"),
+                          convertEntryDate(record.getLong("deliveryDate")),
+                          record.getInt("quantity"),
+                          record.getInt("lftQtyInStck"),
+                          record.getDouble("amount"),
+                          record.getString("distInfo"));
+                    }));
 
     return orderItems;
   }

@@ -2,6 +2,7 @@ package de.uniba.dsg.wss.data.access;
 
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.aerospike.client.policy.BatchPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import de.uniba.dsg.wss.data.model.OrderData;
 import java.time.Instant;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.aerospike.core.AerospikeTemplate;
 
@@ -40,41 +42,46 @@ public class OrderRepositoryOperationsImpl implements OrderRepositoryOperations 
 
   @Override
   public List<OrderData> getOrdersFromDistrict(List<String> orderRefsIds) {
-    List<OrderData> orders = new ArrayList<>();
-    // 1.Step - Collect the keys/ids necessary to retrieve the objects
-    Key[] keys = new Key[orderRefsIds.size()];
-    for (int i = 0; i < keys.length; i++) {
-      keys[i] =
-          new Key(
-              aerospikeTemplate.getNamespace(),
-              aerospikeTemplate.getSetName(OrderData.class),
-              orderRefsIds.get(i));
-    }
+    BatchPolicy batchPolicy = new BatchPolicy();
+    int timeout_socket = 1800000;
+    int timeout_read = 1800000;
+    batchPolicy.setTimeouts(timeout_socket, timeout_read);
 
-    // 2.Step - Retrieve orderData from Aerospike data model
-    Record[] records = aerospikeTemplate.getAerospikeClient().get(null, keys);
+    Key[] keys =
+        orderRefsIds.stream()
+            .map(
+                id ->
+                    new Key(
+                        aerospikeTemplate.getNamespace(),
+                        aerospikeTemplate.getSetName(OrderData.class),
+                        id))
+            .toArray(Key[]::new);
 
-    // 3.Step - Populate the list of orders
-    for (int i = 0; i < records.length; i++) {
-      Record record = records[i];
-      if (record != null) {
+    Record[] records = aerospikeTemplate.getAerospikeClient().get(batchPolicy, keys);
 
-        // Create the OrderData instance
-        OrderData order =
-            new OrderData(
-                orderRefsIds.get(i), // Set the id using the orderRefsIds list
-                record.getString("districtRefId"),
-                record.getString("customerRefId"),
-                record.getString("carrierRefId"),
-                convertEntryDate(record.getLong("entryDate")),
-                record.getInt("itemCount"),
-                record.getBoolean("allLocal"),
-                record.getBoolean("fulfilled"));
-        order.setItemsIds((List<String>) record.getList("itemsIds"));
+    List<OrderData> orders =
+        IntStream.range(0, records.length)
+            .parallel()
+            .filter(i -> records[i] != null)
+            .mapToObj(
+                i -> {
+                  Record record = records[i];
 
-        orders.add(order);
-      }
-    }
+                  OrderData order =
+                      new OrderData(
+                          orderRefsIds.get(i),
+                          record.getString("districtRefId"),
+                          record.getString("customerRefId"),
+                          record.getString("carrierRefId"),
+                          convertEntryDate(record.getLong("entryDate")),
+                          record.getInt("itemCount"),
+                          record.getBoolean("allLocal"),
+                          record.getBoolean("fulfilled"));
+
+                  order.setItemsIds((List<String>) record.getList("itemsIds"));
+                  return order;
+                })
+            .collect(Collectors.toList());
 
     return orders.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }

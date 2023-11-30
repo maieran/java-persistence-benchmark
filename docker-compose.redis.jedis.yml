@@ -24,7 +24,7 @@ services:
       - JAVA_OPTS=-Xmx21G
     cpu_count: 4
     mem_reservation: 12g
-    mem_limit: 21g
+    mem_limit: 28g
 
   db:
     container_name: "wss-redis-jedis"
