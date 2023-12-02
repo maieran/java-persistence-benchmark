@@ -17,4 +17,6 @@ public interface WarehouseRepository {
   WarehouseData findById(String id);
 
   void save(WarehouseData warehouse);
+
+  void deleteAll();
 }

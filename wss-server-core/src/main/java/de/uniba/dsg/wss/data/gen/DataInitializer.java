@@ -74,6 +74,7 @@ public abstract class DataInitializer implements CommandLineRunner {
 
     // Get the current working directory
     String currentDir = System.getProperty("user.dir");
+    String directoryName = "baseline-model-dir";
 
     String[] jsonFiles = {
       "baseline-model_products.json",
@@ -84,7 +85,7 @@ public abstract class DataInitializer implements CommandLineRunner {
     };
 
     for (String filename : jsonFiles) {
-      File file = new File(currentDir + File.separator + filename);
+      File file = new File(currentDir + File.separator + directoryName + File.separator + filename);
       if (file.exists()) {
         LOG.info("Baseline model files already exist. Skipping data generation.");
         return null;
@@ -143,23 +144,49 @@ public abstract class DataInitializer implements CommandLineRunner {
 
       // Get the current working directory
       String currentDir = System.getProperty("user.dir");
+      String directoryName = "baseline-model-dir";
 
       JacksonParser jacksonParser = new JacksonParser();
 
       jacksonParser.serializeProductsToJSON(
-          model.getProducts(), currentDir + File.separator + "baseline-model_products.json");
+          model.getProducts(),
+          currentDir
+              + File.separator
+              + directoryName
+              + File.separator
+              + "baseline-model_products.json");
 
       jacksonParser.serializeWarehousesToJSON(
-          model.getWarehouses(), currentDir + File.separator + "baseline-model_warehouses.json");
+          model.getWarehouses(),
+          currentDir
+              + File.separator
+              + directoryName
+              + File.separator
+              + "baseline-model_warehouses.json");
 
       jacksonParser.serializeEmployeesToJSON(
-          model.getEmployees(), currentDir + File.separator + "baseline-model_employees.json");
+          model.getEmployees(),
+          currentDir
+              + File.separator
+              + directoryName
+              + File.separator
+              + "baseline-model_employees.json");
 
       jacksonParser.serializeCarriersToJSON(
-          model.getCarriers(), currentDir + File.separator + "baseline-model_carriers.json");
+          model.getCarriers(),
+          currentDir
+              + File.separator
+              + directoryName
+              + File.separator
+              + "baseline-model_carriers.json");
 
       jacksonParser.serializeStatsToJSON(
-          model.getStats(), currentDir + File.separator + "baseline-model_stats.json");
+          model.getStats(),
+          currentDir
+              + File.separator
+              + directoryName
+              + File.separator
+              + "baseline-model_stats.json");
     }
   }
 

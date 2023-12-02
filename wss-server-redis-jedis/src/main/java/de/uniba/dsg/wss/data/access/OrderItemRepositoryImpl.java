@@ -3,6 +3,7 @@ package de.uniba.dsg.wss.data.access;
 import de.uniba.dsg.wss.data.model.OrderItemData;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,17 +16,41 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class OrderItemRepositoryImpl implements OrderItemRepository {
-
+  private static final int BATCH_SIZE = 2000;
+  private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, OrderItemData> hashOperations;
 
   public OrderItemRepositoryImpl(RedisTemplate<String, Object> redisTemplate) {
+    this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }
+
+  /*  @Override
+  public void saveAll(Map<String, OrderItemData> orderItems) {
+    String hashKey = "orderItems";
+    hashOperations.putAll(hashKey, orderItems);
+  }*/
 
   @Override
   public void saveAll(Map<String, OrderItemData> orderItems) {
     String hashKey = "orderItems";
-    hashOperations.putAll(hashKey, orderItems);
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < orderItems.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, orderItems.size());
+      Map<String, OrderItemData> batch = getBatch(orderItems, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, OrderItemData> getBatch(
+      Map<String, OrderItemData> orderItems, int start, int end) {
+    return orderItems.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override
@@ -78,5 +103,11 @@ public class OrderItemRepositoryImpl implements OrderItemRepository {
     }
 
     return orderItems;
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "orderItems";
+    redisTemplate.delete(hashKey);
   }
 }

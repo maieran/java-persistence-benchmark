@@ -42,26 +42,47 @@ public class RedisDataInitializer extends DataInitializer {
 
     // Get the current working directory
     String currentDir = System.getProperty("user.dir");
+    String directoryName = "baseline-model-dir";
 
     List<Product> productsList =
         jacksonParser.deserializeProductsFromJSON(
-            currentDir + File.separator + "baseline-model_products.json");
+            currentDir
+                + File.separator
+                + directoryName
+                + File.separator
+                + "baseline-model_products.json");
 
     List<Warehouse> warehouseList =
         jacksonParser.deserializeWarehousesFromJSON(
-            currentDir + File.separator + "baseline-model_warehouses.json");
+            currentDir
+                + File.separator
+                + directoryName
+                + File.separator
+                + "baseline-model_warehouses.json");
 
     List<Employee> employeeList =
         jacksonParser.deserializeEmployeesFromJSON(
-            currentDir + File.separator + "baseline-model_employees.json");
+            currentDir
+                + File.separator
+                + directoryName
+                + File.separator
+                + "baseline-model_employees.json");
 
     List<Carrier> carrierList =
         jacksonParser.deserializeCarriersFromJSON(
-            currentDir + File.separator + "baseline-model_carriers.json");
+            currentDir
+                + File.separator
+                + directoryName
+                + File.separator
+                + "baseline-model_carriers.json");
 
     Stats stats =
         jacksonParser.deserializeStatsFromJSON(
-            currentDir + File.separator + "baseline-model_stats.json");
+            currentDir
+                + File.separator
+                + directoryName
+                + File.separator
+                + "baseline-model_stats.json");
 
     DataGeneratorModel deserializedModel =
         new DataGeneratorModel(productsList, warehouseList, employeeList, carrierList, stats);

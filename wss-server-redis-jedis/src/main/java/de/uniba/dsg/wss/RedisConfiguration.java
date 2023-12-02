@@ -5,16 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -26,7 +28,8 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author Andre Maier
  */
 @Configuration
-@EnableTransactionManagement
+// @EnableRedisRepositories(basePackages = "de.uniba.dsg.wss.data.access")
+@EnableRedisRepositories
 public class RedisConfiguration {
 
   private final Environment environment;
@@ -51,6 +54,8 @@ public class RedisConfiguration {
         Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.pool.max-idle")));
     poolConfig.setMinIdle(
         Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.pool.min-idle")));
+    poolConfig.setMaxWaitMillis(
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout")));
     return poolConfig;
   }
 
@@ -62,11 +67,26 @@ public class RedisConfiguration {
   @Bean
   public JedisConnectionFactory jedisConnectionFactory() {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-    redisStandaloneConfiguration.setHostName(
-        environment.getRequiredProperty("wss.redis.jedis.host"));
+    redisStandaloneConfiguration.setHostName(environment.getRequiredProperty("spring.redis.host"));
     redisStandaloneConfiguration.setPort(
-        Integer.parseInt(environment.getRequiredProperty("wss.redis.jedis.port")));
-    return new JedisConnectionFactory(redisStandaloneConfiguration);
+        Integer.parseInt(environment.getRequiredProperty("spring.redis.port")));
+
+    JedisClientConfiguration jedisClientConfiguration =
+        getJedisClientConfiguration(jedisPoolConfig());
+
+    return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+  }
+
+  @Bean
+  public JedisClientConfiguration getJedisClientConfiguration(JedisPoolConfig poolConfig) {
+    return JedisClientConfiguration.builder()
+        .usePooling()
+        .poolConfig(poolConfig)
+        .and()
+        .readTimeout(
+            Duration.ofMillis(
+                Integer.parseInt(environment.getRequiredProperty("spring.redis.timeout"))))
+        .build();
   }
 
   /**
@@ -78,7 +98,6 @@ public class RedisConfiguration {
    */
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
-
     /* Uses a String for object IDs and Object as the base class for serialization and deserialization
     of different data model objects, utilizing a polymorphic approach with the help of the Jackson
     Library and GenericJackson2JsonRedisSerializer to access data via JSON. */
@@ -93,6 +112,8 @@ public class RedisConfiguration {
     // Registers the JavaTimeModule to assist with serialization/deserialization of LocalDateTime
     // objects
     objectMapper.registerModule(new JavaTimeModule());
+
+    // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     /* Validates and controls serialization to JSON and deserialization from Java Objects of polymorphic types
     of classes, which are marked with @JsonTypeInfo and operates in combination with object mapper */

@@ -15,21 +15,26 @@ services:
       - WSS_MODEL_INITIALIZE=true
       - WSS_MODEL_WAREHOUSE_COUNT=5
       - WSS_MODEL_FULL_SCALE=true
-      - WSS_REDIS_JEDIS_POOL_MAX-TOTAL=32
-      - WSS_REDIS_JEDIS_POOL_MAX-IDLE=16
-      - WSS_REDIS_JEDIS_POOL_MIN-IDLE=8
-      - JAVA_OPTS=-Xmx14G
+      - SPRING_REDIS_HOST=db
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_TIMEOUT=1800000
+      - WSS_REDIS_JEDIS_POOL_MAX-TOTAL=1024
+      - WSS_REDIS_JEDIS_POOL_MAX-IDLE=512
+      - WSS_REDIS_JEDIS_POOL_MIN-IDLE=64
+      - JAVA_OPTS=-Xmx21G
     cpu_count: 4
     mem_reservation: 12g
-    mem_limit: 14g
+    mem_limit: 28g
 
   db:
     container_name: "wss-redis-jedis"
-    image: "redis"
-    volumes:
-      - /var/lib/redis/data
+    image: "redis:7.0.11"
     ports:
       - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/opt/redis/redis.conf
+      - redis_data:/var/lib/redis/data
+    command: ["redis-server", "/opt/redis/redis.conf"]
 volumes:
   redis_data:
 

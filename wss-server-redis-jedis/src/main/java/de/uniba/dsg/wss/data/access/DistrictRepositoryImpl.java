@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DistrictRepositoryImpl implements DistrictRepository {
-
+  private static final int BATCH_SIZE = 2000;
   private final RedisTemplate<String, Object> redisTemplate;
   private final HashOperations<String, String, DistrictData> hashOperations;
 
@@ -26,10 +27,32 @@ public class DistrictRepositoryImpl implements DistrictRepository {
     this.hashOperations = redisTemplate.opsForHash();
   }
 
-  @Override
+  /*  @Override
   public void saveAll(Map<String, DistrictData> districts) {
     String hashKey = "districts";
     hashOperations.putAll(hashKey, districts);
+  }*/
+
+  @Override
+  public void saveAll(Map<String, DistrictData> districts) {
+    String hashKey = "districts";
+    BoundHashOperations<String, String, Object> boundHashOps = redisTemplate.boundHashOps(hashKey);
+
+    int offset = 0;
+    while (offset < districts.size()) {
+      int endIndex = Math.min(offset + BATCH_SIZE, districts.size());
+      Map<String, DistrictData> batch = getBatch(districts, offset, endIndex);
+      boundHashOps.putAll(batch);
+      offset += BATCH_SIZE;
+    }
+  }
+
+  private Map<String, DistrictData> getBatch(
+      Map<String, DistrictData> districts, int start, int end) {
+    return districts.entrySet().stream()
+        .skip(start)
+        .limit(end - start)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   @Override
@@ -56,5 +79,11 @@ public class DistrictRepositoryImpl implements DistrictRepository {
     List<DistrictData> districts = hashOperations.multiGet(hashKey, districtRefsIds);
 
     return districts.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  @Override
+  public void deleteAll() {
+    String hashKey = "districts";
+    redisTemplate.delete(hashKey);
   }
 }

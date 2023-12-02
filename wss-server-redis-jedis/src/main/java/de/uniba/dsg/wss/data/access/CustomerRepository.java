@@ -21,4 +21,6 @@ public interface CustomerRepository {
   void save(CustomerData copiedCustomer);
 
   List<CustomerData> getCustomersByDistricts(List<String> customerRefsIds);
+
+  void deleteAll();
 }

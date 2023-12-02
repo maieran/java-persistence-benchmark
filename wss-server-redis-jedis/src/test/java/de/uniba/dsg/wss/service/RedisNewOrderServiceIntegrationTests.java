@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,36 +41,11 @@ public class RedisNewOrderServiceIntegrationTests extends RedisTest {
     protected int quantity;
 
     public ProductToOrder(String warehouseId, String productId, int quantity) {
-      // remember the optimization :)
       this.stockId = warehouseId + productId;
       this.warehouseId = warehouseId;
       this.productId = productId;
       this.quantity = quantity;
     }
-  }
-
-  private NewOrderRequest getNewOrderRequest(
-      String warehouseId,
-      String districtId,
-      String customerId,
-      List<ProductToOrder> productToOrderList) {
-    NewOrderRequest request = new NewOrderRequest();
-    request.setWarehouseId(warehouseId);
-    request.setDistrictId(districtId);
-    request.setCustomerId(customerId);
-
-    List<NewOrderRequestItem> items = new ArrayList<>();
-    for (ProductToOrder productsToOrder : productToOrderList) {
-      String supplyingWarehouseId = productsToOrder.warehouseId;
-      String productId = productsToOrder.productId;
-      NewOrderRequestItem item = new NewOrderRequestItem();
-      item.setProductId(productId);
-      item.setQuantity(productsToOrder.quantity);
-      item.setSupplyingWarehouseId(supplyingWarehouseId);
-      items.add(item);
-    }
-    request.setItems(items);
-    return request;
   }
 
   @Test
@@ -182,5 +158,52 @@ public class RedisNewOrderServiceIntegrationTests extends RedisTest {
      * proxies of aop when calling redis directly
      */
     // assertEquals(21, this.orderRepository.getOrders().size(););
+  }
+
+  @Test
+  public void testRetryMechanism() {
+
+    // key -> stock id, value -> quantity
+    List<ProductToOrder> productToOrderList =
+        List.of(
+            new ProductToOrder("W1", "P1", 2),
+            new ProductToOrder("W2", "P6", 4),
+            new ProductToOrder("W0", "P8", 11),
+            new ProductToOrder("W3", "P1", 1));
+
+    NewOrderRequest request = this.getNewOrderRequest("W0", "D0", "C0", productToOrderList);
+    this.redisNewOrderService.process(request);
+    int sizeOfOrders = this.orderRepository.getOrders().size();
+
+    assertEquals(21, sizeOfOrders);
+  }
+
+  private NewOrderRequest getNewOrderRequest(
+      String warehouseId,
+      String districtId,
+      String customerId,
+      List<ProductToOrder> productToOrderList) {
+    NewOrderRequest request = new NewOrderRequest();
+    request.setWarehouseId(warehouseId);
+    request.setDistrictId(districtId);
+    request.setCustomerId(customerId);
+
+    List<NewOrderRequestItem> items = new ArrayList<>();
+    for (ProductToOrder productsToOrder : productToOrderList) {
+      String supplyingWarehouseId = productsToOrder.warehouseId;
+      String productId = productsToOrder.productId;
+      NewOrderRequestItem item = new NewOrderRequestItem();
+      item.setProductId(productId);
+      item.setQuantity(productsToOrder.quantity);
+      item.setSupplyingWarehouseId(supplyingWarehouseId);
+      items.add(item);
+    }
+    request.setItems(items);
+    return request;
+  }
+
+  @AfterEach
+  public void tearDown() {
+    deleteTestStorage();
   }
 }

@@ -13,4 +13,6 @@ public interface EmployeeRepository {
   void saveAll(Map<String, EmployeeData> idsToEmployees);
 
   EmployeeData findEmployeeByName(String username);
+
+  void deleteAll();
 }
